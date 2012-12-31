@@ -18,7 +18,7 @@
    useVariable = "0";
    tile = "0";
 
-/*
+
    new GuiWebViewCtrl(WebView) {
       canSaveDynamicFields = "0";
       Enabled = "1";
@@ -39,7 +39,7 @@
       lockAspect = true;
       forceNativeExtent = true;
    };
-  */
+  
    
    new GuiBitmapCtrl(MainMenuAppLogo) {
       canSaveDynamicFields = "1";

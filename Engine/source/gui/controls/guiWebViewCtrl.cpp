@@ -14,11 +14,13 @@
 #include "gui/core/guiCanvas.h"
 #include "sim/actionMap.h"
 
+#include <Awesomium/STLHelpers.h>
 
-IMPLEMENT_CONOBJECT(GuiWebViewCtrl);
+
+IMPLEMENT_CO_NETOBJECT_V1(GuiWebViewCtrl);
 
 ConsoleDocClass( GuiWebViewCtrl,
-   "@brief A gui control that is used to display an image.\n\n"
+   "@brief A gui control that is used to display a web browser.\n\n"
    
    "The image is stretched to the constraints of the control by default. However, the control can also\n"
    "tile the image as well.\n\n"
@@ -37,19 +39,14 @@ ConsoleDocClass( GuiWebViewCtrl,
    
    "@ingroup GuiControls"
 );
-
-/*
-IMPLEMENT_CALLBACK( GuiWebViewCtrl, onInputEvent, void, (const char* device, const char* action, bool state ),
-														  ( device, action, state),
-	"@brief Callback that occurs when an input is triggered on this control\n\n"
-	"@param device The device type triggering the input, such as keyboard, mouse, etc\n"
-	"@param action The actual event occuring, such as a key or button\n"
-	"@param state True if the action is being pressed, false if it is being release\n\n"
+IMPLEMENT_CALLBACK( GuiWebViewCtrl, onGetScrollData, void, (U32 contentWidth, U32 contentHeight, U32 preferredWidth, S32 scrollX, S32 scrollY), (contentWidth, contentHeight, preferredWidth, scrollX, scrollY),
+	"" 
 );
-*/
+IMPLEMENT_CALLBACK( GuiWebViewCtrl, onFinishLoading, void, (), (), "" );
 
 
-GuiWebViewCtrl::GuiWebViewCtrl(void)
+
+GuiWebViewCtrl::GuiWebViewCtrl()
  : mURL(),
    mStartPoint( 0, 0 ),
    mWrap( false ),
@@ -57,34 +54,131 @@ GuiWebViewCtrl::GuiWebViewCtrl(void)
    mForceNativeExtent(false),
    mWebViewTexture(NULL)
 {
-//   mWebViewTexture.getWebView()->setListener(this);
 }
-GuiWebViewCtrl::~GuiWebViewCtrl(void)
+GuiWebViewCtrl::~GuiWebViewCtrl()
 {
-   mWebViewTexture.destroy();
+   if(mWebViewTexture)
+   {
+      mWebViewTexture->destroy();
+      delete mWebViewTexture;
+      mWebViewTexture = NULL;
+   }
 }
+
+void GuiWebViewCtrl::OnShowCreatedWebView(Awesomium::WebView* caller,
+                                 Awesomium::WebView* new_view,
+                                 const Awesomium::WebURL& opener_url,
+                                 const Awesomium::WebURL& target_url,
+                                 const Awesomium::Rect& initial_pos,
+                                 bool is_popup)
+{
+ //  new_view->Resize(mResolution.x, mResolution.y);
+   if(mForceNativeExtent)
+      setExtent(mWebViewTexture->getWidthHeight());
+   else if(mLockAspect)
+      setExtent(getExtent());
+
+   //WebTile* new_tile = new WebTile(new_view, mResolution.x, mResolution.y);
+   mWebViewTexture->setWebView(*new_view);
+   new_view->set_view_listener(this);
+   new_view->set_load_listener(this);
+   new_view->set_process_listener(this);
+   mWebViewTexture->refresh();
+}
+
+void GuiWebViewCtrl::OnFinishLoadingFrame(Awesomium::WebView* caller,
+                                 int64 frame_id,
+                                 bool is_main_frame,
+                                 const Awesomium::WebURL& url)
+{
+   //Con::printf("WebViewData::OnFinishLoadingFrame - %s", Awesomium::ToString(url.path()).c_str());
+   if(is_main_frame)
+   {
+      //Con::printf("WebViewData::OnFinishLoadingFrame - main frame");
+      if( mWebViewTexture ){
+         if(mWebViewTexture->getWebView())
+            mWebViewTexture->getWebView()->SetTransparent(true);
+      }
+   }
+}
+
+
+
+void GuiWebViewCtrl::OnMethodCall(Awesomium::WebView* caller,
+                         unsigned int remote_object_id, 
+                         const Awesomium::WebString& method_name,
+                         const Awesomium::JSArray& args)
+{
+      // call bound script function
+   // todo: make this efficient
+ 
+   String key = String::ToString(remote_object_id) + '.' + String(Awesomium::ToString(method_name).c_str());
+   CompoundKey<String,String> &entry = mScriptCallbackCommands[key];
+   String tsFunctionName = entry.key1;
+   String defualtArgs = entry.key2;
+
+   if(tsFunctionName.isNotEmpty())
+   {
+      U32 argSize = args.size();
+      tsFunctionName += '(';
+
+      if(defualtArgs.isNotEmpty())
+         tsFunctionName += defualtArgs + ','; 
+
+      for(U32 i = 0; i < argSize; i++)
+      {
+         const Awesomium::JSValue& arg = args[i];
+            tsFunctionName += String(Awesomium::ToString(arg.ToString()).c_str());
+
+         if((i+1) != argSize)
+            tsFunctionName += ',';
+      }
+      tsFunctionName += ')';
+      tsFunctionName += ';';
+
+      Con::evaluate(tsFunctionName);
+   }
+
+}
+Awesomium::JSValue GuiWebViewCtrl::OnMethodCallWithReturnValue(Awesomium::WebView* caller,
+                                           unsigned int remote_object_id,
+                                           const Awesomium::WebString& method_name,
+                                           const Awesomium::JSArray& args)
+{
+      // call bound script function
+   // todo: make this efficient
+  // String tsFunctionName = mScriptCallbackCommands[String::ToString(remote_object_id) + '.' + String(Awesomium::ToString(method_name).c_str())];
+   String key = String::ToString(remote_object_id) + '.' + String(Awesomium::ToString(method_name).c_str());
+   CompoundKey<String,String> &entry = mScriptCallbackCommands[key];
+   String tsFunctionName = entry.key1;
+   String defualtArgs = entry.key2;
+
+   if(tsFunctionName.isNotEmpty())
+   {
+      U32 argSize = args.size();
+      tsFunctionName += '(';
+
+      if(defualtArgs.isNotEmpty())
+         tsFunctionName += defualtArgs + ','; 
+
+      for(U32 i = 0; i < argSize; i++)
+      {
+         const Awesomium::JSValue& arg = args[i];
+            tsFunctionName += String(Awesomium::ToString(arg.ToString()).c_str());
+
+         if((i+1) != argSize)
+            tsFunctionName += ',';
+      }
+      tsFunctionName += ')';
+      tsFunctionName += ';';
+
+      return Awesomium::JSValue(Awesomium::WSLit(Con::evaluate(tsFunctionName)));
+   }
+   return Awesomium::JSValue();
+}
+
 
 /*
-//void GuiWebViewCtrl::onFinishLoading(Awesomium::WebView* caller)
-void GuiWebViewCtrl::OnDocumentReady(Awesomium::WebView* caller,
-                                    const Awesomium::WebURL& url)
-{
-//   mWebViewTexture.getWebView().requestScrollData();
-}
-//void GuiWebViewCtrl::onGetPageContents(Awesomium::WebView* caller, 
-//									   const std::string& url, 
-//									   const std::wstring& contents)
-void GuiWebViewCtrl::OnShowCreatedWebView(Awesomium::WebView* caller,
-                                    Awesomium::WebView* new_view,
-                                    const Awesomium::WebURL& opener_url,
-                                    const Awesomium::WebURL& target_url,
-                                    const Awesomium::Rect& initial_pos,
-                                    bool is_popup)
-{
-   if(mWebViewTexture.getWebView())
-      mWebViewTexture.getWebView()->requestScrollData();
-}
-
 void GuiWebViewCtrl::onGetScrollData(Awesomium::WebView* caller,
 									 int contentWidth,
 									 int contentHeight,
@@ -101,31 +195,22 @@ void GuiWebViewCtrl::onGetScrollData(Awesomium::WebView* caller,
       else height = (contentHeight > getExtent().y ? contentHeight : getExtent().y);
 
 
-      mWebViewTexture.setSize(width, height);
+      mWebViewTexture->setSize(width, height);
       if(mForceNativeExtent)
-         setExtent(mWebViewTexture.getWidthHeight());
+         setExtent(mWebViewTexture->getWidthHeight());
       else if(mLockAspect)
          setExtent(getExtent());
    }
 }
+*/
 
 bool GuiWebViewCtrl::setURLString( void *object, const char *index, const char *data )
 {
-   // Prior to this, you couldn't do bitmap.bitmap = "foo.jpg" and have it work.
-   // With protected console types you can now call the setBitmap function and
-   // make it load the image.
    GuiWebViewCtrl *obj = static_cast<GuiWebViewCtrl *>( object );
 
    obj->setURL( data );
-
-//   obj->mWebViewTexture.getWebView().resetZoom();
-//   obj->mWebViewTexture.getWebView().requestScrollData();
-
-   // Return false because the setBitmap method will assign 'mURL' to the
-   // argument we are specifying in the call.
    return false;
 }
-*/
 
 void GuiWebViewCtrl::initPersistFields()
 {
@@ -160,14 +245,11 @@ bool GuiWebViewCtrl::onWake()
 
    if ( !Parent::onWake() )
       return false;
-
-//   if( !smDesignTime )
-//      mouseLock();
     
    setActive(true);
 
    setURL(mURL);
-//   setFirstResponder();
+
    getRoot()->getPlatformWindow()->nativeKeyEvent.notify(this, &GuiWebViewCtrl::handleKeyboard);
 
    return true;
@@ -175,14 +257,8 @@ bool GuiWebViewCtrl::onWake()
 
 void GuiWebViewCtrl::onSleep()
 {
-//   if ( !mURL.equal("texhandle", String::NoCase) )
-//      mTextureObject = NULL;
    Parent::onSleep();
-//   mouseUnlock();
-//   clearFirstResponder();
    getRoot()->getPlatformWindow()->nativeKeyEvent.remove(this, &GuiWebViewCtrl::handleKeyboard);
-   //mWebViewTexture.destroy();
-
 }
 
 //-------------------------------------
@@ -192,14 +268,17 @@ void GuiWebViewCtrl::inspectPostApply()
    // set it's extent to be exactly the size of the bitmap (if present)
    Parent::inspectPostApply();
 
-   if (!mWrap && (getExtent().x == 0) && (getExtent().y == 0) && mWebViewTexture.getTexture())
+   if(!mWebViewTexture)
+      return;
+
+   if(!mWrap && (getExtent().x == 0) && (getExtent().y == 0) && mWebViewTexture->getTexture())
    {
-      setExtent( mWebViewTexture.getWidth(), mWebViewTexture.getHeight());
+      setExtent( mWebViewTexture->getWidth(), mWebViewTexture->getHeight());
    }
-   else if(mLockAspect && mWebViewTexture.isValid())
+   else if(mLockAspect && mWebViewTexture->isValid())
    {
-      F32 nativeWidth = mWebViewTexture.getWidth();
-      F32 nativeHeight = mWebViewTexture.getHeight();
+      F32 nativeWidth = mWebViewTexture->getWidth();
+      F32 nativeHeight = mWebViewTexture->getHeight();
       F32 aspect = nativeWidth/nativeHeight;
       F32 width = getExtent().x;
       F32 height = getExtent().y;
@@ -220,10 +299,10 @@ void GuiWebViewCtrl::inspectPostApply()
 
 bool GuiWebViewCtrl::setExtent( const Point2I &newExtent)
 {
-   if(mLockAspect && mWebViewTexture.isValid())
+   if(mLockAspect && mWebViewTexture && mWebViewTexture->isValid())
    {
-      F32 nativeWidth = mWebViewTexture.getWidth();
-      F32 nativeHeight = mWebViewTexture.getHeight();
+      F32 nativeWidth = mWebViewTexture->getWidth();
+      F32 nativeHeight = mWebViewTexture->getHeight();
       F32 aspect = nativeWidth/nativeHeight;
       F32 width = newExtent.x;
       F32 height = newExtent.y;
@@ -244,32 +323,6 @@ bool GuiWebViewCtrl::setExtent( const Point2I &newExtent)
    return Parent::setExtent(newExtent);
 }
 
-/*
-void GuiWebViewCtrl::setURL( const char *name, bool resize )
-{
-   mURL = name;
-   if ( !isAwake() )
-      return;
-
-   if ( mURL.isNotEmpty() )
-	{
-      if ( !mURL.equal("texhandle", String::NoCase) )
-		   mTextureObject.set( mURL, &GFXDefaultGUIProfile, avar("%s() - mTextureObject (line %d)", __FUNCTION__, __LINE__) );
-
-      // Resize the control to fit the bitmap
-      if ( mTextureObject && resize )
-      {
-         setExtent( mTextureObject->getWidth(), mTextureObject->getHeight() );
-         updateSizing();
-      }
-   }
-   else
-      mTextureObject = NULL;
-
-   setUpdate();
-}
-*/
-
 void GuiWebViewCtrl::updateSizing()
 {
    if(!getParent())
@@ -279,27 +332,39 @@ void GuiWebViewCtrl::updateSizing()
    parentResized( fakeBounds, fakeBounds);
 }
 
-/*
-void GuiWebViewCtrl::setBitmapHandle(GFXTexHandle handle, bool resize)
-{
-   mTextureObject = handle;
-
-   mURL = String("texhandle");
-
-   // Resize the control to fit the bitmap
-   if (resize) 
+void GuiWebViewCtrl::setObjectCallbackScript(String objectName, String callbackName, String tsFunctionName, String args) 
+{ 
+   
+   Awesomium::WebView *view = mWebViewTexture->getWebView();
+   if(view)
    {
-      setExtent(mTextureObject->getWidth(), mTextureObject->getHeight());
-      updateSizing();
+    //  view->setObjectCallback(objectName.utf16(), callbackName.utf16());
+      view->set_js_method_handler(this);
+      
+      Awesomium::JSValue value = view->ExecuteJavascriptWithResult(Awesomium::WSLit(objectName.utf8()), Awesomium::WSLit(""));
+      if(value.IsObject())
+      {
+         Awesomium::JSObject& jsObject = value.ToObject();
+         String key = String::ToString(jsObject.remote_id()) + '.' + callbackName;
+         // todo: use pairs
+         CompoundKey<String,String> &entry = mScriptCallbackCommands[key];
+         entry.key1 = tsFunctionName;
+         entry.key2 = args;
+
+         jsObject.SetCustomMethod(Awesomium::WSLit(callbackName.utf8()),false);
+      }
    }
+   
 }
-*/
 
 void GuiWebViewCtrl::onRender(Point2I offset, const RectI &updateRect)
 {
-   mWebViewTexture.refresh();
+   if(!mWebViewTexture)
+      return;
 
-   if (mWebViewTexture.getTexture())
+   mWebViewTexture->refresh();
+
+   if (mWebViewTexture->getTexture())
    {
       GFX->getDrawUtil()->clearBitmapModulation();
 		if(mWrap)
@@ -308,7 +373,7 @@ void GuiWebViewCtrl::onRender(Point2I offset, const RectI &updateRect)
          // not tile correctly when rendered with GFX->drawBitmapTile(). The non POT
          // bitmap will be padded by the hardware, and we'll see lots of slack
          // in the texture. So... lets do what we must: draw each repeat by itself:
- 			GFXTextureObject* texture = mWebViewTexture.getTexture();
+ 			GFXTextureObject* texture = mWebViewTexture->getTexture();
 			RectI srcRegion;
 			RectI dstRegion;
 			float xdone = ((float)getExtent().x/(float)texture->mBitmapSize.x)+1;
@@ -332,11 +397,11 @@ void GuiWebViewCtrl::onRender(Point2I offset, const RectI &updateRect)
       {
          //RectI rect(offset, Point2I(mWebViewTexture.getTexture().getWidth(), mWebViewTexture.getTexture().getHeight()));
          RectI rect(offset, getExtent());
-         GFX->getDrawUtil()->drawBitmapStretch(mWebViewTexture.getTexture(), rect, GFXBitmapFlip_None, GFXTextureFilterLinear, false);
+         GFX->getDrawUtil()->drawBitmapStretch(mWebViewTexture->getTexture(), rect, GFXBitmapFlip_None, GFXTextureFilterLinear, false);
       }
    }
 
-   if (mProfile->mBorder || !mWebViewTexture.getTexture())
+   if (mProfile->mBorder || !mWebViewTexture->getTexture())
    {
       RectI rect(offset.x, offset.y, getExtent().x, getExtent().y);
       GFX->getDrawUtil()->drawRect(rect, mProfile->mBorderColor);
@@ -347,94 +412,32 @@ void GuiWebViewCtrl::onRender(Point2I offset, const RectI &updateRect)
 
 void GuiWebViewCtrl::setValue(S32 x, S32 y)
 {
-   if (mWebViewTexture.getTexture())
+   if(!mWebViewTexture)
+      return;
+
+   if(mWebViewTexture->getTexture())
    {
-		x += mWebViewTexture.getWidth() / 2;
-		y += mWebViewTexture.getHeight() / 2;
+		x += mWebViewTexture->getWidth() / 2;
+		y += mWebViewTexture->getHeight() / 2;
   	}
-  	while (x < 0)
+  	while(x < 0)
   		x += 256;
   	mStartPoint.x = x % 256;
 
-  	while (y < 0)
+  	while(y < 0)
   		y += 256;
   	mStartPoint.y = y % 256;
 }
-
-
-//--------------------------------------------------------------------------
-// Keyboard events...
-//bool GuiWebViewCtrl::onKeyDown(const GuiEvent& event)
-//{
-      /*
-   //only cut/copy work with this control...
-   if (event.modifier & SI_COPYPASTE)
-   {
-      switch(event.keyCode)
-      {
-         //copy
-         case KEY_C:
-         {
-            //make sure we actually have something selected
-            if (mSelectionActive)
-            {
-               copyToClipboard(mSelectionStart, mSelectionEnd);
-               setUpdate();
-            }
-            return true;
-         }
-         
-         default:
-            break;
-      }
-   }
-      */
-
-//   mWebViewTexture.getWebView()->injectKeyboardEvent();
-
-
-   // Otherwise, let the parent have the event...
- //  return Parent::onKeyDown(event);
-//}
 
 //--------------------------------------------------------------------------
 // Mousing events...
 void GuiWebViewCtrl::onMouseDown(const GuiEvent& event)
 {
-   if(!mActive)
+   if(!mActive || !mWebViewTexture)
       return;
-/*
-   Atom *hitAtom = findHitAtom(globalToLocalCoord(event.mousePoint));
-   if(hitAtom && !mIsEditCtrl)
-   {
-      mouseLock();
-      mHitURL = hitAtom->url;
-      if (mHitURL)
-         mHitURL->mouseDown = true;
-   }
-*/
-//   setFirstResponder();
-//   mouseLock();
-/*
-   mSelectionActive = false;
-   mSelectionAnchor        = getTextPosition(globalToLocalCoord(event.mousePoint));
-   mSelectionAnchorDropped = event.mousePoint;
-   if (mSelectionAnchor < 0)
-      mSelectionAnchor = 0;
-   else if (mSelectionAnchor >= mTextBuffer.length())
-      mSelectionAnchor = mTextBuffer.length();
 
-   mVertMoveAnchorValid = false;
-
-   setUpdate();
-   */
-   
-   //   LEFT_MOUSE_BTN,
-	//	MIDDLE_MOUSE_BTN,
-	//	RIGHT_MOUSE_BTN
-
-   if(mWebViewTexture.getWebView())
-      mWebViewTexture.getWebView()->injectMouseDown(Awesomium::LEFT_MOUSE_BTN);
+   if(mWebViewTexture->getWebView())
+      mWebViewTexture->getWebView()->InjectMouseDown(Awesomium::kMouseButton_Left);
 
 }
 
@@ -445,51 +448,8 @@ void GuiWebViewCtrl::onMouseMove(const GuiEvent& event)
       return;
 
    Point2I point = globalToLocalCoord(event.mousePoint);
-   if(mWebViewTexture.getWebView())
-      mWebViewTexture.getWebView()->injectMouseMove(point.x, point.y);
-
-/*
-   Atom *hitAtom = findHitAtom(globalToLocalCoord(event.mousePoint));
-   bool down = false;
-
-   //note mHitURL can't be set unless this is (!mIsEditCtrl)
-   if(hitAtom && hitAtom->url == mHitURL)
-      down = true;
-
-   if(mHitURL && down != mHitURL->mouseDown)
-      mHitURL->mouseDown = down;
-
-   if (!mHitURL)
-   {
-      S32 newSelection = 0;
-      newSelection = getTextPosition(globalToLocalCoord(event.mousePoint));
-      if (newSelection < 0)
-         newSelection = 0;
-      else if (newSelection > mTextBuffer.length())
-         newSelection = mTextBuffer.length();
-
-      if (newSelection == mSelectionAnchor) 
-      {
-         mSelectionActive = false;
-      }
-      else if (newSelection > mSelectionAnchor) 
-      {
-         mSelectionActive = true;
-         mSelectionStart  = mSelectionAnchor;
-         mSelectionEnd    = newSelection - 1;
-      }
-      else 
-      {
-         mSelectionStart  = newSelection;
-         mSelectionEnd    = mSelectionAnchor - 1;
-         mSelectionActive = true;
-      }
-      setCursorPosition(newSelection);
-      mDirty = true;
-   }
-
-   setUpdate();
-   */
+   if(mWebViewTexture && mWebViewTexture->getWebView())
+      mWebViewTexture->getWebView()->InjectMouseMove(point.x, point.y);
 }
 
 //--------------------------------------------------------------------------
@@ -502,39 +462,9 @@ void GuiWebViewCtrl::onMouseUp(const GuiEvent& event)
 ////   mouseUnlock();
 
 
-   if(mWebViewTexture.getWebView())
-      mWebViewTexture.getWebView()->injectMouseUp(Awesomium::LEFT_MOUSE_BTN);
+   if(mWebViewTexture && mWebViewTexture->getWebView())
+      mWebViewTexture->getWebView()->InjectMouseUp(Awesomium::kMouseButton_Left);
 
-
-/*
-   //see if we've clicked on a URL
-   Atom *hitAtom = findHitAtom(globalToLocalCoord(event.mousePoint));
-   if (mHitURL && hitAtom && hitAtom->url == mHitURL && mHitURL->mouseDown)
-   {
-      mHitURL->mouseDown = false;
-
-      // Convert URL from UTF16 to UTF8.
-      UTF8* url = mTextBuffer.createSubstring8(mHitURL->textStart, mHitURL->len);
-	  onURL_callback(url);
-
-      delete[] url;
-      mHitURL = NULL;
-
-      setUpdate();
-      return;
-   }
-
-   //else, update our selection
-   else
-   {
-      if ((event.mousePoint - mSelectionAnchorDropped).len() < 3)
-         mSelectionActive = false;
-
-      setCursorPosition(getTextPosition(globalToLocalCoord(event.mousePoint)));
-      mVertMoveAnchorValid = false;
-      setUpdate();
-   }
-   */
 }
 
 void GuiWebViewCtrl::onMouseDragged(const GuiEvent &event)
@@ -545,8 +475,8 @@ void GuiWebViewCtrl::onMouseDragged(const GuiEvent &event)
    Parent::onMouseDragged(event);
 
    Point2I point = globalToLocalCoord(event.mousePoint);
-   if(mWebViewTexture.getWebView())
-      mWebViewTexture.getWebView()->injectMouseMove(point.x, point.y);
+   if(mWebViewTexture && mWebViewTexture->getWebView())
+      mWebViewTexture->getWebView()->InjectMouseMove(point.x, point.y);
 }
 void GuiWebViewCtrl::onMouseEnter(const GuiEvent &event)
 {
@@ -573,8 +503,8 @@ void GuiWebViewCtrl::onRightMouseDown(const GuiEvent &event)
 
    Parent::onRightMouseDown(event);
 
-   if(mWebViewTexture.getWebView())
-      mWebViewTexture.getWebView()->injectMouseDown(Awesomium::RIGHT_MOUSE_BTN);
+   if(mWebViewTexture && mWebViewTexture->getWebView())
+      mWebViewTexture->getWebView()->InjectMouseDown(Awesomium::kMouseButton_Right);
 }
 void GuiWebViewCtrl::onRightMouseUp(const GuiEvent &event)
 {
@@ -583,8 +513,8 @@ void GuiWebViewCtrl::onRightMouseUp(const GuiEvent &event)
 
    Parent::onRightMouseUp(event);
 
-   if(mWebViewTexture.getWebView())
-      mWebViewTexture.getWebView()->injectMouseUp(Awesomium::RIGHT_MOUSE_BTN);
+   if(mWebViewTexture && mWebViewTexture->getWebView())
+      mWebViewTexture->getWebView()->InjectMouseUp(Awesomium::kMouseButton_Right);
 }
 void GuiWebViewCtrl::onRightMouseDragged(const GuiEvent &event)
 {
@@ -594,8 +524,8 @@ void GuiWebViewCtrl::onRightMouseDragged(const GuiEvent &event)
    Parent::onRightMouseDragged(event);
 
    Point2I point = globalToLocalCoord(event.mousePoint);
-   if(mWebViewTexture.getWebView())
-      mWebViewTexture.getWebView()->injectMouseMove(point.x, point.y);
+   if(mWebViewTexture && mWebViewTexture->getWebView())
+      mWebViewTexture->getWebView()->InjectMouseMove(point.x, point.y);
 }
 
 void GuiWebViewCtrl::onMiddleMouseDown(const GuiEvent &event)
@@ -605,8 +535,8 @@ void GuiWebViewCtrl::onMiddleMouseDown(const GuiEvent &event)
 
    Parent::onMiddleMouseDown(event);
 
-   if(mWebViewTexture.getWebView())
-      mWebViewTexture.getWebView()->injectMouseDown(Awesomium::MIDDLE_MOUSE_BTN);
+   if(mWebViewTexture && mWebViewTexture->getWebView())
+      mWebViewTexture->getWebView()->InjectMouseDown(Awesomium::kMouseButton_Middle);
 }
 void GuiWebViewCtrl::onMiddleMouseUp(const GuiEvent &event)
 {
@@ -615,8 +545,8 @@ void GuiWebViewCtrl::onMiddleMouseUp(const GuiEvent &event)
 
    Parent::onMiddleMouseUp(event);
 
-   if(mWebViewTexture.getWebView())
-      mWebViewTexture.getWebView()->injectMouseUp(Awesomium::MIDDLE_MOUSE_BTN);
+   if(mWebViewTexture && mWebViewTexture->getWebView())
+      mWebViewTexture->getWebView()->InjectMouseUp(Awesomium::kMouseButton_Middle);
 }
 void GuiWebViewCtrl::onMiddleMouseDragged(const GuiEvent &event)
 {
@@ -626,188 +556,26 @@ void GuiWebViewCtrl::onMiddleMouseDragged(const GuiEvent &event)
    Parent::onMiddleMouseDragged(event);
 
    Point2I point = globalToLocalCoord(event.mousePoint);
-   if(mWebViewTexture.getWebView())
-      mWebViewTexture.getWebView()->injectMouseMove(point.x, point.y);
+   if(mWebViewTexture && mWebViewTexture->getWebView())
+      mWebViewTexture->getWebView()->InjectMouseMove(point.x, point.y);
 }
 
 
 bool GuiWebViewCtrl::onInputEvent(const InputEventInfo &event)
 {
    return Parent::onInputEvent(event);
-   /*
-   // TODO - add POV support...
-   if ( event.action == SI_MAKE )
-   {
-      if ( event.objType == SI_BUTTON
-        || event.objType == SI_POV
-        || ( ( event.objType == SI_KEY ) && !isModifierKey( event.objInst ) ) )
-      {
-       //  char deviceString[32];
-       //  if ( !ActionMap::getDeviceName( event.deviceType, event.deviceInst, deviceString ) )
-       //     return( false );
-
-       //  char actionString[4];
-       //  ActionMap::getKeyString( event.action, actionString );
-
-		 //Con::executef( this, "onInputEvent", deviceString, actionString, "1" );
-		 //onInputEvent_callback(deviceString, actionString, 1);
-   	
-	   Awesomium::WebKeyboardEvent keyEvent;
-	   //keyEvent.text[0] = actionString[0];
-	   //keyEvent.text[1] = actionString[1];
-	   //keyEvent.text[2] = actionString[2];
-	   //keyEvent.text[3] = actionString[3];
-	   //keyEvent.unmodifiedText[0] = actionString[0];
-	   //keyEvent.unmodifiedText[1] = actionString[1];
-	   //keyEvent.unmodifiedText[2] = actionString[2];
-	   //keyEvent.unmodifiedText[3] = actionString[3];
-      keyEvent.type = Awesomium::WebKeyboardEvent::TYPE_KEY_DOWN;
-      keyEvent.virtualKeyCode = event.objInst;
-	   keyEvent.nativeKeyCode = event.objInst;
-	   mWebViewTexture.getWebView()->injectKeyboardEvent(keyEvent);
-
-         return true;
-      }
-   }
-   else if ( event.action == SI_BREAK )
-   {
-      if ( ( event.objType == SI_KEY ) && isModifierKey( event.objInst ) )
-      {
-      //   char actionString[4];
-      //   ActionMap::getKeyString( event.action, actionString );
-
-		 //Con::executef( this, "onInputEvent", deviceString, actionString, "1" );
-		 //onInputEvent_callback(deviceString, actionString, 1);
-   	
-	   Awesomium::WebKeyboardEvent keyEvent;
-	 //  keyEvent.text[0] = actionString[0];
-	 //  keyEvent.text[1] = actionString[1];
-	 //  keyEvent.text[2] = actionString[2];
-	 //  keyEvent.text[3] = actionString[3];
-	 //  keyEvent.unmodifiedText[0] = actionString[0];
-	 //  keyEvent.unmodifiedText[1] = actionString[1];
-	 //  keyEvent.unmodifiedText[2] = actionString[2];
-	 //  keyEvent.unmodifiedText[3] = actionString[3];
-      keyEvent.type = Awesomium::WebKeyboardEvent::TYPE_KEY_UP;
-      keyEvent.virtualKeyCode = event.objInst;
-	   keyEvent.nativeKeyCode = event.objInst;
-	   mWebViewTexture.getWebView()->injectKeyboardEvent(keyEvent);
-
-
-         return true;
-      }
-   }
-   return false;
-*/
-   /*
-   switch(event.deviceType)
-   {
-   case MouseDeviceType:
-      switch(event.action)
-      {
-      case SI_MAKE:
-         mWebViewTexture.getWebView()->injectMouseDown(static_cast<Awesomium::MouseButton>(event.objInst - KEY_BUTTON0));
-         return true;
-      case SI_MOVE:
-         {
-            Point2I point = globalToLocalCoord(getRoot()->getCanvasCursorPos());
-            mWebViewTexture.getWebView()->injectMouseMove(point.x, point.y);
-         }
-         return true;
-      case SI_BREAK:
-         mWebViewTexture.getWebView()->injectMouseUp(static_cast<Awesomium::MouseButton>(event.objInst - KEY_BUTTON0));
-         return true;
-      }
-      break;
-   }
-
-   return false;
-   */
-//   if ( event.action == SI_MAKE )
-//   {
-
-     // static_cast<win32Window>(getRoot()->getPlatformWindow())
-/*
-      if(key == 8 || key == 127) // Backspace or Delete key
-	   {
-		   injectKey(Awesomium::KeyCodes::AK_BACK);
-		   return;
-	   }
-	   else if(key == 9) // Tab key
-	   {
-		   injectKey(Awesomium::KeyCodes::AK_TAB);
-		   return;
-	   }
-	   else if(key == 27) // Escape key
-	   {
-		   exit(0);
-	   }
-      */
-//      int key = event.ascii;
-   	
-//	   Awesomium::WebKeyboardEvent keyEvent;
-//	   keyEvent.text[0] = key;
-//	   keyEvent.unmodifiedText[0] = key;
-//	   keyEvent.type = Awesomium::WebKeyboardEvent::TYPE_CHAR;
-//	   keyEvent.virtualKeyCode = key;
-//	   keyEvent.nativeKeyCode = key;
-//	   mWebViewTexture.getWebView()->injectKeyboardEvent(keyEvent);
-     // mWebViewTexture.getWebView()->injectKeyboardEvent(Awesomium::WebKeyboardEvent(event.objInst));
-//      return true;
-
-
-/*
-      if ( event.objType == SI_BUTTON
-        || event.objType == SI_POV
-        || ( ( event.objType == SI_KEY ) && !isModifierKey( event.objInst ) ) )
-      {
-       //  char deviceString[32];
-       //  if ( !ActionMap::getDeviceName( event.deviceType, event.deviceInst, deviceString ) )
-       //     return( false );
-
-       //  const char* actionString = ActionMap::buildActionString( &event );
-
-		 //Con::executef( this, "onInputEvent", deviceString, actionString, "1" );
-		// onInputEvent_callback(deviceString, actionString, 1);
-
-
-         return( true );
-      }
-      */
-//   }
-//   else if ( event.action == SI_BREAK )
-//   {
-      /*
-      if ( ( event.objType == SI_KEY ) && isModifierKey( event.objInst ) )
-      {
-         char keyString[32];
-         if ( !ActionMap::getKeyString( event.objInst, keyString ) )
-            return( false );
-
-         //Con::executef( this, "onInputEvent", "keyboard", keyString, "0" );
-		 onInputEvent_callback("keyboard", keyString, 0);
-
-         return( true );
-      }
-      */
-     // static_cast<win32Window>(getRoot()->getPlatformWindow())
-     // mWebViewTexture.getWebView()->injectKeyboardEvent(Awesomium::WebKeyboardEvent(event.objInst));
- //     return true;
- //  }
-
-//   return false;
 }
 
 void GuiWebViewCtrl::handleKeyboard(WindowId did, UINT message, WPARAM wParam, WPARAM lParam)
 {
   // const Awesomium::WebKeyboardEvent* key = new ;
-   if(mWebViewTexture.getWebView())
-      mWebViewTexture.getWebView()->injectKeyboardEvent(Awesomium::WebKeyboardEvent(message, wParam, lParam));
+   if(mWebViewTexture && mWebViewTexture->getWebView())
+      mWebViewTexture->getWebView()->InjectKeyboardEvent(Awesomium::WebKeyboardEvent(message, wParam, lParam));
 }
 
 Point2I GuiWebViewCtrl::getNativeExtent() const
 {
-   return (mWebViewTexture.isValid() ? mWebViewTexture.getWidthHeight() : getExtent());
+   return (mWebViewTexture && mWebViewTexture->isValid() ? mWebViewTexture->getWidthHeight() : getExtent());
 }
 
 
@@ -840,12 +608,11 @@ static ConsoleDocFragment _sGuiWebViewCtrlSetURL2(
 
 
 //"Set the bitmap displayed in the control. Note that it is limited in size, to 256x256."
-ConsoleMethod( GuiWebViewCtrl, setURL, void, 3, 3,
+DefineEngineMethod( GuiWebViewCtrl, setURL, void, (String url),,
    "( String filename | String filename ) Assign an image to the control.\n\n"
    "@hide" )
 {
-//   char filename[1024];
-   object->setURL(argv[2]);
+   object->setURL(url);
 }
 
 DefineEngineMethod( GuiWebViewCtrl, getNativeExtent, Point2I, (),,
@@ -853,3 +620,10 @@ DefineEngineMethod( GuiWebViewCtrl, getNativeExtent, Point2I, (),,
 {
    return object->getNativeExtent();
 }
+
+DefineEngineMethod( GuiWebViewCtrl, setObjectCallback, void, (String objectName, String callbackName, String tsFunctionName, String args),,
+   "set a javascript object property.\n"
+   "@param \n\n" )
+{ 
+   object->setObjectCallbackScript(objectName, callbackName, tsFunctionName, args);
+}		

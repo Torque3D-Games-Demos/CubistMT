@@ -171,3 +171,4 @@ console.log
 !Engine/bin
 My Projects/CubistMT/game/shaders/procedural/*
 My Projects/CubistMT/game/Cache/*
+My Projects/CubistMT/buildFiles/Link/*
