@@ -51,6 +51,11 @@ class WindowInputGenerator
       /// (one unit of mouse movement is a mickey) to units in the GUI.
       F32             mPixelsPerMickey;
 
+      // start jc
+   public: 
+      //void handleTouchEvent (WindowId did, U32 touchId, S32 x, S32 y, U32 eventType);
+      // end jc
+
       // Event Handlers
       void handleMouseButton(WindowId did, U32 modifier,  U32 action, U16 button);
       void handleMouseWheel (WindowId did, U32 modifier,  S32 wheelDeltaX, S32 wheelDeltaY);
@@ -72,6 +77,15 @@ class WindowInputGenerator
       /// Returns true if the given keypress event should be send as a raw keyboard
       /// event even if it maps to a character input event.
       bool wantAsKeyboardEvent( U32 modifiers, U32 key );
+
+   // start jc
+      void touchWindowFocus()
+      {
+         mNotifyPosition = true;
+         mFocused = true;
+      }
+
+   // end jc
 };
 
 #endif // _WINDOW_INPUTGENERATOR_H_

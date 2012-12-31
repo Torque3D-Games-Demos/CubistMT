@@ -56,7 +56,12 @@ ConsoleDocClass( GuiBitmapCtrl,
 GuiBitmapCtrl::GuiBitmapCtrl(void)
  : mBitmapName(),
    mStartPoint( 0, 0 ),
-   mWrap( false )
+   mWrap( false ), 
+// start jc
+   mLockAspect(false),
+   mTranslucent(true),
+   mTranslucentBlendOp(Material::LerpAlpha)
+// end jc
 {	
 }
 
@@ -81,6 +86,14 @@ void GuiBitmapCtrl::initPersistFields()
          "The bitmap file to display in the control." );
       addField( "wrap",   TypeBool,     Offset( mWrap, GuiBitmapCtrl ),
          "If true, the bitmap is tiled inside the control rather than stretched to fit." );
+   // start jc
+      addField( "lockAspect",   TypeBool,     Offset( mLockAspect, GuiBitmapCtrl ),
+         "If true, ." );
+      addField( "translucent",   TypeBool,     Offset( mTranslucent, GuiBitmapCtrl ),
+         "If true, ." );
+      addField( "translucentBlendOp",   TYPEID< Material::BlendOp >(),     Offset( mTranslucentBlendOp, GuiBitmapCtrl ),
+         "If true, ." );
+   // end jc
       
    endGroup( "Bitmap" );
 
@@ -92,7 +105,70 @@ bool GuiBitmapCtrl::onWake()
    if (! Parent::onWake())
       return false;
    setActive(true);
-   setBitmap(mBitmapName);
+
+// start jc
+//   setBitmap(mBitmapName);
+   setBitmap(mBitmapName, (!mWrap && (getExtent().x == 0) && (getExtent().y == 0)));
+//   updateSizing();
+
+		GFXStateBlockDesc stateTranslucent;
+		//blendGui.zEnable = true;
+		//blendGui.zWriteEnable = true;
+		//blendGui.zFunc = GFXCmpLessEqual;
+		//blendGui.cullMode = GFXCullNone;
+	   // Translucency   
+	   stateTranslucent.blendDefined = true;
+	   stateTranslucent.blendEnable = bool(mTranslucentBlendOp != Material::None);
+	   stateTranslucent.zDefined = true;
+	   stateTranslucent.zWriteEnable = false;   
+	   stateTranslucent.alphaDefined = true;
+	   stateTranslucent.alphaTestEnable = false;
+	   stateTranslucent.alphaTestRef = 0.0f;
+	   stateTranslucent.alphaTestFunc = GFXCmpGreaterEqual;
+	   stateTranslucent.samplersDefined = true;
+	   stateTranslucent.samplers[0].textureColorOp = GFXTOPModulate;
+	   stateTranslucent.samplers[0].alphaOp = GFXTOPModulate;   
+	   stateTranslucent.samplers[0].alphaArg1 = GFXTATexture;
+	   stateTranslucent.samplers[0].alphaArg2 = GFXTADiffuse;   
+	   switch( mTranslucentBlendOp )
+	   {
+	   case Material::Add:
+		  {
+			 stateTranslucent.blendSrc = GFXBlendOne;
+			 stateTranslucent.blendDest = GFXBlendOne;
+			 break;
+		  }
+	   case Material::AddAlpha:
+		  {
+			 stateTranslucent.blendSrc = GFXBlendSrcAlpha;
+			 stateTranslucent.blendDest = GFXBlendOne;
+			 break;
+		  }
+	   case Material::Mul:
+		  {
+			 stateTranslucent.blendSrc = GFXBlendDestColor;
+			 stateTranslucent.blendDest = GFXBlendZero;
+			 break;
+		  }
+	   case Material::LerpAlpha:
+		  {
+			 stateTranslucent.blendSrc = GFXBlendSrcAlpha;
+			 stateTranslucent.blendDest = GFXBlendInvSrcAlpha;
+			 break;
+		  }
+
+	   default:
+		  {
+			 // default to LerpAlpha
+			 stateTranslucent.blendSrc = GFXBlendSrcAlpha;
+			 stateTranslucent.blendDest = GFXBlendInvSrcAlpha;
+			 break;
+		  }
+	   }
+
+	mTranslucentSB = GFX->createStateBlock(stateTranslucent);
+// end jc
+
    return true;
 }
 
@@ -115,6 +191,28 @@ void GuiBitmapCtrl::inspectPostApply()
    {
       setExtent( mTextureObject->getWidth(), mTextureObject->getHeight());
    }
+// start jc
+   else if(mLockAspect && mTextureObject && mTextureObject.isValid())
+   {
+      F32 nativeWidth = mTextureObject->getWidth();
+      F32 nativeHeight = mTextureObject->getHeight();
+      F32 aspect = nativeWidth/nativeHeight;
+      F32 width = getExtent().x;
+      F32 height = getExtent().y;
+
+      // reuse aspect variable as scale factor
+      if(aspect > width/height)
+         // fit to hieght
+         aspect = height / nativeHeight;     
+      else
+         // fit to width
+         aspect = width / nativeWidth;
+      
+      width = nativeHeight * aspect;
+      height = nativeWidth * aspect;
+      setExtent(width, height);
+   }
+// end jc
 }
 
 void GuiBitmapCtrl::setBitmap( const char *name, bool resize )
@@ -129,17 +227,60 @@ void GuiBitmapCtrl::setBitmap( const char *name, bool resize )
 		   mTextureObject.set( mBitmapName, &GFXDefaultGUIProfile, avar("%s() - mTextureObject (line %d)", __FUNCTION__, __LINE__) );
 
       // Resize the control to fit the bitmap
+   // start jc
+      /*
       if ( mTextureObject && resize )
       {
          setExtent( mTextureObject->getWidth(), mTextureObject->getHeight() );
          updateSizing();
       }
+      */
+      if ( mTextureObject && mTextureObject.isValid() )
+         if(resize)
+         {
+            setExtent( mTextureObject->getWidth(), mTextureObject->getHeight() );
+            updateSizing();
+         }
+         else if(mLockAspect)
+         {
+            setExtent(getExtent());
+            updateSizing();
+         }
+   // end jc
    }
    else
       mTextureObject = NULL;
 
    setUpdate();
 }
+// start jc
+bool GuiBitmapCtrl::setExtent( const Point2I &newExtent)
+{
+   if(mLockAspect && mTextureObject && mTextureObject.isValid())
+   {
+      F32 nativeWidth = mTextureObject->getWidth();
+      F32 nativeHeight = mTextureObject->getHeight();
+      F32 aspect = nativeWidth/nativeHeight;
+      F32 width = newExtent.x;
+      F32 height = newExtent.y;
+
+      // reuse aspect variable as scale factor
+      if(aspect < width/height)
+         // fit to hieght
+         aspect = height / nativeHeight;     
+      else
+         // fit to width
+         aspect = width / nativeWidth;
+      
+      width = nativeWidth * aspect;
+      height = nativeHeight * aspect;
+
+      return Parent::setExtent(Point2I(width, height));
+   }
+   return Parent::setExtent(newExtent);
+}
+// end jc
+
 
 void GuiBitmapCtrl::updateSizing()
 {
@@ -166,9 +307,25 @@ void GuiBitmapCtrl::setBitmapHandle(GFXTexHandle handle, bool resize)
 
 void GuiBitmapCtrl::onRender(Point2I offset, const RectI &updateRect)
 {
-   if (mTextureObject)
+// start jc
+//   if (mTextureObject)
+   if (mTextureObject && mTextureObject.isValid())
+// end jc
    {
+   // start jc
       GFX->getDrawUtil()->clearBitmapModulation();
+
+		
+	   if(mTranslucent && mTranslucentBlendOp != Material::LerpAlpha)
+      {
+		  GFX->setStateBlock( mTranslucentSB );
+		  GFX->getDrawUtil()->lockStateBlock();
+		  if(mTranslucentBlendOp == Material::Add || mTranslucentBlendOp == Material::AddAlpha)
+			GFX->getDrawUtil()->setGenericShader(GFXDevice::GSAddColorTexture);
+	   }
+	   else GFX->setStateBlock( mDefaultGuiSB );
+   // end jc
+
 		if(mWrap)
 		{
          // We manually draw each repeat because non power of two textures will 
@@ -200,6 +357,14 @@ void GuiBitmapCtrl::onRender(Point2I offset, const RectI &updateRect)
          RectI rect(offset, getExtent());
          GFX->getDrawUtil()->drawBitmapStretch(mTextureObject, rect, GFXBitmapFlip_None, GFXTextureFilterLinear, false);
       }
+   // start jc
+	  if(mTranslucent && mTranslucentBlendOp != Material::LerpAlpha)
+	  {
+		 GFX->getDrawUtil()->unlockStateBlock();
+         GFX->setStateBlock( mDefaultGuiSB );
+		 GFX->getDrawUtil()->setGenericShader(GFXDevice::GSModColorTexture);
+	  }
+   // end jc
    }
 
    if (mProfile->mBorder || !mTextureObject)
@@ -213,7 +378,10 @@ void GuiBitmapCtrl::onRender(Point2I offset, const RectI &updateRect)
 
 void GuiBitmapCtrl::setValue(S32 x, S32 y)
 {
-   if (mTextureObject)
+// start jc
+//   if (mTextureObject)
+   if (mTextureObject && mTextureObject.isValid())
+// end jc
    {
 		x += mTextureObject->getWidth() / 2;
 		y += mTextureObject->getHeight() / 2;
@@ -226,6 +394,14 @@ void GuiBitmapCtrl::setValue(S32 x, S32 y)
   		y += 256;
   	mStartPoint.y = y % 256;
 }
+
+// start jc
+Point2I GuiBitmapCtrl::getNativeExtent() const
+{
+   return (mTextureObject && mTextureObject.isValid() ? mTextureObject.getWidthHeight() : getExtent());
+}
+// end jc
+
 
 DefineEngineMethod( GuiBitmapCtrl, setValue, void, ( S32 x, S32 y ),,
    "Set the offset of the bitmap within the control.\n"
@@ -264,3 +440,11 @@ ConsoleMethod( GuiBitmapCtrl, setBitmap, void, 3, 4,
    Con::expandScriptFilename(filename, sizeof(filename), argv[2]);
    object->setBitmap(filename, argc > 3 ? dAtob( argv[3] ) : false );
 }
+
+// start jc
+DefineEngineMethod( GuiBitmapCtrl, getNativeExtent, Point2I, (),,
+   "( , bool resize ) Assign an image to the control.\n\n")
+{
+   return object->getNativeExtent();
+}
+// end jc

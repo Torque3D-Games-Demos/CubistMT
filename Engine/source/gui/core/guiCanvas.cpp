@@ -122,7 +122,11 @@ GuiCanvas::GuiCanvas(): GuiControl(),
                         mMiddleMouseLast(false),
                         mRightMouseLast(false),
                         mPlatformWindow(NULL),
-                        mLastRenderMs(0)
+                        mLastRenderMs(0),
+                     // start jc
+                        mTouchCapturedMouse(false),
+                        mTouchCapturedMouseId(0) 
+                     // end jc
 {
    setBounds(0, 0, 640, 480);
    mAwake = true;
@@ -142,6 +146,10 @@ GuiCanvas::GuiCanvas(): GuiControl(),
 #ifdef TORQUE_DEMO_PURCHASE
    mPurchaseScreen = NULL;
 #endif
+
+// start jc
+   mFullscreenMonitor = 0;
+// end jc
 }
 
 GuiCanvas::~GuiCanvas()
@@ -177,6 +185,10 @@ void GuiCanvas::initPersistFields()
 
    addGroup("Canvas Rendering");
    addProtectedField( "numFences", TypeS32, Offset( mNumFences, GuiCanvas ), &setProtectedNumFences, &defaultProtectedGetFn, "The number of GFX fences to use." );
+// start jc
+   addField( "fullscreenMonitor", TypeS32, Offset( mFullscreenMonitor, GuiCanvas ), "The monitor to use for fullsceen mode." );
+   
+// end jc
    endGroup("Canvas Rendering");
 
    Parent::initPersistFields();
@@ -207,7 +219,10 @@ bool GuiCanvas::onAdd()
    Journal::Disable();
 
    // Initialize the window...
-   GFXVideoMode vm = GFXInit::getInitialVideoMode();
+// start jc
+//   GFXVideoMode vm = GFXInit::getInitialVideoMode();
+   GFXVideoMode vm = GFXInit::getInitialVideoMode(mFullscreenMonitor);
+// end jc
 
    //If we're recording, store the intial video resolution
    if (Journal::IsRecording())
@@ -442,6 +457,14 @@ void GuiCanvas::setCursorPos(const Point2I &pt)
       mPlatformWindow->setCursorPosition( screenPt.x, screenPt.y ); 
    }
 }
+
+// start jc
+Point2I GuiCanvas::getCanvasCursorPos()
+{
+   //AssertISV(mPlatformWindow, "GuiCanvas::setCursorPos - no window present!");
+   return mLastCursorPt;
+}
+// end jc
 
 void GuiCanvas::showCursor(bool state)
 { 
@@ -839,7 +862,31 @@ bool GuiCanvas::processMouseEvent(InputEventInfo &inputEvent)
    }
    return false;
 }
+// start jc
 
+// start jc
+bool GuiCanvas::processTouchEvent( U32 touchId, S32 x, S32 y, U32 eventType )
+{
+   Con::printf("handleTouchEvent: %d, %d, %d, %d", touchId, x, y, eventType);
+   
+   switch(eventType)
+   {
+   case TOUCH_DOWN:
+//      rootTouchDown();
+      break;
+
+   case TOUCH_MOVE:
+  //    rootTouchMove();
+      break;
+
+   case TOUCH_UP:
+  //    rootTouchUp();
+      break;
+   }
+
+   return true;
+}
+// end jc
 bool GuiCanvas::processGamepadEvent(InputEventInfo &inputEvent)
 {
    if (! mFirstResponder)
@@ -1252,6 +1299,96 @@ bool GuiCanvas::rootMouseWheelDown(const GuiEvent &event)
    return false;
 }
 
+// start jc
+#include "TUIO/TuioClient.h"
+#include "TUIO/TuioPoint.h"
+
+void GuiCanvas::findTouchControl(const GuiTouchEvent &event)
+{
+   // Any children at all?
+   if(size() == 0 || !event.client || !event.cursor)
+   {
+      mMouseControl = NULL;
+      return;
+   }
+
+   // Otherwise, check the point and find the overlapped control.
+   GuiControl *controlHit = findHitControl(event.touchPosition);
+   if(controlHit != static_cast<GuiControl*>(mMouseControl))
+      mMouseControl = controlHit;
+}
+Point2I GuiCanvas::getLocalTouchPosition(Point2F& point)
+{
+   Point2I extent = mPlatformWindow->getClientExtent();
+   Point2I cursorPt((S32)(mClampF(point.x, 0.0f, 1.0f)*((F32)extent.x)),
+                    (S32)(mClampF(point.y, 0.0f, 1.0f)*((F32)extent.y)));
+
+   return cursorPt;
+}
+bool GuiCanvas::isLocked(S32 id)
+{
+   if(mTouchCapturedControl.isEmpty()){
+      return false;
+   }else{
+      return mTouchCapturedControl[id]? true : false;
+   }
+}
+
+bool GuiCanvas::rootTouchUp(const GuiTouchEvent &event)
+{
+	if (mFirstResponder)
+		return mFirstResponder->onTouchUp(event);
+
+
+   // if the touchID is locked by a control give it the event and leave
+   if(!mTouchCapturedControl.isEmpty())
+   {
+      GuiControl* ctrl = mTouchCapturedControl[event.touchId];
+      if(ctrl)
+         return ctrl->onTouchUp(event); 
+   }
+
+   GuiControl *controlHit = NULL;
+   controlHit = findHitControl(event.touchPosition);
+   if(!controlHit) return false;
+
+
+   return controlHit->onTouchUp(event);
+}
+bool GuiCanvas::rootTouchMove(const GuiTouchEvent &event)
+{
+	if (mFirstResponder)
+		return mFirstResponder->onTouchMove(event);
+
+
+   // if the touchID is locked by a control give it the message and leave
+   if(!mTouchCapturedControl.isEmpty())
+   {
+      GuiControl* ctrl = mTouchCapturedControl[event.touchId];
+      if(ctrl)
+         return ctrl->onTouchMove(event); 
+   }
+
+   GuiControl *controlHit = NULL;
+   controlHit = findHitControl(event.touchPosition);
+   if(!controlHit) return false;
+
+   return controlHit->onTouchMove(event);
+}
+bool GuiCanvas::rootTouchDown(const GuiTouchEvent &event)
+{
+	if (mFirstResponder)
+		return mFirstResponder->onTouchDown(event);
+
+   GuiControl *controlHit = NULL;
+   
+   controlHit = findHitControl(event.touchPosition);
+   if(!controlHit) return false;
+
+   return controlHit->onTouchDown(event);
+}
+// end jc
+
 void GuiCanvas::setContentControl(GuiControl *gui)
 {
 #ifdef TORQUE_DEMO_PURCHASE
@@ -1496,6 +1633,26 @@ void GuiCanvas::mouseUnlock(GuiControl *lockingControl)
    }
    mMouseCapturedControl = NULL;
 }
+
+// start jc
+void GuiCanvas::touchIDLock(U32 touchID, GuiControl *lockingControl)
+{
+   // store a pointer to the locking object indexed against the id
+   mTouchCapturedControl[touchID] = lockingControl;
+}
+
+void GuiCanvas::touchIDUnlock(U32 touchID, GuiControl *lockingControl)
+{
+   // shouldn't happen really but it should be harmless
+      GuiControl* ctrl = mTouchCapturedControl[touchID];
+      if(ctrl != lockingControl )
+         return;
+
+   // go on off you go, can't have clogging up the system
+   mTouchCapturedControl.erase(touchID);
+}
+// end jc
+
 
 void GuiCanvas::paint()
 {
@@ -2554,7 +2711,7 @@ ConsoleMethod( GuiCanvas, setFocus, void, 2,2, "() - Claim OS input focus for th
       window->setFocus();
 }
 
-ConsoleMethod( GuiCanvas, setVideoMode, void, 5, 8,
+ConsoleMethod( GuiCanvas, setVideoMode, void, 5, 11,
                "(int width, int height, bool fullscreen, [int bitDepth], [int refreshRate], [int antialiasLevel] )\n"
                "Change the video mode of this canvas. This method has the side effect of setting the $pref::Video::mode to the new values.\n\n"
                "\\param width The screen width to set.\n"
@@ -2562,7 +2719,12 @@ ConsoleMethod( GuiCanvas, setVideoMode, void, 5, 8,
                "\\param fullscreen Specify true to run fullscreen or false to run in a window\n"
                "\\param bitDepth [optional] The desired bit-depth. Defaults to the current setting. This parameter is ignored if you are running in a window.\n"
                "\\param refreshRate [optional] The desired refresh rate. Defaults to the current setting. This parameter is ignored if you are running in a window"
-					"\\param antialiasLevel [optional] The level of anti-aliasing to apply 0 = none" )
+					"\\param antialiasLevel [optional] The level of anti-aliasing to apply 0 = none"
+            // start jc
+               "\\param positionX [optional] The screen width to set.\n"
+               "\\param positionY [optional] The screen height to set.\n"
+               "\\param borderless [optional] The window has no borders.\n" )
+            // end jc
 {
    if (!object->getPlatformWindow())
       return;
@@ -2644,6 +2806,22 @@ ConsoleMethod( GuiCanvas, setVideoMode, void, 5, 8,
    {
       vm.antialiasLevel = dAtoi(argv[7]);
    }
+
+// start jc
+   if ((argc > 8) && (dStrlen(argv[8]) > 0))
+   {
+      vm.position.x = dAtoi(argv[8]);
+   }
+   if ((argc > 9) && (dStrlen(argv[9]) > 0))
+   {
+      vm.position.y = dAtoi(argv[9]);
+   }
+
+   if ((argc > 10) && (dStrlen(argv[10]) > 0))
+   {
+      vm.borderless = dAtob(argv[10]);
+   }
+// end jc
 
    object->getPlatformWindow()->setVideoMode(vm);
 

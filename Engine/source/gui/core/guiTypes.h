@@ -35,6 +35,11 @@
 #ifndef _DYNAMIC_CONSOLETYPES_H_
 #include "console/dynamicTypes.h"
 #endif
+// start jc
+#ifndef _COLLISION_H_
+#include "collision/collision.h"
+#endif
+// end jc
 
 
 #include "gfx/gfxDevice.h"
@@ -78,6 +83,16 @@ struct Gui3DMouseEvent : public GuiEvent
       : vec( 0.f, 0.f, 0.f ),
         pos( 0.f, 0.f, 0.f ) {}
 };
+
+// start jc
+struct ShapeInputEvent : public Gui3DMouseEvent
+{
+   RayInfo     ri;
+   
+   ShapeInputEvent()
+      : ri() {}
+};
+// end jc
 
 
 /// @name Docking Flag

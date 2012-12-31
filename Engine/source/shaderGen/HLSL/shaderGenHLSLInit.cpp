@@ -51,6 +51,9 @@ void _initShaderGenHLSL( ShaderGen *shaderGen )
    FEATUREMGR->registerFeature( MFT_DiffuseColor, new DiffuseFeatureHLSL );
    FEATUREMGR->registerFeature( MFT_DiffuseVertColor, new DiffuseVertColorFeatureHLSL );
    FEATUREMGR->registerFeature( MFT_AlphaTest, new AlphaTestHLSL );
+// start jc
+   FEATUREMGR->registerFeature( MFT_AlphaScatter, new AlphaScatterHLSL );
+// end jc
    FEATUREMGR->registerFeature( MFT_GlowMask, new GlowMaskHLSL );
    FEATUREMGR->registerFeature( MFT_LightMap, new LightmapFeatHLSL );
    FEATUREMGR->registerFeature( MFT_ToneMap, new TonemapFeatHLSL );
@@ -93,6 +96,12 @@ void _initShaderGenHLSL( ShaderGen *shaderGen )
    FEATUREMGR->registerFeature( MFT_ForwardShading, new NamedFeatureHLSL( "Forward Shaded Material" ) );
 
    FEATUREMGR->registerFeature( MFT_ImposterVert, new ImposterVertFeatureHLSL );
+
+// start jc
+   FEATUREMGR->registerFeature( MFT_IsObjectSpaceNormals, new NamedFeatureHLSL( "ObjectSpaceNormals" ) );
+   FEATUREMGR->registerFeature( MFT_FogBlendAdd, new FogBlendAddFeatHLSL );
+// end jc
+
 }
 
 MODULE_BEGIN( ShaderGenHLSL )

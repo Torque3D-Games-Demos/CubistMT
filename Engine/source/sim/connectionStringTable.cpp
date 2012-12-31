@@ -62,7 +62,9 @@ public:
    }
    virtual void process(NetConnection *connection)
    {
+      /*start pg
       Con::printf("Mapping string: %s to index: %d", mString.getString(), mIndex);
+      end pg*/
       connection->mapString(mIndex, mString);
    }
 #ifdef TORQUE_DEBUG_NET

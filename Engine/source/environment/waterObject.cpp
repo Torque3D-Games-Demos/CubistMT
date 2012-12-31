@@ -202,7 +202,10 @@ WaterObject::WaterObject()
    mSpecularColor( 1.0f, 1.0f, 1.0f, 1.0f ),
    mDepthGradientMax( 50.0f ),
    mEmissive( false ),
-   mUnderwaterColor(9, 6, 5, 240)
+   mUnderwaterColor(9, 6, 5, 240),
+// start jc
+  mUnderwaterFog(true)
+// end jc
 {
    mTypeMask = WaterObjectType | StaticObjectType;
 
@@ -349,7 +352,9 @@ void WaterObject::initPersistFields()
       addField( "wetDepth", TypeF32, Offset( mWaterFogData.wetDepth, WaterObject ), "The depth in world units at which full darkening will be received,"
 		  " giving a wet look to objects underwater." );
       addField( "wetDarkening", TypeF32, Offset( mWaterFogData.wetDarkening, WaterObject ), "The refract color intensity scaled at wetDepth." );
-
+// start jc
+      addField( "underwaterFog", TypeBool, Offset( mUnderwaterFog, WaterObject ), "Enable underwater fog." );
+// end jc
    endGroup( "Underwater Fogging" );
 
    addGroup( "Misc" );
@@ -475,6 +480,9 @@ U32 WaterObject::packUpdate( NetConnection * conn, U32 mask, BitStream *stream )
       stream->write( mWaterFogData.densityOffset );      
       stream->write( mWaterFogData.wetDepth );
       stream->write( mWaterFogData.wetDarkening );
+// start jc 
+      stream->write( mUnderwaterFog );
+// end jc
 
       stream->write( mDistortStartDist );
       stream->write( mDistortEndDist );
@@ -585,6 +593,9 @@ void WaterObject::unpackUpdate( NetConnection * conn, BitStream *stream )
       stream->read( &mWaterFogData.densityOffset );      
       stream->read( &mWaterFogData.wetDepth );
       stream->read( &mWaterFogData.wetDarkening );
+// start jc 
+      stream->read( &mUnderwaterFog );
+// end jc
 
       stream->read( &mDistortStartDist );
       stream->read( &mDistortEndDist );
@@ -696,7 +707,11 @@ void WaterObject::prepRenderImage( SceneRenderState *state )
    mWaterFogData.plane = mWaterPlane;
    mPlaneReflector.refplane = mWaterPlane;
 
+// start jc
+//   updateUnderwaterEffect( state );
+   if ( mUnderwaterFog )
    updateUnderwaterEffect( state );
+// end jc
 
    ObjectRenderInst *ri = state->getRenderPass()->allocInst<ObjectRenderInst>();
    ri->renderDelegate.bind( this, &WaterObject::renderObject );
@@ -726,7 +741,10 @@ void WaterObject::renderObject( ObjectRenderInst *ri, SceneRenderState *state, B
    //MathUtils::getZBiasProjectionMatrix( bias, frustum, &projMat );
    //GFX->setProjectionMatrix( projMat );
  
-   
+// start jc
+   if(!state->isReflectPass())
+   {
+// end jc
    GFXOcclusionQuery *query = mPlaneReflector.getOcclusionQuery();
 
    bool doQuery = ( !mPlaneReflector.mQueryPending && query && mReflectorDesc.useOcclusionQuery );
@@ -739,8 +757,14 @@ void WaterObject::renderObject( ObjectRenderInst *ri, SceneRenderState *state, B
 
    if ( doQuery )
       query->end();   
+// start jc
+   }
+// end jc
 
-   if ( mUnderwater && mBasicLighting )
+// start jc
+//   if ( mUnderwater && mBasicLighting )
+   if ( mUnderwaterFog && mUnderwater && mBasicLighting )
+// end jc
       drawUnderwaterFilter( state );
 }
 

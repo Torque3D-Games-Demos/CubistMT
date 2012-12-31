@@ -109,6 +109,10 @@ public:
                               F32 staticFriction );
    virtual void applyCorrection( const MatrixF &xfm );
    virtual void applyImpulse( const Point3F &origin, const Point3F &force );
+   // start jc
+	virtual void moveGlobalPosition(const Point3F& vec);
+   
+   // end jc
 };
 
 #endif // _T3D_PHYSICS_PXBODY_H_

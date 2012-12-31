@@ -30,6 +30,15 @@
 //#include "gfx/gfxDrawUtil.h"
 //#include "sim/netConnection.h"
 
+// start pg
+#include "platform\platform.h"
+#include "platform\profiler.h"
+
+static   const 
+F32      MIN_CAPSULE_HEIGHT = 0.0005f,
+         MIN_CAPSULE_RADIUS = 0.05f,
+         SKIN_WIDTH = 0.05f;
+// end pg
 
 PxPlayer::PxPlayer()
    :  PhysicsPlayer(),
@@ -75,7 +84,8 @@ void PxPlayer::init( const char *type,
    mObject = obj;
    mWorld = (PxWorld*)world;
    mOriginOffset = size.z * 0.5f;
-
+// start pg
+/*
    //if ( dStricmp( type, "Capsule" ) == 0 )
    {
       NxCapsuleControllerDesc desc;
@@ -84,6 +94,7 @@ void PxPlayer::init( const char *type,
       desc.radius -= desc.skinWidth;
       desc.height = size.z - ( desc.radius * 2.0f );
       desc.height -= desc.skinWidth * 2.0f;
+
 
       desc.climbingMode = CLIMB_CONSTRAINED;
       desc.position.set( 0, 0, 0 );
@@ -98,6 +109,56 @@ void PxPlayer::init( const char *type,
       //mColShape = new btBoxShape( btVector3( 0.5f, 0.5f, 1.0f ) );
       //mOriginOffset = 1.0f;
    }
+*/
+
+   if ( dStricmp( type, "FishController" ) == 0 ){
+
+      //capsule with radius and height comiong from x & y component of size
+      F32   _radius = size.x;
+      F32   _height = size.y;
+      //mOriginOffset = (_height + 2.0f*_radius)*0.5f;  //capsules base on point
+
+      NxCapsuleControllerDesc desc;
+
+      desc.interactionFlag = NXIF_INTERACTION_EXCLUDE;
+
+      desc.skinWidth = SKIN_WIDTH;
+      desc.radius = _radius;
+      desc.height = _height;
+
+      desc.climbingMode = CLIMB_EASY;
+      desc.position.set( 0, 0, 0 );
+      desc.upDirection = NX_Z;
+      desc.callback = this; // TODO: Fix this as well!
+	   desc.slopeLimit = runSurfaceCos;
+	   desc.stepOffset = stepHeight;
+      mController = mWorld->createController( desc );
+  // }else if ( dStricmp( type, "Capsule" ) == 0 ){
+   }else{
+      NxCapsuleControllerDesc desc;
+      desc.skinWidth = SKIN_WIDTH; // Expose?
+
+      //shrink box to allow for skin
+      Point3F  newSize;
+      newSize.x = size.x - 2.0f*SKIN_WIDTH;
+      newSize.y = size.y - 2.0f*SKIN_WIDTH;
+      newSize.z = size.z - 2.0f*SKIN_WIDTH;
+      //make biggest capsule that will fit in box vertically
+      desc.radius = getMax( newSize.x, newSize.y ) * 0.5f;
+      desc.height = newSize.z - ( desc.radius * 2.0f );
+
+      if(desc.height<MIN_CAPSULE_HEIGHT)desc.height =MIN_CAPSULE_HEIGHT;
+      if(desc.radius<MIN_CAPSULE_RADIUS)desc.radius = MIN_CAPSULE_RADIUS;
+
+      desc.climbingMode = CLIMB_EASY;  //pghack
+      desc.position.set( 0, 0, 0 );
+      desc.upDirection = NX_Z;
+      desc.callback = this; // TODO: Fix this as well!
+	   desc.slopeLimit = runSurfaceCos;
+	   desc.stepOffset = stepHeight;
+      mController = mWorld->createController( desc );
+   }
+// end pg
 
    // Put the kinematic actor on group 29.
    NxActor *kineActor = mController->getActor();
@@ -147,8 +208,10 @@ Point3F PxPlayer::move( const VectorF &disp, CollisionList &outCol )
    // the player is flying and remove the step offset.  If we have a small
    // z displacement here, zero it out.
    NxVec3 dispNx( disp.x, disp.y, disp.z );
-   if (mIsZero(disp.z))
-      dispNx.z = 0.0f;
+// start jc
+//   if (mIsZero(disp.z))
+//      dispNx.z = 0.0f;
+// end jc
    
    NxU32 activeGroups = 0xFFFFFFFF;
    activeGroups &= ~( 1<<31 ); // Skip activeGroup for triggers ( 31 )
@@ -411,7 +474,26 @@ MatrixF& PxPlayer::getTransform( MatrixF *outMatrix )
 
 void PxPlayer::setScale( const Point3F &scale )
 {
+// start jc
+   AssertFatal( mController, "PxPlayer::setTransform - The controller is null!" );
+
+   NxCapsuleController *capsule = static_cast<NxCapsuleController*>(mController);
+   if(capsule)
+   {
+	   mWorld->releaseWriteLock();
+      capsule->setRadius(scale.x);
+	   capsule->setHeight(scale.y);
+   }
+// end jc
 }
+// start jc
+//   virtual void setSpacials( const Point3F &nPos, const Point3F &nSize ) {}
+void PxPlayer::setSpacials( const Point3F &nPos, const Point3F &nSize )
+{
+   setScale(nSize);
+}
+// end jc
+
 
 Box3F PxPlayer::getWorldBounds()
 {

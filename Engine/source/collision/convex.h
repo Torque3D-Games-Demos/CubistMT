@@ -194,6 +194,10 @@ protected:
    ConvexType mType;                      ///< Type of Convex this is @see ConvexType
 
 public:
+   //start pg
+   void  setObject(SceneObject *a){mObject = a;}
+   //end pg
+
 
    /// Constructor
    Convex();

@@ -68,6 +68,9 @@ protected:
    MRandom mRandom;
 
    bool mIsDirty;
+// start jc
+   U32 mStartTime;
+// end jc
 
 public:
 
@@ -88,6 +91,10 @@ public:
 
    const VectorF& getDirection() const { return mDirection; }
    VectorF getTarget() const { return VectorF( mCurrentTarget.x, mCurrentTarget.y, 0 ); }
+
+// start jc
+   void resetWind( S32 randomSeed );
+// end jc
 };
 
 

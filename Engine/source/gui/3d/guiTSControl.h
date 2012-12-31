@@ -38,6 +38,10 @@ struct CameraQuery
    F32         fov;
    bool        ortho;
    MatrixF     cameraMatrix;
+// start jc
+   Point4F frustumOffset;
+// end jc
+
 };
 
 /// Abstract base class for 3D viewport GUIs.
@@ -76,6 +80,12 @@ protected:
    CameraQuery mLastCameraQuery;	
    
 public:
+// start jc
+   F32            mForceAspect;   
+   Point4F        mForceFrustumOffset;
+   F32            mCameraRoll;
+   bool			  mEnableAugmentations;
+// end jc
    
    GuiTSCtrl();
 

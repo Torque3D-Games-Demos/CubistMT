@@ -49,7 +49,9 @@ Win32WindowManager::Win32WindowManager()
    // By default, we have no parent window.
    mParentWindow = NULL;
 
-   mCurtainWindow = NULL;
+// start jc
+//   mCurtainWindow = NULL;
+// end jc
 
    mOffscreenRender = false;
 }
@@ -146,8 +148,21 @@ PlatformWindow *Win32WindowManager::createWindow(GFXDevice *device, const GFXVid
 
    DWORD	dwExStyle;
    DWORD dwStyle = WS_CLIPCHILDREN | WS_CLIPSIBLINGS;
+// start jc
+//   dwStyle       |= WS_OVERLAPPEDWINDOW | WS_THICKFRAME | WS_CAPTION; 
+//   dwExStyle     = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
+   if(!mode.borderless)
+   {
    dwStyle       |= WS_OVERLAPPEDWINDOW | WS_THICKFRAME | WS_CAPTION; 
    dwExStyle     = WS_EX_APPWINDOW | WS_EX_WINDOWEDGE;
+   }
+   else
+   {
+      dwStyle       |= WS_POPUP | WS_VISIBLE; 
+   //   dwStyle       |= WS_VISIBLE; 
+      dwExStyle     = WS_EX_APPWINDOW | WS_EX_TOPMOST;
+   }
+// end jc
 
    // If we're parented, we want a different set of window styles.
    if(mParentWindow)
@@ -163,12 +178,15 @@ PlatformWindow *Win32WindowManager::createWindow(GFXDevice *device, const GFXVid
    w32w->mWindowHandle = CreateWindowEx(
       dwExStyle,
       Win32Window::getWindowClassName(),           //class name
-      String( getEngineProductString() ).utf16(),  //window title
+   // start jc
+   //   String( getEngineProductString() ).utf16(),  //window title
+      (String( getEngineProductString() )+String::ToString(w32w->mWindowId)).utf16(),  //window title
+   // end jc
       dwStyle,                                     //style - need clip siblings/children for opengl
-      0,
-      0,
-      0,
-      0,
+      mode.position.x,
+      mode.position.y,
+      mode.resolution.x - mode.position.x,
+      mode.resolution.y - mode.position.y,
       mParentWindow,                     //parent window
       NULL,                              //menu? No.
       NULL,                              //the hInstance
@@ -415,6 +433,8 @@ void Win32WindowManager::_processCmdLineArgs( const S32 argc, const char **argv 
    }
 }
 
+// start jc
+/*
 void Win32WindowManager::lowerCurtain()
 {
    if(mCurtainWindow)
@@ -451,3 +471,55 @@ void Win32WindowManager::raiseCurtain()
    DestroyWindow(mCurtainWindow);
    mCurtainWindow = NULL;
 }
+*/
+void Win32WindowManager::lowerCurtain()
+{
+   if(mCurtainWindow.size() != 0)
+      return;
+
+   lowerCurtain(mWindowListHead->getHWND());
+}
+
+void Win32WindowManager::lowerCurtain(HWND hwnd)
+{
+
+   // For now just grab monitor of the first window... we may need to
+   // beef this up later on, maybe by passing in the window that's entering
+   // leaving full-screen to lowerCurtain.
+   HMONITOR hMon = MonitorFromWindow(hwnd, MONITOR_DEFAULTTOPRIMARY);
+
+   // Get the monitor's extents.
+   MONITORINFO monInfo;
+   dMemset(&monInfo, 0, sizeof MONITORINFO);
+   monInfo.cbSize = sizeof MONITORINFO;
+
+   GetMonitorInfo(hMon, &monInfo);
+
+   HWND curtainWindow = CreateWindow(Win32Window::getCurtainWindowClassName(), 
+                           dT(""), (WS_POPUP | WS_MAXIMIZE | WS_VISIBLE),
+                           monInfo.rcWork.left, monInfo.rcWork.top, 
+                           monInfo.rcWork.right - monInfo.rcWork.left, 
+                           monInfo.rcWork.bottom - monInfo.rcWork.top, 
+                           NULL, NULL, NULL, NULL);
+
+   if(curtainWindow && !mOffscreenRender)
+   {
+      mCurtainWindow.insert(hwnd, curtainWindow);
+      SetWindowPos(curtainWindow, HWND_TOPMOST, monInfo.rcWork.left, monInfo.rcWork.top, monInfo.rcWork.right, monInfo.rcWork.bottom,  SWP_NOMOVE | SWP_NOSIZE | SWP_SHOWWINDOW);
+   }
+}
+
+void Win32WindowManager::raiseCurtain()
+{
+   if(mCurtainWindow.size() != 1)
+      return;
+
+   raiseCurtain(mCurtainWindow.begin()->value);
+}
+void Win32WindowManager::raiseCurtain(HWND hwnd)
+{
+
+   DestroyWindow(mCurtainWindow[hwnd]);
+   mCurtainWindow.erase(hwnd);
+}
+// end jc

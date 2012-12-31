@@ -33,6 +33,11 @@
 #ifndef _MMATH_H_
 #include "math/mMath.h"
 #endif
+// start jc
+#ifndef _MTRANSFORM_H_
+#include "math/mTransform.h"
+#endif
+// end jc
 
 
 //------------------------------------------------------------------------------
@@ -148,6 +153,23 @@ inline bool mathRead(Stream& stream, EaseF* e)
    success     &= stream.read( &e->param[ 1 ] );
    return success;
 }
+// start jc
+inline bool mathRead(Stream& stream, AngAxisF* a)
+{
+   bool success = mathRead(stream,  &a->axis );
+   success     &= stream.read( &a->angle );
+   return success;
+}
+inline bool mathRead(Stream& stream, TransformF* t)
+{
+   bool success = mathRead(stream, &t->mPosition );
+   success &= stream.read( &t->mHasRotation );
+   if(t->mHasRotation)
+      success     &= mathRead(stream, &t->mOrientation );
+   return success;
+}
+// end jc
+
 
 //------------------------------------------------------------------------------
 //-------------------------------------- WRITING
@@ -262,6 +284,23 @@ inline bool mathWrite(Stream& stream, const EaseF& e)
    success     &= stream.write(e.param[1]);
    return success;
 }
+
+// start jc
+inline bool mathWrite(Stream& stream, const AngAxisF& a)
+{
+   bool success = mathWrite(stream, a.axis);
+   success     &= stream.write(a.angle);
+   return success;
+}
+inline bool mathWrite(Stream& stream, const TransformF& t)
+{
+   bool success = mathWrite(stream, t.mPosition);
+   success     &= stream.write(t.mHasRotation);
+   if(t.mHasRotation)
+      success     &= mathWrite(stream, t.mOrientation);
+   return success;
+}
+// end jc
 
 #endif //_MATHIO_H_
 

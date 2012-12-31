@@ -34,6 +34,9 @@
 #include "sfx/sfxTrack.h"
 #include "sfx/sfxTypes.h"
 #include "core/util/safeDelete.h"
+// start jc
+#include "gfx/video/webTexture.h"
+// end jc
 
 
 IMPLEMENT_CONOBJECT( Material );
@@ -159,6 +162,9 @@ Material::Material()
    dMemset(mCellSize, 0, sizeof(mCellSize));
    dMemset(mNormalMapAtlas, 0, sizeof(mNormalMapAtlas));
    dMemset(mUseAnisotropic, 0, sizeof(mUseAnisotropic));
+// start jc
+   dMemset(mWebViewData, 0, sizeof(mWebViewData));
+// end jc
 
    mImposterLimits = Point4F::Zero;
 
@@ -167,6 +173,10 @@ Material::Material()
    mTranslucent = false;
    mTranslucentBlendOp = LerpAlpha;
    mTranslucentZWrite = false;
+// start jc
+   mObjectSpaceNormals = false;
+   mAlphaScatter = false;
+// end jc
 
    mAlphaTest = false;
    mAlphaRef = 1;
@@ -235,6 +245,11 @@ void Material::initPersistFields()
       addField( "detailNormalMapStrength", TypeF32, Offset(mDetailNormalMapStrength, Material), MAX_STAGES,
          "Used to scale the strength of the detail normal map when blended with the base normal map." );
 
+   // start jc
+      addField( "webViewData", TYPEID<WebViewData>(), Offset( mWebViewData, Material ), MAX_STAGES,
+         "Link to a WebViewData object used to render the 'web' material." );
+   // end jc
+
       addField("specular", TypeColorF, Offset(mSpecular, Material), MAX_STAGES,
          "The color of the specular highlight when not using a specularMap." );
 
@@ -295,6 +310,11 @@ void Material::initPersistFields()
 
       addField("scrollDir", TypePoint2F, Offset(mScrollDir, Material), MAX_STAGES,
          "The scroll direction in UV space when scroll animation is enabled." );
+
+      //start pg
+      addField("scrollOffset", TypePoint2F, Offset(mScrollOffset, Material), MAX_STAGES,
+         "The scroll start position in UV space when scroll animation is enabled." );
+      //end pg
 
       addField("scrollSpeed", TypeF32, Offset(mScrollSpeed, Material), MAX_STAGES,
          "The speed to scroll the texture in UVs per second when scroll animation is enabled." );
@@ -381,6 +401,14 @@ void Material::initPersistFields()
 
    addField("dynamicCubemap", TypeBool, Offset(mDynamicCubemap, Material),
       "Enables the material to use the dynamic cubemap from the ShapeBase object its applied to." );
+
+// start jc
+   addField("objectSpaceNormals", TypeBool, Offset(mObjectSpaceNormals, Material),
+      "If true this material is uses object space for normal mapping." );
+
+   addField("alphaScatter", TypeBool, Offset(mAlphaScatter, Material),
+      "Enables scatter alpha test when rendering the material.\n@see alphaRef\n" );
+// end jc
 
    addGroup( "Behavioral" );
 

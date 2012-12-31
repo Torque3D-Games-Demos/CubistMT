@@ -376,8 +376,11 @@ enum ParticleSystemState
    PSS_DrawComplete,
 };
 
+// start jc
 /// A special render instance for particles.
-struct ParticleRenderInst : public RenderInst
+//struct ParticleRenderInst : public RenderInst
+struct ParticleRenderInst : public MeshRenderInst
+// end jc
 {
    /// The vertex buffer.
    GFXVertexBufferHandleBase *vertBuff;

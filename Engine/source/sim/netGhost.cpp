@@ -30,6 +30,10 @@
 #include "console/console.h"
 #include "console/consoleTypes.h"
 #include "console/engineAPI.h"
+// start jc
+#include "T3D/shapeBase.h"
+// end jc
+
 
 #define DebugChecksum 0xF00DBAAD
 
@@ -347,6 +351,9 @@ void NetConnection::ghostWritePacket(BitStream *bstream, PacketNotify *notify)
    camInfo.fov = (F32)(3.1415f / 4.0f);
    camInfo.sinFov = 0.7071f;
    camInfo.cosFov = 0.7071f;
+// start jc
+   camInfo.offset.set(0.0f,0.0f,1.0f,1.0f); 
+// end jc
 
    GhostInfo *walk;
 
@@ -539,10 +546,21 @@ void NetConnection::ghostReadPacket(BitStream *bstream)
       index = (U32) bstream->readInt(idSize);
       if(bstream->readFlag()) // is this ghost being deleted?
       {
+  // start jc
+         /*
 		 mGhostsActive--;
          AssertFatal(mLocalGhosts[index] != NULL, "Error, NULL ghost encountered.");
          mLocalGhosts[index]->deleteObject();
          mLocalGhosts[index] = NULL;
+         */
+         AssertWarn(mLocalGhosts[index] != NULL, "Error, NULL ghost encountered.");
+         if(mLocalGhosts[index])
+         {
+		      mGhostsActive--;
+            mLocalGhosts[index]->deleteObject();
+            mLocalGhosts[index] = NULL;
+         }
+   // end jc
       }
       else
       {
@@ -769,6 +787,26 @@ bool NetConnection::validateGhostArray()
 
 void NetConnection::objectInScope(NetObject *obj)
 {
+   //ghostfix
+
+#ifdef   WEB_GHOSTING
+// start jc
+   // insure WebViewData objects are scoped to the clients of there host objects
+   ShapeBase* shape = dynamic_cast<ShapeBase*>(obj);
+   if(shape && shape->hasWebViewData())
+   {
+      NetObject* webViewData = reinterpret_cast<NetObject*>(shape->getWebViewData());
+   //   NetObject* webViewData = shape->getWebViewData();
+      if(webViewData)
+      {
+         if(getGhostIndex(webViewData) == -1)
+            shape->setMaskBits(ShapeBase::SkinMask);
+         objectInScope(webViewData);
+      }
+   }
+// end jc
+#endif
+
    if (!mScoping || !isGhostingFrom())
       return;
 	if (obj->isScopeLocal() && !isLocalConnection())
@@ -846,7 +884,9 @@ void NetConnection::handleConnectionMessage(U32 message, U32 sequence, U32 ghost
    {
       case GhostAlwaysDone:
          mGhostingSequence = sequence;
-         NetConnection::smGhostAlwaysDone.trigger();
+   // start jc - http://www.garagegames.com/community/forums/viewthread/76743
+   //      NetConnection::smGhostAlwaysDone.trigger();
+   // end jc
          // ok, all the ghost always objects are now on the client... but!
          // it's possible that there were some file load errors...
          // if so, we need to indicate to the server to restart ghosting, after
@@ -856,12 +896,18 @@ void NetConnection::handleConnectionMessage(U32 message, U32 sequence, U32 ghost
          mGhostAlwaysSaveList.push_back(sv);
          if(mGhostAlwaysSaveList.size() == 1)
             loadNextGhostAlwaysObject(true);
+   // start jc - http://www.garagegames.com/community/forums/viewthread/76743
+         NetConnection::smGhostAlwaysDone.trigger();
+   // end jc
          break;
       case ReadyForNormalGhosts:
          if(sequence != mGhostingSequence)
             return;
          Con::executef(this, "onGhostAlwaysObjectsReceived");
          Con::printf("Ghost Always objects received.");
+   // start jc - http://www.garagegames.com/community/forums/viewthread/76743
+         NetConnection::smGhostAlwaysDone.trigger();
+   // end jc
          mGhosting = true;
          for(i = 0; i < mGhostFreeIndex; i++)
          {

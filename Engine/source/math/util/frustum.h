@@ -434,6 +434,10 @@ class Frustum : public PolyhedronImpl< FrustumData >
 
       U32 getNumTiles() const { return mNumTiles; }
       const Point2I& getCurTile() const { return mCurrTile; }
+  // start jc
+      const Point2F& getTileOverlap() const { return mTileOverlap; }
+	  void offsetFrustum(Point4F offset);
+  // end jc
       void tileFrustum(U32 numTiles, const Point2I& curTile, Point2F overlap);
       static void tile( F32 *left, F32 *right, F32 *top, F32 *bottom, U32 numTiles, const Point2I& curTile, Point2F overlap );
 

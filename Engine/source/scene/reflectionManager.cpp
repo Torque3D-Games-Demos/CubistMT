@@ -145,6 +145,11 @@ void ReflectionManager::update(  F32 timeSlice,
    if ( screenShotMode )
       gScreenShot->tileFrustum( culler );
 
+// start jc
+   if(query.frustumOffset.z != 0.0f && query.frustumOffset.w != 0.0f)
+      culler.offsetFrustum(query.frustumOffset);
+// end jc
+
    // We use the frame time and not real time 
    // here as this may be called multiple times 
    // within a frame.

@@ -21,6 +21,14 @@
 //-----------------------------------------------------------------------------
 
 #include "platform/platform.h"
+// start jc
+#include "gui/controls/guiWebViewCtrl.h"
+#include "gfx/video/webTexture.h"
+#include "console/simTUIO.h"
+#include "materials/ProcessedMaterial.h"
+#include "math/mathIO.h"
+#include "console/engineAPI.h"
+// end jc
 #include "T3D/shapeBase.h"
 
 #include "core/dnet.h"
@@ -125,6 +133,324 @@ IMPLEMENT_CALLBACK( ShapeBaseData, onForceUncloak, void, ( ShapeBase* obj, const
    "@param obj The ShapeBase object\n"
    "@param reason String describing why the object was uncloaked\n" );
 
+// start jc
+IMPLEMENT_CALLBACK( ShapeBaseData, onMouseDown, void, ( ShapeBase* obj, U8 modifier, Point3F mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ),
+														  ( obj, modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the mouse is pressed down while in this control.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Mouse was pressed down in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onMouseDown(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( ShapeBaseData, onMouseUp, void, ( ShapeBase* obj, U8 modifier, Point3F mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ),
+													    ( obj, modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the mouse is released while in this control.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Mouse was released in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onMouseUp(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( ShapeBaseData, onMouseMove, void, ( ShapeBase* obj, U8 modifier, Point3F mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord  ),
+												   ( obj, modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the mouse is moved (without dragging) while in this control.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Mouse was moved in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onMouseMove(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( ShapeBaseData, onMouseDragged, void, (  ShapeBase* obj, U8 modifier, Point3F mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord  ),
+												   ( obj, modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the mouse is dragged while in this control.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Mouse was dragged in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onMouseDragged(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( ShapeBaseData, onMouseEnter, void, (  ShapeBase* obj, U8 modifier, Point3F mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord  ),
+												   ( obj, modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the mouse enters this control.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Mouse entered this control, causing the callback\n"
+   "GuiMouseEventCtrl::onMouseEnter(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( ShapeBaseData, onMouseLeave, void, (  ShapeBase* obj, U8 modifier, Point3F mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord  ),
+												   ( obj, modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the mouse leaves this control.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Mouse left this control, causing the callback\n"
+   "GuiMouseEventCtrl::onMouseLeave(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( ShapeBaseData, onRightMouseDown, void, (  ShapeBase* obj, U8 modifier, Point3F mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord  ),
+												   ( obj, modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the right mouse button is pressed while in this control.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Right mouse button was pressed in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onRightMouseDown(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( ShapeBaseData, onRightMouseUp, void, (  ShapeBase* obj, U8 modifier, Point3F mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord  ),
+												   ( obj, modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the right mouse button is released while in this control.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Right mouse button was released in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onRightMouseUp(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( ShapeBaseData, onRightMouseDragged, void, (  ShapeBase* obj, U8 modifier, Point3F mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord  ),
+												   ( obj, modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the mouse is dragged in this control while the right mouse button is pressed.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Right mouse button was dragged in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onRightMouseDragged(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( ShapeBaseData, onTouchDown, bool, ( ShapeBase* obj, S32 id, Point3F touchPoint, Point3F pos, Point3F vec, Point2F touchUVCoord  ),
+												   ( obj, id, touchPoint, pos, vec, touchUVCoord ),
+   "@brief Callback that occurs whenever the mouse is dragged in this control while the right mouse button is pressed.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Right mouse button was dragged in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onRightMouseDragged(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( ShapeBaseData, onTouchMove, bool, ( ShapeBase* obj, S32 id, Point3F touchPoint, Point3F pos, Point3F vec, Point2F touchUVCoord  ),
+												   ( obj, id, touchPoint, pos, vec, touchUVCoord ),
+   "@brief Callback that occurs whenever the mouse is dragged in this control while the right mouse button is pressed.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Right mouse button was dragged in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onRightMouseDragged(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( ShapeBaseData, onTouchUp, bool, ( ShapeBase* obj, S32 id, Point3F touchPoint, Point3F pos, Point3F vec, Point2F touchUVCoord  ),
+												   ( obj, id, touchPoint, pos, vec, touchUVCoord ),
+   "@brief Callback that occurs whenever the mouse is dragged in this control while the right mouse button is pressed.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Right mouse button was dragged in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onRightMouseDragged(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+/*
+IMPLEMENT_CALLBACK( ShapeBase, onAdd, void, ( SimObjectId ID ), ( ID ),
+	"Called when this ScriptGroup is added to the system.\n"
+	"@param ID Unique object ID assigned when created (%this in script).\n" 
+);
+
+IMPLEMENT_CALLBACK( ShapeBase, onRemove, void, ( SimObjectId ID ), ( ID ),
+	"Called when this ScriptObject is removed from the system.\n"
+	"@param ID Unique object ID assigned when created (%this in script).\n" 
+);
+*/
+
+IMPLEMENT_CALLBACK( ShapeBaseData, onAddClient, void, ( ShapeBase* obj ), ( obj ),
+	"Called when this ScriptGroup is added to the system.\n"
+	"@param ID Unique object ID assigned when created (%this in script).\n" 
+);
+
+IMPLEMENT_CALLBACK( ShapeBaseData, onRemoveClient, void, ( ShapeBase* obj ), ( obj ),
+	"Called when this ScriptGroup is removed from the system.\n"
+	"@param ID Unique object ID assigned when created (%this in script).\n" 
+);
+
+IMPLEMENT_CALLBACK( ShapeBaseData, onMaterialsLoaded, void, (ShapeBase* obj), (obj),
+	"Called when this ScriptGroup is added to the system.\n"
+	"@param ID Unique object ID assigned when created (%this in script).\n" 
+);
+
+
+// end jc
+
 //----------------------------------------------------------------------------
 // Timeout for non-looping sounds on a channel
 static SimTime sAudioTimeout = 500;
@@ -173,6 +499,9 @@ ShapeBaseData::ShapeBaseData()
    cameraMaxFov( 120.f ),
    isInvincible( false ),
    renderWhenDestroyed( true ),
+   renderInReflections( true ), // start jc
+   overrideBounds(0,0,0,0,0,0), // start jc
+   mAlwaysUnderwater(false),// start jc
    debris( NULL ),
    debrisID( 0 ),
    debrisShapeName( StringTable->insert("") ),
@@ -562,6 +891,11 @@ void ShapeBaseData::initPersistFields()
       addField( "computeCRC", TypeBool, Offset(computeCRC, ShapeBaseData),
          "If true, verify that the CRC of the client's shape model matches the "
          "server's CRC for the shape model when loaded by the client." );
+// start jc
+   addField( "alwaysUnderwater", TypeBool, Offset(mAlwaysUnderwater, ShapeBaseData),
+      "@brief Is this object always underwater.\n\n"
+      "If True then this object is always underwater and doesn't recalculate watercoverage and boyancy.\n" );
+// end jc
 
    endGroup( "Misc" );
 
@@ -573,6 +907,12 @@ void ShapeBaseData::initPersistFields()
       //addField( "reflectMaxDist", TypeF32, Offset( reflectMaxDist, ShapeBaseData ), "distance at which reflection is never updated" );
       //addField( "reflectMinDist", TypeF32, Offset( reflectMinDist, ShapeBaseData ), "distance at which reflection is always updated" );
       //addField( "reflectDetailAdjust", TypeF32, Offset( reflectDetailAdjust, ShapeBaseData ), "scale up or down the detail level for objects rendered in a reflection" );
+   // start jc
+      addField( "renderInReflections", TypeBool, Offset(renderInReflections, ShapeBaseData),
+         "renderInReflections flag; when false the shape will not be reflected." );
+      addField( "overrideBounds", TypeBox3F, Offset(overrideBounds, ShapeBaseData),
+         "renderInReflections flag; when false the shape will not be reflected." );	  
+   // end jc
 
    endGroup( "Reflection" );
 
@@ -726,6 +1066,16 @@ void ShapeBaseData::packData(BitStream* stream)
    //stream->write(reflectMinDist);
    //stream->write(reflectMaxDist);
    //stream->write(reflectDetailAdjust);
+// start jc
+   stream->writeFlag( renderInReflections );
+   mathWrite(*stream, overrideBounds );
+
+   // allow for client side callbacks
+   stream->writeString(mSuperClassName);
+   stream->writeString(mClassName);
+
+   stream->writeFlag(mAlwaysUnderwater);
+// end jc
 }
 
 void ShapeBaseData::unpackData(BitStream* stream)
@@ -824,6 +1174,15 @@ void ShapeBaseData::unpackData(BitStream* stream)
    //stream->read(&reflectMinDist);
    //stream->read(&reflectMaxDist);
    //stream->read(&reflectDetailAdjust);
+// start jc
+   renderInReflections = stream->readFlag();
+   mathRead(*stream, &overrideBounds);
+
+   setSuperClassNamespace(stream->readSTString());
+   setClassNamespace(stream->readSTString());
+
+   mAlwaysUnderwater = stream->readFlag();
+// end jc
 }
 
 
@@ -861,6 +1220,21 @@ IMPLEMENT_CALLBACK( ShapeBase, validateCameraFov, F32, (F32 fov), (fov),
    "@return The FOV as validated by the server.\n\n"
 
    "@see ShapeBaseData\n\n");
+
+
+// start jc
+//typedef ShapeBase::InputEventsMethod ShapeBaseInputEventsMethod;
+//DefineEnumType( ShapeBaseInputEventsMethod );
+
+ImplementEnumType( ShapeBaseInputEventsMethod,
+   "The type of visual blending style to apply to the particles.\n"
+   "@ingroup FX\n\n")
+   { ShapeBase::MeshHit,      "Mesh",     "Hit test against the animated mesh.\n" },
+   { ShapeBase::ConvexHit,    "Convex",   "Hit test against the convex collison hulls.\n" },
+   { ShapeBase::HybridHit,    "Hybrid",   "Hit test against the convex collison hulls and then against the animated mesh.\n" },
+   { ShapeBase::BoxHit,       "BoundingBox",      "Hit test against the box of the mesh.\n" },
+EndImplementEnumType;
+// end jc
 
 ShapeBase::ShapeBase()
  : mDrag( 0.0f ),
@@ -910,8 +1284,23 @@ ShapeBase::ShapeBase()
    mMass( 1.0f ),
    mOneOverMass( 1.0f ),
    mMoveMotion( false ),
-   mIsAiControlled( false )
+   mIsAiControlled( false ),
+// start jc
+   mWebViewData(NULL),
+   mWebViewID(0),
+   mEnableInputEvents(false),
+   mInputEventsMethod(MeshHit),
+   mTriggerStates(0),
+   mHasWebSkin(false),
+   mMeshCulling(false)
+// end jc
 {
+//start pg
+   mMaterialAnim.enabled = false;
+   mMaterialAnim.frameCount = 0;
+   mMaterialAnim.totalTime = 0;
+   // end pg
+
    mTypeMask |= ShapeBaseObjectType | LightObjectType;   
 
    S32 i;
@@ -930,6 +1319,12 @@ ShapeBase::ShapeBase()
       mScriptThread[i].atEnd = false;
 	   mScriptThread[i].timescale = 1.f;
 	   mScriptThread[i].position = -1.f;
+   // start jc
+#ifdef TORQUE_RESYNC_ANIM
+	   mScriptThread[i].reSync = 0.0f;
+	   mScriptThread[i].reSyncFactor = 1.0f;
+#endif
+   // end jc
    }
 
    for (i = 0; i < MaxTriggerKeys; i++)
@@ -992,6 +1387,25 @@ void ShapeBase::initPersistFields()
       "@brief Is this object AI controlled.\n\n"
       "If True then this object is considered AI controlled and not player controlled.\n" );
 
+// start jc
+   addGroup("web");
+
+      addField( "webViewData", TYPEID< WebViewData >(), Offset( mWebViewData, ShapeBase ),
+         "Link to a WebViewData object used to render the 'web' material." );
+      addField( "enableInputEvents", TypeBool, Offset( mEnableInputEvents, ShapeBase ),
+         "If true recieve 3D input events." );
+      addField( "inputEventsMethod", TYPEID< InputEventsMethod >(), Offset( mInputEventsMethod, ShapeBase ),
+         "If true recieve 3D input events." );
+
+   endGroup("web");
+
+   addGroup("Rendering");
+      addField( "meshCulling",   TypeBool,   Offset( mMeshCulling, ShapeBase ), 
+         "Enables detailed culling of meshes within the TSStatic. Should only be used "
+         "with large complex shapes like buildings which contain many submeshes." );
+   endGroup("Rendering");
+// end jc
+
    Parent::initPersistFields();
 }
 
@@ -1013,6 +1427,19 @@ const char *ShapeBase::_getFieldSkin( void *object, const char *data )
 
 bool ShapeBase::onAdd()
 {
+// start pg
+   if(mWebViewData){
+      Con::printf("Add web data - %s",isClientObject()?"Client":"server");
+   }
+// end pg
+
+// start jc
+   if(mEnableInputEvents)
+      mTypeMask |= InputEventObjectType;
+   else
+      mTypeMask &= ~InputEventObjectType;
+// end jc
+
    if( !Parent::onAdd() )
       return false;
       
@@ -1039,7 +1466,25 @@ bool ShapeBase::onAdd()
       if(mDataBlock->cloakTexName != StringTable->insert(""))
         mCloakTexture = TextureHandle(mDataBlock->cloakTexName, MeshTexture, false);
 */         
+// start jc
+   if(isServerObject() && mWebViewData && !mWebViewData->isProperlyAdded())
+      mWebViewData->registerObject();
 
+
+ //  if(isClientObject())
+   if(isGhost())
+   {
+      mDataBlock->onAddClient_callback(this);
+
+      if(mShapeInstance && mShapeInstance->getMaterialList())
+         mDataBlock->onMaterialsLoaded_callback(this);
+
+	//  if(mSkinNameHandle.isValidString())
+    //     mAppliedSkinName = mSkinNameHandle.getString();
+   }
+
+
+// end jc
    return true;
 }
 
@@ -1054,9 +1499,22 @@ void ShapeBase::onRemove()
       for (S32 i = 0; i < MaxSoundThreads; i++)
          stopAudio(i);
 
+// start jc
+   if(isServerObject() && mWebViewData && !mWebViewData->isProperlyAdded())
+      mWebViewData->unregisterObject();
+// end jc
+
    if ( isClientObject() )   
    {
+// start jc
+      if(mDataBlock)
+	      mDataBlock->onRemoveClient_callback(this);
+// end jc
+
       mCubeReflector.unregisterReflector();      
+   // start jc
+      mPlaneReflector.unregisterReflector();
+   // end jc
 
       if ( mWeaponCamShake )
       {
@@ -1097,10 +1555,27 @@ bool ShapeBase::onNewDataBlock( GameBaseData *dptr, bool reload )
    if (bool(mDataBlock->mShape)) {
       delete mShapeInstance;
       mShapeInstance = new TSShapeInstance(mDataBlock->mShape, isClientObject());
-      if (isClientObject())
+   // start jc
+   //   if (isClientObject())
+   
+      if (isClientObject() && mShapeInstance)
+      {
          mShapeInstance->cloneMaterialList();
+      //   if(mShapeInstance->getMaterialList())
+      //      onMaterialsLoaded_callback();
+      }
 
+
+
+   // end jc
+
+  // start jc
+  //    mObjBox = mDataBlock->mShape->bounds;
+	  if(!mDataBlock->overrideBounds.isEmpty())
+		mObjBox = mDataBlock->overrideBounds;
+	  else
       mObjBox = mDataBlock->mShape->bounds;
+  // end jc
       resetWorldBox();
 
       // Set the initial mesh hidden state.
@@ -1160,6 +1635,12 @@ bool ShapeBase::onNewDataBlock( GameBaseData *dptr, bool reload )
       }
    }
 
+   if( isGhost() )
+   // start jc
+   //   reSkin();
+      reSkinNewPath();
+   // end jc
+
    //
    mEnergy = 0;
    mDamage = 0;
@@ -1178,12 +1659,25 @@ bool ShapeBase::onNewDataBlock( GameBaseData *dptr, bool reload )
    
    if ( isClientObject() )
    {      
+   // start jc
       mCubeReflector.unregisterReflector();
+      mPlaneReflector.unregisterReflector();
 
       if ( mDataBlock->reflectorDesc )
+      {
+         switch(mDataBlock->reflectorDesc->type)
+         {
+         case ReflectorDesc::PLANE:
+            mPlaneReflector.registerReflector( this, mDataBlock->reflectorDesc ); 
+            break;
+         case ReflectorDesc::CUBE:
          mCubeReflector.registerReflector( this, mDataBlock->reflectorDesc );      
-   }
+            break;
+         }
+      }
+   // end jc
 
+   }
    return true;
 }
 
@@ -1207,6 +1701,101 @@ void ShapeBase::onImpact(VectorF vec)
       mDataBlock->onImpact_callback( this, NULL, vec, vec.len() );
 }
 
+// start jc
+//----------------------------------------------------------------------------
+S32 ShapeBase::findNode(const String &name) const
+{
+   if(mShapeInstance && mShapeInstance->getShape())
+      return mShapeInstance->getShape()->findNode(name);
+   return 0;
+}
+
+
+void ShapeBase::getNodeWorldTransform(S32 nodeIndex, MatrixF* mat) const
+{
+   //MatrixF nodeMat;
+	if(nodeIndex != -1 && mShapeInstance) 
+	{
+		if(isServerObject() && bool(mShapeInstance->getNodeAnimationState(nodeIndex)))
+			mShapeInstance->animate(0);
+
+	   MatrixF nodeMat(mShapeInstance->mNodeTransforms[nodeIndex]);
+	   Point3F position = nodeMat.getPosition();
+	   position.convolve( getScale() );
+	   nodeMat.setPosition( position );
+	   mat->mul(getTransform(), nodeMat);
+	}
+	else
+		*mat = getTransform();
+
+
+
+
+}
+
+
+void ShapeBase::setEnableInputEvents( bool enable )
+{
+   if ( enable != mEnableInputEvents )
+   {
+      removeFromScene();
+      if(enable)
+         mTypeMask |= InputEventObjectType;
+      else
+         mTypeMask &= ~InputEventObjectType;
+      addToScene();
+   }
+}
+
+void ShapeBase::onMouseDown(const ShapeInputEvent &event)
+{
+   mDataBlock->onMouseDown_callback(this, event.modifier, event.ri.point, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+void ShapeBase::onMouseUp(const ShapeInputEvent & event)
+{
+   mDataBlock->onMouseUp_callback(this, event.modifier, event.ri.point, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+void ShapeBase::onMouseMove(const ShapeInputEvent & event)
+{
+   mDataBlock->onMouseMove_callback(this, event.modifier, event.ri.point, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+void ShapeBase::onMouseDragged(const ShapeInputEvent & event)
+{
+   mDataBlock->onMouseDragged_callback(this, event.modifier, event.ri.point, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+void ShapeBase::onMouseEnter(const ShapeInputEvent & event)
+{
+   mDataBlock->onMouseEnter_callback(this, event.modifier, event.ri.point, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+void ShapeBase::onMouseLeave(const ShapeInputEvent & event)
+{
+   mDataBlock->onMouseLeave_callback(this, event.modifier, event.ri.point, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+void ShapeBase::onRightMouseDown(const ShapeInputEvent & event)
+{
+   mDataBlock->onRightMouseDown_callback(this, event.modifier, event.ri.point, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+void ShapeBase::onRightMouseUp(const ShapeInputEvent & event)
+{
+   mDataBlock->onRightMouseUp_callback(this, event.modifier, event.ri.point, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+void ShapeBase::onRightMouseDragged(const ShapeInputEvent & event)
+{
+   mDataBlock->onRightMouseDragged_callback(this, event.modifier, event.ri.point, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+bool ShapeBase::onTouchDown(const ShapeTouchEvent & event)
+{
+   return mDataBlock->onTouchDown_callback(this, event.touchId, event.ri.point, event.pos, event.vec, event.ri.texCoord);
+}
+bool ShapeBase::onTouchMove(const ShapeTouchEvent & event)
+{
+   return mDataBlock->onTouchMove_callback(this, event.touchId, event.ri.point, event.pos, event.vec, event.ri.texCoord);
+}
+bool ShapeBase::onTouchUp(const ShapeTouchEvent & event)
+{
+   return mDataBlock->onTouchUp_callback(this, event.touchId, event.ri.point, event.pos, event.vec, event.ri.texCoord);
+}
+// end jc
 
 //----------------------------------------------------------------------------
 
@@ -1327,7 +1916,89 @@ void ShapeBase::processTick(const Move* move)
       if (mWhiteOut <= 0.0)
          mWhiteOut = 0.0;
    }
+
+// start jc
+   if (isGhost())
+   {
+      // Only need to deal with triggers on the client
+      if(mShapeInstance)
+      {
+         U32 currTriggerState = mShapeInstance->getTriggerState();
+         if( currTriggerState != mTriggerStates )
+         {
+            for(S32 stateNum=0; stateNum<31; stateNum++)
+            {
+               bool state = ((currTriggerState & (1 << stateNum))!=0);
+               U32 bit = 1 << stateNum;
+               bool ret = ((mTriggerStates & bit)!=0);
+
+               if( ret != state )
+                  if( state )
+                  {
+                  //   mTriggerStates |= bit;
+                     mDataBlock->onTrigger_callback( this, stateNum, true );
+                  }            
+                  else
+                  {
+                  //   mTriggerStates &= ~bit;
+                     mDataBlock->onTrigger_callback( this, stateNum, false );
+                  }   
+            } 
+            mTriggerStates = currTriggerState;
+         }
+      }
+   }
+// end jc
+
+
+   //material animations
+   if(mMaterialAnim.enabled )materialAnimTick();
 }
+// start jc
+void ShapeBase::interpolateTick(F32 delta)
+{
+   if (isGhost())
+   {
+
+#if TORQUE_AWESOMIUM_VERSION >= 17
+      if(mWebViewID && !mWebViewData)
+      {
+         GameConnection *con = GameConnection::getConnectionToServer();
+         mWebViewData = static_cast<WebViewData*>(con->resolveGhost(mWebViewID));
+
+         if(mWebViewData)
+         {
+            Con::printf("setting page loaded to false");
+#ifdef   CLEAN_PAGE
+            mWebViewData->setPageLoaded(false);
+#endif
+         }
+
+         mShapeInstance->webSkin(mWebViewData);
+      }
+
+      if(mWebViewData)
+      {
+         if(!mHasWebSkin)
+            webSkin();
+         else
+            mWebViewData->refresh();
+      }
+      else
+         mHasWebSkin = false;
+#else
+      if (mWebViewID)
+      {
+         if(!mWebViewData)
+            webSkin();
+
+         if(mWebViewData)
+            mWebViewData->refresh();
+      }
+#endif  
+   }
+}
+// end jc
 
 void ShapeBase::advanceTime(F32 dt)
 {
@@ -1492,6 +2163,11 @@ void ShapeBase::onCameraScopeQuery(NetConnection *cr, CameraScopeQuery * query)
          query->sinFov = mSin(query->fov);
          query->cosFov = mCos(query->fov);
       }
+// start jc
+	  Point4F offset;
+	  if(con->getControlCameraFrustumOffset(&offset))
+		 query->offset = offset;
+// end jc
    }
 
    // use eye rather than camera transform (good enough and faster)
@@ -1570,6 +2246,12 @@ void ShapeBase::updateContainer()
 {
    PROFILE_SCOPE( ShapeBase_updateContainer );
 
+// start jc
+   if(!mDataBlock->mAlwaysUnderwater || (mDataBlock->mAlwaysUnderwater && !mCurrentWaterObject))
+   {   
+// end jc
+
+
    // Update container drag and buoyancy properties
 
    // Set default values.
@@ -1604,7 +2286,21 @@ void ShapeBase::updateContainer()
    }
 
    mAppliedForce = info.appliedForce;
+// start jc
+//   mGravityMod = info.gravityScale;
+
+   if(mGravityMod != info.gravityScale)
+   {
    mGravityMod = info.gravityScale;
+      setMaskBits(GravityMask);
+   }
+// end jc
+
+// start jc
+   }  
+   if(mDataBlock->mAlwaysUnderwater)
+		mWaterCoverage = 1.0;
+// end jc
 
    //Con::printf( "WaterCoverage: %f", mWaterCoverage );
    //Con::printf( "Drag: %f", mDrag );
@@ -1842,12 +2538,26 @@ void ShapeBase::onMount( SceneObject *obj, S32 node )
    // Are we mounting to a ShapeBase object?
    mShapeBaseMount = dynamic_cast<ShapeBase*>( obj );
 
+// start jc
+   Box3F scaledBox = mObjBox;
+   scaledBox.minExtents.convolve(obj->getScale());
+   scaledBox.maxExtents.convolve(obj->getScale());
+   setObjectBox(scaledBox);
+// end jc
+
    Parent::onMount( obj, node );
 }
 
 void ShapeBase::onUnmount( SceneObject *obj, S32 node )
 {
    Parent::onUnmount( obj, node );
+
+// start jc
+   Box3F scaledBox = mObjBox;
+   scaledBox.minExtents.convolveInverse(obj->getScale());
+   scaledBox.maxExtents.convolveInverse(obj->getScale());
+   setObjectBox(scaledBox);
+// end jc
 
    mShapeBaseMount = NULL;
 }
@@ -2311,9 +3021,17 @@ bool ShapeBase::setThreadSequence(U32 slot, S32 seq, bool reset)
       if (mShapeInstance) {
          if (!st.thread)
             st.thread = mShapeInstance->addThread();
+
+      // start jc
+         if (st.thread)
+         {
          mShapeInstance->setSequence(st.thread,seq,0);
          stopThreadSound(st);
          updateThread(st);
+      }
+         else
+            Con::warnf("ShapeBase::setThreadSequence - error sequence with no thread");
+      // end jc
       }
       return true;
    }
@@ -2358,6 +3076,15 @@ void ShapeBase::updateThread(Thread& st)
 					{
 						mShapeInstance->setTimeScale( st.thread, 1.f );
 						mShapeInstance->setPos( st.thread, st.position );
+               // start jc
+#ifdef TORQUE_RESYNC_ANIM
+                  st.reSyncFactor = (1.0f / st.thread->getScaledDuration()) * TORQUE_RESYNC_ANIM_TIME;
+                  if(st.timescale > 0.0f)
+                     st.reSync = mClampF(st.position + st.reSyncFactor, 0.0f, 1.0f);
+                  else
+                     st.reSync = mClampF(st.position - st.reSyncFactor, 0.0f, 1.0f);
+#endif
+               // end jc
 					}
 
 					mShapeInstance->setTimeScale(st.thread, st.timescale );
@@ -2444,6 +3171,17 @@ bool ShapeBase::setThreadPosition( U32 slot, F32 pos )
 	}
 	return false;
 }
+
+// start jc
+F32 ShapeBase::getThreadPosition( U32 slot )
+{
+	Thread& st = mScriptThread[slot];
+	if (st.sequence != -1)
+		return st.position;
+   return -1;
+}
+// end jc
+
 
 bool ShapeBase::setThreadDir(U32 slot,bool forward)
 {
@@ -2584,11 +3322,21 @@ void ShapeBase::_prepRenderImage(   SceneRenderState *state,
    // images unless the shape is also rendered.
    if ( state->isShadowPass() && !renderSelf )
       return;
+// start jc
+   if ( state->isReflectPass() && !mDataBlock->renderInReflections )
+      return;
+// end jc
 
    // If we're currently rendering our own reflection we
    // don't want to render ourselves into it.
    if ( mCubeReflector.isRendering() )
       return;
+// start jc
+   if ( mPlaneReflector.isRendering() )
+      return;
+
+   mPlaneReflector.refplane.set( getPosition(), Point3F(0,0,1) );   
+// end jc
 
    // We force all the shapes to use the highest detail
    // if we're the control object or mounted.
@@ -2694,6 +3442,11 @@ void ShapeBase::prepBatchRender(SceneRenderState* state, S32 mountedImageIndex )
    if ( mCubeReflector.isEnabled() )
       rdata.setCubemap( mCubeReflector.getCubemap() );
    rdata.setFadeOverride( (1.0f - mCloakLevel) * mFadeVal );
+   // start jc
+   if ( mPlaneReflector.isEnabled() )
+      rdata.setReflectTex( mPlaneReflector.reflectTex );
+   // end jc
+
 
    // We might have some forward lit materials
    // so pass down a query to gather lights.
@@ -2712,18 +3465,45 @@ void ShapeBase::prepBatchRender(SceneRenderState* state, S32 mountedImageIndex )
    }
    else
    {
+   // start jc
+      // If we have submesh culling enabled then prepare
+      // the object space frustum to pass to the shape.
+      Frustum culler;
+      if ( mMeshCulling )
+      {
+         culler = state->getFrustum();
+         MatrixF xfm( true );
+         xfm.scale( Point3F::One / getScale() );
+         xfm.mul( getRenderWorldTransform() );
+
+         xfm.mul( culler.getTransform() );
+         culler.setTransform( xfm );
+         rdata.setCuller( &culler );
+      }
+   // end jc
+
       MatrixF mat = getRenderTransform();
       mat.scale( mObjScale );
       GFX->setWorldMatrix( mat );
 
-      if ( state->isDiffusePass() && mCubeReflector.isEnabled() && mCubeReflector.getOcclusionQuery() )
+// start jc
+//      if ( state->isDiffusePass() && mCubeReflector.isEnabled() && mCubeReflector.getOcclusionQuery() )
+
+      if ( state->isDiffusePass() && ((mCubeReflector.isEnabled() && mCubeReflector.getOcclusionQuery()) || (mPlaneReflector.isEnabled() && mPlaneReflector.getOcclusionQuery())) )
+// end jc
       {
          RenderPassManager *pass = state->getRenderPass();
 
          OccluderRenderInst *ri = pass->allocInst<OccluderRenderInst>();   
 
          ri->type = RenderPassManager::RIT_Occluder;
+      // start jc
+      //   ri->query = mCubeReflector.getOcclusionQuery();   
+         if(mPlaneReflector.isEnabled())
+            ri->query = mPlaneReflector.getOcclusionQuery(); 
+         else
          ri->query = mCubeReflector.getOcclusionQuery();   
+      // end jc
          mObjToWorld.mulP( mObjBox.getCenter(), &ri->position );
          ri->scale.set( mObjBox.getExtents() );
          ri->orientation = pass->allocUniqueXform( mObjToWorld );        
@@ -2819,6 +3599,9 @@ bool ShapeBase::castRayRendered(const Point3F &start, const Point3F &end, RayInf
    if (mShapeInstance) 
    {
       RayInfo localInfo;
+  // start jc
+	  localInfo.generateTexCoord = info->generateTexCoord;
+  // end jc
       mShapeInstance->animate();
       bool res = mShapeInstance->castRayRendered(start, end, &localInfo, mShapeInstance->getCurrentDetail());
       if (res)
@@ -3084,9 +3867,14 @@ U32 ShapeBase::packUpdate(NetConnection *con, U32 mask, BitStream *stream)
             mask &= ~(ImageMaskN << i);
    }
 
+// start jc
+//   if(!stream->writeFlag(mask & (NameMask | DamageMask | SoundMask | MeshHiddenMask |
+//         ThreadMask | ImageMask | CloakMask | InvincibleMask |
+//         ShieldMask | SkinMask)))
    if(!stream->writeFlag(mask & (NameMask | DamageMask | SoundMask | MeshHiddenMask |
          ThreadMask | ImageMask | CloakMask | InvincibleMask |
-         ShieldMask | SkinMask)))
+         ShieldMask | SkinMask | GravityMask | UVAnimMask )))
+// end jc
       return retMask;
 
    if (stream->writeFlag(mask & DamageMask)) {
@@ -3095,7 +3883,25 @@ U32 ShapeBase::packUpdate(NetConnection *con, U32 mask, BitStream *stream)
       stream->writeNormalVector( damageDir, 8 );
    }
 
+// start jc
+#ifndef TORQUE_RESYNC_ANIM
    if (stream->writeFlag(mask & ThreadMask)) {
+#else
+   bool needsReSync = false;
+   for (int i = 0; i < MaxScriptThreads; i++)
+   {
+      Thread& st = mScriptThread[i];
+      if(st.timescale > 0.0f)
+         needsReSync = bool(st.position >= st.reSync);
+      else
+         needsReSync = bool(st.position <= st.reSync);
+      
+      if(needsReSync)
+         break; 
+   }
+   if (stream->writeFlag(mask & ThreadMask) || needsReSync) {
+#endif
+// end jc
       for (int i = 0; i < MaxScriptThreads; i++) {
          Thread& st = mScriptThread[i];
          if (stream->writeFlag( (st.sequence != -1 || st.state == Thread::Destroy) && (mask & (ThreadMaskN << i)) ) ) {
@@ -3156,7 +3962,10 @@ U32 ShapeBase::packUpdate(NetConnection *con, U32 mask, BitStream *stream)
    }
 
    // Group some of the uncommon stuff together.
-   if (stream->writeFlag(mask & (NameMask | ShieldMask | CloakMask | InvincibleMask | SkinMask | MeshHiddenMask ))) {
+// start jc
+   //if (stream->writeFlag(mask & (NameMask | ShieldMask | CloakMask | InvincibleMask | SkinMask | MeshHiddenMask ))) {
+   if (stream->writeFlag(mask & (NameMask | ShieldMask | CloakMask | InvincibleMask | SkinMask  | UVAnimMask | MeshHiddenMask | GravityMask ))) {
+// end jc         
          
       if (stream->writeFlag(mask & CloakMask))
       {
@@ -3189,8 +3998,40 @@ U32 ShapeBase::packUpdate(NetConnection *con, U32 mask, BitStream *stream)
       if ( stream->writeFlag( mask & MeshHiddenMask ) )
          stream->writeBits( mMeshHidden );
 
+// start jc
+   //   if (stream->writeFlag(mask & SkinMask))
+   //      con->packNetStringHandleU(stream, mSkinNameHandle);
+
+      if( stream->writeFlag(mask & UVAnimMask ) )
+      {
+         con->packNetStringHandleU(stream, mMaterialAnim.animName);
+         con->packNetStringHandleU(stream, mMaterialAnim.animPrefix);
+         stream->write(mMaterialAnim.frameCount);
+         stream->write(mMaterialAnim.totalTime);
+         stream->write(mMaterialAnim.time);
+      }
+
       if (stream->writeFlag(mask & SkinMask))
+      {
          con->packNetStringHandleU(stream, mSkinNameHandle);
+           
+         if(stream->writeFlag(bool(mWebViewData)))
+         {
+            S32 gIndex = con->getGhostIndex(mWebViewData);
+
+            if(stream->writeFlag(bool(gIndex != -1)))
+               stream->writeRangedU32( U32(gIndex), 0, NetConnection::MaxGhostCount );
+         }
+         
+         stream->writeFlag(mEnableInputEvents);
+         stream->writeRangedU32( mInputEventsMethod, 0, 5 );
+         stream->writeFlag( mMeshCulling );
+	  }
+      if (stream->writeFlag(mask & GravityMask))
+      {
+	      stream->write(mGravityMod);
+	  }
+// end jc
    }
 
    return retMask;
@@ -3452,15 +4293,57 @@ void ShapeBase::unpackUpdate(NetConnection *con, BitStream *stream)
          _updateHiddenMeshes();
       }
 
+// start pg
+      if( stream->readFlag() ){   //UVAnimMask
+         NetStringHandle desiredNameHandle = con->unpackNetStringHandleU(stream);
+         mMaterialAnim.animPrefix = con->unpackNetStringHandleU(stream);
+         stream->read(&mMaterialAnim.frameCount);
+         stream->read(&mMaterialAnim.totalTime);
+         stream->read(&mMaterialAnim.time);
+         if (mMaterialAnim.animName != desiredNameHandle)
+         {
+            mMaterialAnim.animName = desiredNameHandle;
+            if(mMaterialAnim.frameCount){
+               materialAnimReset();
+            }
+         }
+      }
+// end pg
+
       if (stream->readFlag())    // SkinMask
       {
          NetStringHandle skinDesiredNameHandle = con->unpackNetStringHandleU(stream);;
          if (mSkinNameHandle != skinDesiredNameHandle)
          {
             mSkinNameHandle = skinDesiredNameHandle;
-            reSkin();
+         // start jc
+         //   reSkin();
+
+            reSkinNewPath();
+         // end jc
          }
+      // start jc
+         if( stream->readFlag() )
+         {
+            Con::printf("reading new mWebViewID");
+            if(stream->readFlag())
+            {
+               mWebViewID = stream->readRangedU32( 0, NetConnection::MaxGhostCount );
+            }
+         }
+         mEnableInputEvents = stream->readFlag();
+         mInputEventsMethod = static_cast<InputEventsMethod>(stream->readRangedU32(0,5));
+         mMeshCulling = stream->readFlag();   
+      // end jc
+
       }
+// start jc
+	if (stream->readFlag())
+	{
+		stream->read(&mGravityMod);
+	}
+// end jc
+
    }
 }
 
@@ -3739,12 +4622,151 @@ void ShapeBase::reSkin()
             oldSkin = newSkin.substr( 0, split );
             newSkin = newSkin.erase( 0, split+1 );
          }
-
-         mShapeInstance->reSkin( newSkin, oldSkin );
+      // start jc
+      //   mShapeInstance->reSkin( newSkin, oldSkin );
+         Torque::Path path(newSkin);
+         if(path.getDirectoryCount() >= 1)
+         {
+            mShapeInstance->reSkin( newSkin, oldSkin, true );
+         }
+         else
+            mShapeInstance->reSkin( newSkin, oldSkin );
+      // end jc
          mAppliedSkinName = newSkin;
       }
    }
 }
+// start jc
+/*
+void ShapeBase::reSkin(const char* oldSkin)
+{
+   if ( oldSkin && isGhost() && mShapeInstance && mSkinNameHandle.isValidString() )
+   {
+      mAppliedSkinName = oldSkin;
+      const char* newSkin = mSkinNameHandle.getString();
+      mShapeInstance->reSkin( newSkin, mAppliedSkinName );
+      mAppliedSkinName = newSkin;
+      mSkinHash = _StringTable::hashString( newSkin );
+   }
+}
+*/
+
+void ShapeBase::cloneMaterial(String name)
+{
+   if ( isGhost() && mShapeInstance )
+   {
+      mShapeInstance->cloneMaterial( name );
+   }
+}
+
+void ShapeBase::reSkinNewPath()
+{
+//   if ( isGhost() && mShapeInstance && mSkinNameHandle.isValidString() ){
+//      const char* newSkin = mSkinNameHandle.getString();
+//      Torque::Path path(newSkin);
+//      if(path.getDirectoryCount() >= 1){
+//         mShapeInstance->reSkin( newSkin, mAppliedSkinName, true );
+//      }else{
+         reSkin();
+//      }
+//   }
+}
+
+
+void ShapeBaseWebViewEvent::process( SimObject *object )
+{
+   ShapeBase *shape = dynamic_cast<ShapeBase*>( object );
+   AssertFatal( shape, "ShapeBaseWebViewEvent::process - wasn't a ShapeBase" );
+   if ( !shape || !shape->isProperlyAdded() )
+      return;
+
+   shape->webSkin();
+}
+
+void ShapeBase::setUrl(const char *url)
+{
+   if( !mWebViewData ){
+      webSkin();
+   }
+   if(mWebViewData){
+      mWebViewData->setURL(FileName(url));
+   }
+}
+
+
+
+void ShapeBase::webSkin()
+{
+#if TORQUE_AWESOMIUM_VERSION >= 17
+
+      if(mWebViewData && mWebViewData->getWebViewTexture() && mWebViewData->getWebViewTexture()->getTexture().isValid() && mWebViewData->getWebViewTexture()->getTexture()!= GFXTexHandle::ZERO)
+      {
+         mShapeInstance->webSkin(mWebViewData);
+         mHasWebSkin = true;
+      }
+#else
+   if(!mWebViewData)
+   {
+      GameConnection *con = GameConnection::getConnectionToServer();
+      mWebViewData = static_cast<WebViewData*>(con->resolveGhost(mWebViewID));
+   }
+   if(mWebViewData)
+   {
+      mShapeInstance->webSkin(mWebViewData);
+      mHasWebSkin = true;
+   }
+#endif
+}
+
+
+void ShapeBase::updateCollisionBox()
+{
+   S32 dl = mShapeInstance->getCurrentDetail();    
+   mShapeInstance->computeBounds(dl, mObjBox); 
+
+   resetWorldBox();
+}
+void ShapeBase::setObjectBox(Box3F objBox)
+{
+   mObjBox = objBox;
+   resetWorldBox();
+}
+
+Point2I ShapeBase::getTextureResolution(U32 index)
+{
+   if(!mShapeInstance)
+      return Point2I(0, 0);
+
+   TSMaterialList* matList = mShapeInstance->getMaterialList();
+   if(!matList)
+       return Point2I(0, 0);
+
+   MatInstance *matInst = static_cast<MatInstance*>(matList->getMaterialInst(index));
+   if(!matInst || !matInst->getProcessedMaterial())
+	   return Point2I(0, 0);
+
+   const RenderPassData *rpd = matInst->getProcessedMaterial()->getPass(0);
+   if(!rpd || !(rpd->mTexSlot[0].texObject))
+	   return Point2I(0, 0);
+
+   return rpd->mTexSlot[0].texObject.getWidthHeight();
+}
+
+
+bool  ShapeBase::rayCrossesTransparency(RayInfo* ri)
+{
+   if(mWebViewData && ri->texCoord.x != -1)
+   {
+      // todo: use the new filp value on RenderBuffer and fix all the v flips
+      return mWebViewData->isSeeThruPixel(Point2F(ri->texCoord.x-0.5f, 0.5f-ri->texCoord.y));
+   }
+
+   return false;
+}
+
+// end jc
+
+
 
 void ShapeBase::setCurrentWaterObject( WaterObject *obj )
 {
@@ -3893,6 +4915,14 @@ DefineEngineMethod( ShapeBase, setThreadPosition, bool, ( S32 slot, F32 pos ),,
    return false;
 }
 
+// start jc
+DefineEngineMethod( ShapeBase, getThreadPosition, F32, ( S32 slot ),,
+   "@brief .\n\n")
+{
+   return object->getThreadPosition(slot);
+}
+// end jc
+
 DefineEngineMethod( ShapeBase, stopThread, bool, ( S32 slot ),,
    "@brief Stop an animation thread.\n\n"
 
@@ -3941,6 +4971,40 @@ DefineEngineMethod( ShapeBase, pauseThread, bool, ( S32 slot ),,
    }
    return false;
 }
+
+//----------------------------------------------------------------------------
+// start jc
+ConsoleMethod( ShapeBase, getNodeIndex, S32, 3, 3, "S32 getNodeIndex(string nodeName)")
+{
+   return object->findNode(argv[2]);
+}
+
+DefineEngineMethod( ShapeBase, getNodeTransform, TransformF,(S32 index),, "Transform getNodeTransform(int nodeIndex)")
+{
+   MatrixF mat = object->getNodeTransform(index);
+   Point3F pos;
+
+   mat.mul(object->getTransform());
+
+   mat.getColumn(3,&pos);
+   AngAxisF aa(mat);
+ //  dSprintf(returnBuffer,256,"%g %g %g %g %g %g %g",
+ //           pos.x,pos.y,pos.z,aa.axis.x,aa.axis.y,aa.axis.z,aa.angle);
+   return TransformF(pos,aa);
+}
+#ifdef TORQUE_CUBE_NODESCALES
+DefineEngineMethod( ShapeBase, getNodeScale, Point3F,(S32 index),, "Transform getNodeTransform(int nodeIndex)")
+{
+ //  MatrixF mat = object->getNodeTransform(index);
+
+   
+   return object->getNodeScale(index);
+}
+#endif
+
+
+// end jc
+
 
 //----------------------------------------------------------------------------
 DefineEngineMethod( ShapeBase, mountImage, bool,
@@ -4315,7 +5379,10 @@ DefineEngineMethod( ShapeBase, getSlotTransform, TransformF, ( S32 slot ),,
    "@return the mount transform\n\n" )
 {
    MatrixF xf(true);
-   if (slot >= 0 && slot < ShapeBase::MaxMountedImages)
+// start jc
+// if (slot >= 0 && slot < ShapeBase::MaxMountedImages)
+   if (slot >= 0 && slot < SceneObject::NumMountPoints)
+// end jc
       object->getMountTransform( slot, MatrixF::Identity, &xf );
 
    return xf;
@@ -4895,6 +5962,83 @@ DefineEngineMethod( ShapeBase, getSkinName, const char*, (),,
    return object->getSkinName();
 }
 
+// start jc
+DefineEngineMethod( ShapeBase, setWebViewData, void, (WebViewData* vebView),,
+   "Apply a new skin to this shape.\n"
+   "@param name name of the skin to apply\n\n" )
+{ 
+   object->setWebViewData( vebView );
+}
+
+DefineEngineMethod( ShapeBase, setUrl, void, (const char *_url),,
+   "Apply a new skin to this shape.\n"
+   "@param name name of the skin to apply\n\n" )
+{ 
+   object->setUrl(_url);
+}
+
+
+
+DefineEngineMethod( ShapeBase, findNode, S32, (const char* name),,
+   "Apply a new skin to this shape.\n"
+   "@param name name of the skin to apply\n\n" )
+{ 
+   return object->findNode( name );
+}
+DefineEngineMethod( ShapeBase, getNodeWorldTransform, MatrixF, (S32 nodeIndex),,
+   "Apply a new skin to this shape.\n"
+   "@param name name of the skin to apply\n\n" )
+{
+   MatrixF mat;
+   object->getNodeWorldTransform( nodeIndex, &mat );
+   return mat;
+}
+/*
+DefineEngineMethod( ShapeBase, getNodeTransform, MatrixF, (S32 nodeIndex),,
+   "Apply a new skin to this shape.\n"
+   "@param name name of the skin to apply\n\n" )
+{
+   MatrixF mat;
+   object->getNodeTransform( nodeIndex, &mat );
+   return mat;
+}
+DefineEngineMethod( ShapeBase, getNodePosition, Point3F, (S32 nodeIndex),,
+   "Apply a new skin to this shape.\n"
+   "@param name name of the skin to apply\n\n" )
+{
+   Point3F pos;
+   object->getNodePosition( nodeIndex, &pos );
+   return pos;
+}
+DefineEngineMethod( ShapeBase, getNodeRotation, AngAxisF, (S32 nodeIndex),,
+   "Apply a new skin to this shape.\n"
+   "@param name name of the skin to apply\n\n" )
+{
+   QuatF rot;
+   object->getNodeRotation( nodeIndex, &rot );
+   return AngAxisF(rot);
+}
+DefineEngineMethod( ShapeBase, setNodeTransform, bool, (S32 nodeIndex, Point3F pos, AngAxisF rot),,
+   "Apply a new skin to this shape.\n"
+   "@param name name of the skin to apply\n\n" )
+{
+   return object->setNodeTransform( nodeIndex, pos, rot );
+}
+DefineEngineMethod( ShapeBase, setNodePosition, bool, (S32 nodeIndex, Point3F pos),,
+   "Apply a new skin to this shape.\n"
+   "@param name name of the skin to apply\n\n" )
+{
+   return object->setNodePosition( nodeIndex, pos );
+}
+DefineEngineMethod( ShapeBase, setNodeRotation, bool, (S32 nodeIndex, AngAxisF rot),,
+   "Apply a new skin to this shape.\n"
+   "@param name name of the skin to apply\n\n" )
+{
+   return object->setNodeRotation( nodeIndex, rot );
+}
+*/
+// end jc
+
 //----------------------------------------------------------------------------
 void ShapeBase::consoleInit()
 {
@@ -4970,6 +6114,84 @@ void ShapeBase::setAllMeshesHidden( bool forceHidden )
 
    setMaskBits( MeshHiddenMask );
 }
+//start pg
+//***********************************************************
+// material animation
+//***********************************************************
+void  ShapeBase::materialAnimStart(const char *baseMaterialName, 
+                                   const char *animMaterialPrefix,
+                                   int frameCount, 
+                                   F32 totalTime)
+{
+   if(isGhost())return;
+
+   setMaskBits(UVAnimMask);
+   mMaterialAnim.frameCount = frameCount;
+   mMaterialAnim.totalTime = totalTime;
+   mMaterialAnim.time = 0;
+
+   //-----------
+   if (baseMaterialName[0] != '\0') {
+      if (baseMaterialName[0] == StringTagPrefixByte){
+         mMaterialAnim.animName = NetStringHandle(U32(dAtoi(baseMaterialName + 1)));
+      }else{
+         mMaterialAnim.animName = NetStringHandle(baseMaterialName);
+      }
+   }else{
+      mMaterialAnim.animName = NetStringHandle();
+   }
+   //-----------
+   if (animMaterialPrefix[0] != '\0') {
+      if (animMaterialPrefix[0] == StringTagPrefixByte){
+         mMaterialAnim.animPrefix = NetStringHandle(U32(dAtoi(animMaterialPrefix + 1)));
+      }else{
+         mMaterialAnim.animPrefix = NetStringHandle(animMaterialPrefix);
+      }
+   }else{
+      mMaterialAnim.animPrefix = NetStringHandle();
+   }
+}
+void  ShapeBase::materialAnimReset()
+{
+   mMaterialAnim.enabled = true;  
+   mMaterialAnim.time = 0;
+   mMaterialAnim.frame = 0;
+   if( mMaterialAnim.animName.getString() ){
+      mMaterialAnim.oldSkinName = String(mMaterialAnim.animName.getString());
+   }
+}
+void  ShapeBase::materialAnimTick()
+{
+   mMaterialAnim.time += TickMs;
+   if( !isGhost() )return;
+
+   int   iFrame = (int)( (mMaterialAnim.time/mMaterialAnim.totalTime)*((F32)mMaterialAnim.frameCount) );
+   iFrame = min(iFrame, mMaterialAnim.frameCount);
+
+   if( iFrame != mMaterialAnim.frame ){
+
+      String  newSkinName;
+      if(iFrame<10){
+         newSkinName = String::ToString("%s00%d",mMaterialAnim.animPrefix.getString(), iFrame);
+      }else if(iFrame<100){
+         newSkinName = String::ToString("%s0%d",mMaterialAnim.animPrefix.getString(),iFrame);
+      }else{
+         newSkinName = String::ToString("%s%d",mMaterialAnim.animPrefix.getString(),iFrame);
+      }
+      mMaterialAnim.frame = iFrame;
+      mShapeInstance->reSkin( newSkinName, mMaterialAnim.oldSkinName, true );
+      mMaterialAnim.oldSkinName = newSkinName;
+   }
+}
+void  ShapeBase::materialAnimSetTime(F32 _time)
+{
+   if(isGhost())return;
+   if(mMaterialAnim.totalTime>0){
+      mMaterialAnim.time = _time;
+      setMaskBits(UVAnimMask);
+   }
+}
+//end pg
 
 DefineEngineMethod( ShapeBase, setAllMeshesHidden, void, ( bool hide ),,
    "@brief Set the hidden state on all the shape meshes.\n\n"
@@ -5150,3 +6372,68 @@ DefineEngineMethod( ShapeBase, getModelFile, const char *, (),,
 	const char *fieldName = StringTable->insert( String("shapeFile") );
    return datablock->getDataField( fieldName, NULL );
 }
+// start jc
+inline S32 ShapeBase::findNode(const String &nodeName)
+{
+   return getShape()->findNode(nodeName);
+}
+inline MatrixF ShapeBase::getNodeTransform(S32 nodeIndex)
+{
+   return mShapeInstance->mNodeTransforms[nodeIndex];
+}
+#ifdef TORQUE_CUBE_NODESCALES
+inline Point3F ShapeBase::getNodeScale(S32 nodeIndex)
+{
+   if (!mShapeInstance ||
+          //  !mShapeInstance->getShape() ||
+            nodeIndex >= mShapeInstance->mNodeScales.size())
+      return Point3F::One;
+
+   return mShapeInstance->mNodeScales[nodeIndex];
+}
+#endif
+
+// end jc
+
+// start jc
+DefineEngineMethod( ShapeBase, updateCollisionBox, void, (),,
+   "Get the model filename used by this shape.\n"
+   "@return the shape filename\n\n" )
+{
+   object->updateCollisionBox();
+}
+DefineEngineMethod( ShapeBase, setObjectBox, void, (Box3F objBox),,
+   "Get the model filename used by this shape.\n"
+   "@return the shape filename\n\n" )
+{
+   object->setObjectBox(objBox);
+}
+
+DefineEngineMethod( ShapeBase, getTextureResolution, Point2I, (U32 index),,
+   "Get the model filename used by this shape.\n"
+   "@return the shape filename\n\n" )
+{
+   return object->getTextureResolution(index);
+}
+DefineEngineMethod( ShapeBase, hasWebViewData, bool, (),,
+   "Get the model filename used by this shape.\n"
+   "@return the shape filename\n\n" )
+{
+   return object->hasWebViewData();
+}
+// end jc
+
+// start pg
+DefineEngineMethod( ShapeBase, materialAnimStart, void, (const char *baseMaterialName, const char *animMaterialPrefix,int frameCount, F32 frameRate),,
+   "Get the model filename used by this shape.\n"
+   "@return the shape filename\n\n" )
+{
+   object->materialAnimStart(baseMaterialName, animMaterialPrefix, frameCount, frameRate);
+}
+DefineEngineMethod( ShapeBase, materialAnimSetTime, void, (F32 _time),,
+   "Get the model filename used by this shape.\n"
+   "@return the shape filename\n\n" )
+{
+   object->materialAnimSetTime(_time);
+}
+// end pg

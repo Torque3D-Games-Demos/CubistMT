@@ -51,6 +51,12 @@
 #include "scene/sceneContainer.h"
 #endif
 
+// start jc
+#ifndef _MTRANSFORM_H_
+#include "math/mTransform.h"
+#endif
+// end jc
+
 
 class SceneManager;
 class SceneRenderState;
@@ -65,6 +71,11 @@ class SFXAmbience;
 
 struct ObjectRenderInst;
 struct Move;
+// start jc
+struct ShapeInputEvent;
+struct ShapeTouchEvent;
+// end jc
+
 
 
 /// A 3D object.
@@ -93,6 +104,9 @@ struct Move;
 class SceneObject : public NetObject, private SceneContainer::Link, public ProcessObject
 {
    public:
+// start jc
+   friend class TouchTSCtrl;
+// end jc
 
       typedef NetObject Parent;
 
@@ -118,7 +132,8 @@ class SceneObject : public NetObject, private SceneContainer::Link, public Proce
          ScaleMask         = BIT( 1 ),
          FlagMask          = BIT( 2 ),
          MountedMask       = BIT( 3 ),
-         NextFreeMask      = BIT( 4 )
+         SkinMask		      = BIT( 4 ), // start jc
+         NextFreeMask      = BIT( 5 )
       };
       
       /// Bit-flags stored in mObjectFlags.
@@ -345,6 +360,10 @@ class SceneObject : public NetObject, private SceneContainer::Link, public Proce
       U32 mBinMinY;
       U32 mBinMaxY;
 
+   // start jc
+      bool mNoAutoScope;
+   // end jc
+
       /// Returns the container sequence key.
       U32 getContainerSeqKey() const { return mContainerSeqKey; }
 
@@ -450,6 +469,24 @@ class SceneObject : public NetObject, private SceneContainer::Link, public Proce
 
       /// Returns the momentum of this object
       virtual Point3F getMomentum() const { return Point3F( 0, 0, 0 ); }
+// start jc
+   virtual void onMouseUp(const ShapeInputEvent &){};
+   virtual void onMouseDown(const ShapeInputEvent &){};
+   virtual void onMouseMove(const ShapeInputEvent &){};
+   virtual void onMouseDragged(const ShapeInputEvent &){};
+   virtual void onMouseEnter(const ShapeInputEvent &){};
+   virtual void onMouseLeave(const ShapeInputEvent &){};
+   virtual void onRightMouseDown(const ShapeInputEvent &){};
+   virtual void onRightMouseUp(const ShapeInputEvent &){};
+   virtual void onRightMouseDragged(const ShapeInputEvent &){};
+   virtual void onMouseWheelUp(const ShapeInputEvent &){};
+   virtual void onMouseWheelDown(const ShapeInputEvent &){};
+
+   virtual bool onTouchUp(const ShapeTouchEvent &)    { return false; };
+   virtual bool onTouchDown(const ShapeTouchEvent &)  { return false; };
+   virtual bool onTouchMove(const ShapeTouchEvent &)  { return false; };
+   virtual  bool  rayCrossesTransparency(RayInfo* ri) {return false;}
+// end jc
 
       /// Sets the momentum of this object
       /// @param   momentum   Momentum
@@ -668,6 +705,9 @@ class SceneObject : public NetObject, private SceneContainer::Link, public Proce
       /// Returns the object a object on the mount list is mounted to
       /// @param   node
       virtual SceneObject* getMountNodeObject( S32 node );
+// start jc
+      void getMountedTransform(MatrixF *mat);
+// end jc
 
       void resolveMountPID();
 
@@ -766,6 +806,10 @@ class SceneObject : public NetObject, private SceneContainer::Link, public Proce
       static bool _setFieldScale( void *object, const char *index, const char *data );
       static bool _setMountPID( void* object, const char* index, const char* data );
 
+      // start jc
+      static const char* _getNoAutoScope( void* object, const char* data );
+      static bool _setNoAutoScope( void *object, const char *index, const char *data );
+      // end jc
       /// @}
 };
 

@@ -96,6 +96,9 @@ namespace {
    static F32 sTargetFov               = 90.f;     ///< the desired FOV
    static F32 sLastCameraUpdateTime    = 0;        ///< last time camera was updated
    static S32 sZoomSpeed               = 500;      ///< ms per 90deg fov change
+// start jc
+   static Point4F sFrustumOffset = Point4F::Zero;
+// end jc
 
    /// A scale to apply to the normal visible distance
    /// typically used for tuning performance.
@@ -180,6 +183,61 @@ bool GameGetCameraTransform(MatrixF *mat, Point3F *velocity)
    return connection && connection->getControlCameraTransform(0, mat) &&
       connection->getControlCameraVelocity(velocity);
 }
+//start pg
+//------------------------------------------------------------------------------
+DefineEngineFunction( getCameraMatrix, MatrixF, ( ),,
+                     "get camera matrix")
+{
+   Point3F  velocity;
+   MatrixF  matrix;
+   GameGetCameraTransform(&matrix, &velocity);
+   return matrix;
+}
+//------------------------------------------------------------------------------
+DefineEngineFunction( getCameraX, Point3F, ( ),,
+                     "get camera X axis (camera side vector)")
+{
+   Point3F  velocity;
+   MatrixF  matrix;
+   GameGetCameraTransform(&matrix, &velocity);
+   Point3F  p;
+   matrix.getColumn(0,&p);
+   return p;
+}
+//------------------------------------------------------------------------------
+DefineEngineFunction( getCameraY, Point3F, ( ),,
+                     "get camera Y axis (vector into view)")
+{
+   Point3F  velocity;
+   MatrixF  matrix;
+   GameGetCameraTransform(&matrix, &velocity);
+   Point3F  p;
+   matrix.getColumn(1,&p);
+   return p;
+}
+//------------------------------------------------------------------------------
+DefineEngineFunction( getCameraZ, Point3F, ( ),,
+                     "get camera Z axis which is cameras up")
+{
+   Point3F  velocity;
+   MatrixF  matrix;
+   GameGetCameraTransform(&matrix, &velocity);
+   Point3F  p;
+   matrix.getColumn(2,&p);
+   return p;
+}
+//------------------------------------------------------------------------------
+DefineEngineFunction( getCameraP, Point3F, ( ),,
+                     "get camera position")
+{
+   Point3F  velocity;
+   MatrixF  matrix;
+   GameGetCameraTransform(&matrix, &velocity);
+   Point3F  p;
+   matrix.getColumn(3,&p);
+   return p;
+}
+//end pg
 
 //------------------------------------------------------------------------------
 DefineEngineFunction( setDefaultFov, void, ( F32 defaultFOV ),,
@@ -209,6 +267,26 @@ DefineEngineFunction( setFov, void, ( F32 FOV ),,
 {
    sTargetFov = mClampF(FOV, MinCameraFov, MaxCameraFov);
 }
+// start jc
+DefineEngineFunction( setFrustumOffset, void, ( Point4F offset ),,
+				"@brief .\n")
+{
+   sFrustumOffset = offset;
+}
+DefineEngineFunction( getFrustumOffset, Point4F, (),,
+				"@brief .\n")
+{
+   return sFrustumOffset;
+}
+void GameSetCameraFov(Point4F offset)
+{
+   sFrustumOffset = offset;
+}
+Point4F GameGetFrustumOffset()
+{
+   return sFrustumOffset;
+}
+// end jc
 
 F32 GameGetCameraFov()
 {
@@ -353,6 +431,9 @@ bool GameProcessCameraQuery(CameraQuery *query)
       // tuning scale which we never let over 1.
       sVisDistanceScale = mClampF( sVisDistanceScale, 0.01f, 1.0f );
       query->farPlane = gClientSceneGraph->getVisibleDistance() * sVisDistanceScale;
+// start jc
+      query->frustumOffset = gClientSceneGraph->getFrustumOffset(); 
+// end jc
 
       F32 cameraFov;
       if(!connection->getControlCameraFov(&cameraFov))

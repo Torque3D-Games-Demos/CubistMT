@@ -58,7 +58,10 @@
 #include "materials/baseMatInstance.h"
 
 // Amount of time if takes to transition to a new action sequence.
-static F32 sAnimationTransitionTime = 0.25f;
+// start jc
+//static F32 sAnimationTransitionTime = 0.25f;
+static F32 sAnimationTransitionTime = 0.5f;
+// end jc
 static bool sUseAnimationTransitions = true;
 static F32 sLandReverseScale = 0.25f;
 static F32 sSlowStandThreshSquared = 1.69f;
@@ -351,6 +354,12 @@ PlayerData::PlayerData()
    upResistSpeed = 38.0f;
    upResistFactor = 1.0f;
 
+// strat jc
+   // Flying
+   canFly = false;
+// end jc
+
+
    minImpactSpeed = 25.0f;
    minLateralImpactSpeed = 25.0f;
 
@@ -365,6 +374,10 @@ PlayerData::PlayerData()
    crouchBoxSize.set(1.0f, 1.0f, 2.0f);
    proneBoxSize.set(1.0f, 2.3f, 1.0f);
    swimBoxSize.set(1.0f, 2.3f, 1.0f);
+// start ds - offset collision box and zrotation
+	renderOffset.set(0.0f,0.0f,0.0f);
+//	zRotationOffset = 0.0f;
+// end ds
 
    // location of head, torso, legs
    boxHeadPercentage = 0.85f;
@@ -408,6 +421,14 @@ PlayerData::PlayerData()
    groundImpactShakeAmp.set( 20.0f, 20.0f, 20.0f );
    groundImpactShakeDuration = 1.0f;
    groundImpactShakeFalloff = 10.0f;
+// start jc - Dan&rsquo;s mods (turning inertia) ->
+   horizTurnSpeedInertia = 0.0f;
+   vertTurnSpeedInertia = 0.0f;
+//   AITurnSpeed = 1.0f;
+   maxTurnRate = M_2PI_F; // default to 1 full circle per second
+   conformToGround = false;
+   smoothCamera = 0.0f;
+// end jc - <- Dan&rsquo;s mods (turning inertia)
 
    // Air control
    airControl = 0.0f;
@@ -563,6 +584,13 @@ bool PlayerData::preload(bool server, String &errorStr)
       if( !splashEmitterList[i] && splashEmitterIDList[i] != 0 )
          if( Sim::findObject( splashEmitterIDList[i], splashEmitterList[i] ) == false)
             Con::errorf(ConsoleLogEntry::General, "PlayerData::onAdd - Invalid packet, bad datablockId(particle emitter): 0x%x", splashEmitterIDList[i]);
+
+// start jc - Dan&rsquo;s mods (turning inertia) ->
+   //Constrain these to sensible values
+   horizTurnSpeedInertia = mClampF(horizTurnSpeedInertia,0.0f,1.0f);
+   vertTurnSpeedInertia = mClampF(vertTurnSpeedInertia,0.0f,1.0f);
+//   AITurnSpeed = mClampF(AITurnSpeed,0.01f,1.0f);
+// end jc - Dan&rsquo;s mods (turning inertia)
 
    // First person mounted image shapes.
    for (U32 i=0; i<ShapeBase::MaxMountedImages; ++i)
@@ -763,8 +791,22 @@ void PlayerData::initPersistFields()
          "@see upMaxSpeed\n"
          "@see upResistSpeed\n" );
 
+// start jc - Dan&rsquo;s mods (turning inertia) ->
+   addField("horizTurnSpeedInertia",TypeF32,Offset(horizTurnSpeedInertia,PlayerData));
+   addField("vertTurnSpeedInertia",TypeF32,Offset(vertTurnSpeedInertia,PlayerData));
+//   addField("AITurnSpeed",TypeF32,Offset(AITurnSpeed,PlayerData));
+   addField("maxTurnRate",    TypeF32, Offset(maxTurnRate,     PlayerData));
+   addField("conformToGround", TypeBool, Offset(conformToGround, PlayerData));
+   addField("smoothCamera", TypeF32, Offset(smoothCamera,PlayerData));
+// end jc - Dan&rsquo;s mods (turning inertia)
    endGroup( "Movement" );
    
+// start ds
+   addGroup( "Movement: Flying" );
+   addField("canFly", TypeBool, Offset(canFly, PlayerData));
+   endGroup( "Movement: Flying" );
+// end ds
+
    addGroup( "Movement: Jumping" );
 
       addField( "jumpForce", TypeF32, Offset(jumpForce, PlayerData),
@@ -1285,6 +1327,13 @@ void PlayerData::packData(BitStream* stream)
    mathWrite(*stream, proneBoxSize);
    mathWrite(*stream, swimBoxSize);
 
+// start ds - offset collision box and zrotation
+   stream->write(renderOffset.x);
+   stream->write(renderOffset.y);
+   stream->write(renderOffset.z);
+//   stream->write(zRotationOffset);
+// end ds
+
    if( stream->writeFlag( footPuffEmitter ) )
    {
       stream->writeRangedU32( footPuffEmitter->getId(), DataBlockObjectIdFirst,  DataBlockObjectIdLast );
@@ -1328,6 +1377,15 @@ void PlayerData::packData(BitStream* stream)
    stream->write(groundImpactShakeAmp.z);
    stream->write(groundImpactShakeDuration);
    stream->write(groundImpactShakeFalloff);
+
+// start jc - Dan&rsquo;s mods (turning inertia) ->
+   stream->write(horizTurnSpeedInertia);
+   stream->write(vertTurnSpeedInertia);
+//   stream->write(AITurnSpeed);
+   stream->write(maxTurnRate);
+   stream->write(conformToGround);
+   stream->write(smoothCamera);
+// end jc - Dan&rsquo;s mods (turning inertia)
 
    // Air control
    stream->write(airControl);
@@ -1464,6 +1522,12 @@ void PlayerData::unpackData(BitStream* stream)
    mathRead(*stream, &crouchBoxSize);
    mathRead(*stream, &proneBoxSize);
    mathRead(*stream, &swimBoxSize);
+// start ds - offset collision box and zrotation
+   stream->read(&renderOffset.x);
+   stream->read(&renderOffset.y);
+   stream->read(&renderOffset.z);
+//   stream->read(&zRotationOffset);
+// end ds
 
    if( stream->readFlag() )
    {
@@ -1507,6 +1571,15 @@ void PlayerData::unpackData(BitStream* stream)
    stream->read(&groundImpactShakeAmp.z);
    stream->read(&groundImpactShakeDuration);
    stream->read(&groundImpactShakeFalloff);
+
+// start jc - Dan&rsquo;s mods (turning inertia) ->
+   stream->read(&horizTurnSpeedInertia);
+   stream->read(&vertTurnSpeedInertia);
+//   stream->read(&AITurnSpeed);
+   stream->read(&maxTurnRate);
+   stream->read(&conformToGround);
+   stream->read(&smoothCamera);
+// end jc - Dan&rsquo;s mods (turning inertia)
 
    // Air control
    stream->read(&airControl);
@@ -1564,6 +1637,11 @@ F32 Player::mGravity = -20;
 Player::Player()
 {
    mTypeMask |= PlayerObjectType | DynamicShapeObjectType;
+// start jc
+#ifdef TORQUE_HIFI_NET
+   mTypeMask |= GameBaseHiFiObjectType;
+#endif
+// end jc
 
    delta.pos = mAnchorPoint = Point3F(0,0,100);
    delta.rot = delta.head = Point3F(0,0,0);
@@ -1599,6 +1677,9 @@ Player::Player()
    mFalling = false;
    mSwimming = false;
    mInWater = false;
+// start jc
+   mFlying = false;
+// end jc
    mPose = StandPose;
    mContactTimer = 0;
    mJumpDelay = 0;
@@ -1632,6 +1713,22 @@ Player::Player()
    mLastWaterPos.set( 0.0, 0.0, 0.0 );
 
    mMountPending = 0;
+// start ds
+   /*
+   // Variable Movement -- Zshazz
+   mForceMod = 0.0f; // I'm implementing it so that if it is 0, then it does nothing
+   mMaxForwardSpeedMod = 0.0f;
+   mMaxBackwardSpeedMod = 0.0f;
+   mMaxSideSpeedMod = 0.0f;
+   */
+// end ds
+// start jc - moved to player for variable motion.
+   mMoveSpeed = 1.0f;
+// end jc
+
+// start ds
+	mFrozen = false;
+// end ds
 
    mPhysicsRep = NULL;
 
@@ -1658,6 +1755,35 @@ Player::~Player()
 
 //----------------------------------------------------------------------------
 
+// start ds
+/*
+// Variable Movement -- Zshazz
+// Had to make the initPersistFields entirely because player doesn't normally have it.
+void Player::initPersistFields()
+{
+   Parent::initPersistFields();
+   
+   // Add the Variable Movement things you want.
+   addField("forwardForceMod", TypeF32, Offset(mForceMod, Player));
+   addField("maxForwardSpeedMod", TypeF32, Offset(mMaxForwardSpeedMod,Player));
+   addField("maxBackwardSpeedMod", TypeF32, Offset(mMaxBackwardSpeedMod,Player));
+   addField("maxSideSpeedMod", TypeF32, Offset(mMaxSideSpeedMod,Player));
+}
+*/
+// end ds
+// start jc - moved to player for variable motion.
+/**
+ * Sets the speed at which this AI moves
+ *
+ * @param speed Speed to move, default player was 10
+ */
+void Player::setMoveSpeed( F32 speed )
+{
+//   mMoveSpeed = getMax(0.0001f, getMin( 1.0f, speed ));
+   mMoveSpeed = getMax(0.0001f, getMin( 1000.0f, speed ));
+}
+// end jc
+
 bool Player::onAdd()
 {
    ActionAnimation serverAnim = mActionAnimation;
@@ -1675,6 +1801,9 @@ bool Player::onAdd()
    mState = NullState;
    setState(state);
    setPose(StandPose);
+// start jc
+   mFlying = mDataBlock->canFly;
+// end jc
 
    if (serverAnim.action != PlayerData::NullAnimation)
    {
@@ -2018,6 +2147,10 @@ void Player::processTick(const Move* move)
    bool prevMoveMotion = mMoveMotion;
    Pose prevPose = getPose();
 
+// start ds
+	if (!mFrozen)
+	{
+// end ds
    // If we're not being controlled by a client, let the
    // AI sub-module get a chance at producing a move.
    Move aiMove;
@@ -2051,6 +2184,9 @@ void Player::processTick(const Move* move)
       }
    }
 
+// start ds
+	}
+// end ds
    Parent::processTick(move);
    // Warp to catch up to server
    if (delta.warpTicks > 0) {
@@ -2060,14 +2196,26 @@ void Player::processTick(const Move* move)
       getTransform().getColumn(3, &delta.pos);
       delta.pos += delta.warpOffset;
       delta.rot += delta.rotOffset;
-
+// start ds - Brenden animation fix
+/*
       // Wrap yaw to +/-PI
       if (delta.rot.z < - M_PI_F)
          delta.rot.z += M_2PI_F;
       else if (delta.rot.z > M_PI_F)
          delta.rot.z -= M_2PI_F;
+*/
+      if (delta.rot.x > M_PI_F) delta.rot.x -= M_2PI_F;
+      else if (delta.rot.x <= -M_PI_F) delta.rot.x += M_2PI_F;
+      if (delta.rot.y > M_PI_F) delta.rot.y -= M_2PI_F;
+      else if (delta.rot.y <= -M_PI_F) delta.rot.y += M_2PI_F;
+      if (delta.rot.z > M_PI_F) delta.rot.z -= M_2PI_F;
+      else if (delta.rot.z <= -M_PI_F) delta.rot.z += M_2PI_F;
+// end ds
 
       setPosition(delta.pos,delta.rot);
+// start jc
+      setRenderPosition(delta.pos,delta.rot);
+// end jc
       updateDeathOffsets();
       updateLookAnimation();
 
@@ -2075,7 +2223,11 @@ void Player::processTick(const Move* move)
       delta.posVec = -delta.warpOffset;
       delta.rotVec = -delta.rotOffset;
    }
-   else {
+// start ds
+//   else {
+	else if (!mFrozen)
+	{
+// end ds
       // If there is no move, the player is either an
       // unattached player on the server, or a player's
       // client ghost.
@@ -2097,6 +2249,7 @@ void Player::processTick(const Move* move)
       PROFILE_START(Player_PhysicsSection);
       if ( isServerObject() || didRenderLastRender() || getControllingClient() )
       {
+      PROFILE_START(Player_PhysicsSection_mPhysicsRep); // start jc
          if ( !mPhysicsRep )
          {
             if ( isMounted() )
@@ -2110,11 +2263,20 @@ void Player::processTick(const Move* move)
                updateWorkingCollisionSet();
             }
          }
+      PROFILE_END(); // start jc
 
+      PROFILE_START(Player_PhysicsSection_updateState); // start jc
          updateState();
+      PROFILE_END(); // start jc
+      PROFILE_START(Player_PhysicsSection_updateMove); // start jc
          updateMove(move);
+      PROFILE_END(); // start jc
+      PROFILE_START(Player_PhysicsSection_updateLookAnimation); // start jc
          updateLookAnimation();
+      PROFILE_END(); // start jc
+      PROFILE_START(Player_PhysicsSection_updateDeathOffsets); // start jc
          updateDeathOffsets();
+      PROFILE_END(); // start jc
          updatePos();
       }
       PROFILE_END();
@@ -2153,12 +2315,14 @@ void Player::processTick(const Move* move)
       }
    }
 }
-
 void Player::interpolateTick(F32 dt)
 {
    if (mControlObject)
       mControlObject->interpolateTick(dt);
-
+// start ds
+	if (!mFrozen)
+	{
+// end ds
    // Client side interpolation
    Parent::interpolateTick(dt);
 
@@ -2181,13 +2345,19 @@ void Player::interpolateTick(F32 dt)
       }
    }
 */
-
+//start ds
+	}
+// end ds
    updateLookAnimation(dt);
    delta.dt = dt;
 }
 
 void Player::advanceTime(F32 dt)
 {
+// start ds
+	if (!mFrozen)
+	{
+// end ds
    // Client side animations
    Parent::advanceTime(dt);
    updateActionThread();
@@ -2197,6 +2367,10 @@ void Player::advanceTime(F32 dt)
    updateWaterSounds(dt);
 
    mLastPos = getPosition();
+// start ds
+	}
+// end ds
+
 
    if (mImpactSound)
       playImpactSound();
@@ -2276,6 +2450,10 @@ void Player::updateState()
                   // this serves and counter, and direction state
                   mRecoverTicks = mReversePending;
                   mActionAnimation.forward = false;
+           // start ds - brendan animation fix
+               if (mActionAnimation.action != PlayerData::NullAnimation)
+               {
+			 // end jc
 
                   S32 seq = mDataBlock->actionList[mActionAnimation.action].sequence;
                   S32 imageBasedSeq = convertActionToImagePrefix(mActionAnimation.action);
@@ -2288,6 +2466,9 @@ void Player::updateState()
                   mShapeInstance->transitionToSequence(mActionAnimation.thread,
                                                        seq, pos, sAnimationTransitionTime, true);
                   mReversePending = 0;
+            // start ds - brendan animation fix
+               }
+            // end ds
                }
                else
                {
@@ -2318,6 +2499,8 @@ const char* Player::getStateName()
    return "Move";
 }
 
+// start ds
+/*
 void Player::getDamageLocation(const Point3F& in_rPos, const char *&out_rpVert, const char *&out_rpQuad)
 {
    // TODO: This will be WRONG when player is prone or swimming!
@@ -2399,6 +2582,42 @@ void Player::getDamageLocation(const Point3F& in_rPos, const char *&out_rpVert, 
       };
    }
 }
+*/
+void Player::getDamageLocation(const Point3F& in_rPos, const char *&out_rpVert, const char *&out_rpQuad)
+{
+   Point3F newPoint;
+   mWorldToObj.mulP(in_rPos, &newPoint);
+   F32 zHeight;
+   if(mPose == SwimPose)
+      zHeight = mObjBox.maxExtents.y;
+   else
+      zHeight = mObjBox.maxExtents.z;
+   F32 zTorso  = mDataBlock->boxTorsoPercentage;
+   F32 zHead   = mDataBlock->boxHeadPercentage;
+
+   zTorso *= zHeight;
+   zHead  *= zHeight;
+
+   if(mPose == SwimPose) {
+      if (newPoint.y <= zTorso)
+         out_rpVert = "legs";
+      else if (newPoint.y <= zHead)
+         out_rpVert = "torso";
+      else
+         out_rpVert = "head";
+   }
+   else {
+      if (newPoint.z <= zTorso)
+         out_rpVert = "legs";
+      else if (newPoint.z <= zHead)
+         out_rpVert = "torso";
+      else
+         out_rpVert = "head";
+   }
+
+   out_rpQuad = "center"; // default to "center", so we're not returning nothing
+}
+// end ds
 
 const char* Player::getPoseName() const
 {
@@ -2460,7 +2679,12 @@ void Player::setPose( Pose pose )
 
    // Resize the PhysicsPlayer rep. should we have one
    if ( mPhysicsRep )
-      mPhysicsRep->setSpacials( getPosition(), boxSize );
+   // start jc
+   //   mPhysicsRep->setSpacials( getPosition(), boxSize );
+      mPhysicsRep->setSpacials( getPosition(), boxSize * getScale() );
+    //  mPhysicsRep->setScale( boxSize * getScale() );
+	//	mPhysicsRep->setTransform( getTransform() );
+   // end jc
 
    if ( isServerObject() )
       mDataBlock->onPoseChange_callback( this, EngineMarshallData< PlayerPose >(oldPose), EngineMarshallData< PlayerPose >(mPose));
@@ -2476,12 +2700,54 @@ void Player::allowAllPoses()
    mAllowSwimming = true;
 }
 
+
+// start jc
 void Player::updateMove(const Move* move)
 {
+	// todo: see if this works
+	//if (!getControllingClient() && isGhost())
+	//	return;
+
+   if(mFlying)
+      updateMoveFlight(move);
+   else updateMoveOriginal(move);
+}
+
+//----------------------------------------------------------------------------
+
+void Player::updateMoveOriginal(const Move* move)
+{
+   PROFILE_SCOPE( Player_updateMoveOriginal );
+
+	mFlying = false;
+// end jc
    delta.move = *move;
+
+// start ds
+   /*
+   // Variable Movement -- Zshazz
+   //printf("Player::updateMove - %f\n",mRunForceMod);
+   if (mForceMod == 0.0f) // If its 0, then use the standard runForce
+      mForceMod = mDataBlock->runForce; // sets mRunForceMod to DataBlock's if it is 0.
+   if (mMaxForwardSpeedMod == 0.0f)
+      mMaxForwardSpeedMod = mDataBlock->maxForwardSpeed;
+   if (mMaxBackwardSpeedMod == 0.0f)
+      mMaxBackwardSpeedMod = mDataBlock->maxBackwardSpeed;
+   if (mMaxSideSpeedMod == 0.0f)
+      mMaxSideSpeedMod = mDataBlock->maxSideSpeed;
+  */
+// end ds
+// start jc
+   if(mMoveSpeed < 0.0001f)
+      mMoveSpeed = 0.0001f;
+// end jc
+
+
+PROFILE_START( Player_updateMoveOriginal_waterCoverage );
 
    // Is waterCoverage high enough to be 'swimming'?
    {
+
       bool swimming = mWaterCoverage > 0.65f && canSwim();      
 
       if ( swimming != mSwimming )
@@ -2497,6 +2763,9 @@ void Player::updateMove(const Move* move)
          mSwimming = swimming;
       }
    }
+PROFILE_END();
+
+PROFILE_START( Player_updateMoveOriginal_triggerImages );
 
    // Trigger images
    if (mDamageState == Enabled) 
@@ -2515,15 +2784,32 @@ void Player::updateMove(const Move* move)
    // Update current orientation
    if (mDamageState == Enabled) {
       F32 prevZRot = mRot.z;
+
+// start jc - Dan&rsquo;s mods (turning inertia) ->
+      //Need to save this before it&rsquo;s overwritten!
+      Point3F prevHeadVec = delta.headVec;
+// end jc - Dan&rsquo;s mods (turning inertia)
+
       delta.headVec = mHead;
 
       F32 p = move->pitch * (mPose == SprintPose ? mDataBlock->sprintPitchScale : 1.0f);
+// start jc - Dan&rsquo;s mods (turning inertia) ->
+      //If there was no movement this tick, add on some of last tick&rsquo;s movement
+      if(p == 0.0f)
+         p -= prevHeadVec.x * mDataBlock->vertTurnSpeedInertia;
+// end jc - Dan&rsquo;s mods (turning inertia)
+
       if (p > M_PI_F) 
          p -= M_2PI_F;
       mHead.x = mClampF(mHead.x + p,mDataBlock->minLookAngle,
                         mDataBlock->maxLookAngle);
 
       F32 y = move->yaw * (mPose == SprintPose ? mDataBlock->sprintYawScale : 1.0f);
+// start jc - Dan&rsquo;s mods (turning inertia) ->
+      if(y == 0.0f)
+         y -= delta.rotVec.z * mDataBlock->horizTurnSpeedInertia;
+// end jc - Dan&rsquo;s mods (turning inertia)
+
       if (y > M_PI_F)
          y -= M_2PI_F;
 
@@ -2563,7 +2849,9 @@ void Player::updateMove(const Move* move)
    }
    MatrixF zRot;
    zRot.set(EulerF(0.0f, 0.0f, mRot.z));
+PROFILE_END();
 
+PROFILE_START( Player_updateMoveOriginal_directionSpeed );
    // Desired move direction & speed
    VectorF moveVec;
    F32 moveSpeed;
@@ -2629,11 +2917,18 @@ void Player::updateMove(const Move* move)
    // Acceleration due to gravity
    VectorF acc(0.0f, 0.0f, mGravity * mGravityMod * TickSec);
 
+PROFILE_END();
+
+PROFILE_START( Player_updateMoveOriginal_findContact );
+
    // Determine ground contact normal. Only look for contacts if
    // we can move and aren't mounted.
    VectorF contactNormal(0,0,0);
    bool jumpSurface = false, runSurface = false;
-   if ( !isMounted() )
+// start jc
+//   if ( !isMounted() )
+   if ( !isMounted() && !mSwimming)
+// end jc
       findContact( &runSurface, &jumpSurface, &contactNormal );
    if ( jumpSurface )
       mJumpSurfaceNormal = contactNormal;
@@ -2646,8 +2941,11 @@ void Player::updateMove(const Move* move)
    if ( !runSurface && !contactNormal.isZero() )  
       acc = ( acc - 2 * contactNormal * mDot( acc, contactNormal ) );   
 
+PROFILE_END();
+
    // Acceleration on run surface
    if (runSurface && !mSwimming) {
+PROFILE_SCOPE( Player_updateMoveOriginal_runSurface );
       mContactTimer = 0;
 
       // Remove acc into contact surface (should only be gravity)
@@ -2721,6 +3019,9 @@ void Player::updateMove(const Move* move)
       VectorF runAcc = pv - (mVelocity + acc);
       F32 runSpeed = runAcc.len();
 
+// start ds
+	// todo: fix this for variable speed motion
+/*
       // Clamp acceleration, player also accelerates faster when
       // in his hard landing recover state.
       F32 maxAcc;
@@ -2732,6 +3033,20 @@ void Player::updateMove(const Move* move)
       {
          maxAcc = (mDataBlock->runForce / getMass()) * TickSec;
       }
+      //F32 maxAcc = (mDataBlock->runForce / getMass()) * TickSec;
+*/
+	  // Variable Movement -- Zshazz
+      // Clamp acceleration, player also accelerates faster when
+      // in his hard landing recover state.
+      F32 moveForce = 0.0f;
+      switch(mPose)
+	  {
+	  case SprintPose:	moveForce = mDataBlock->sprintForce;	break;
+	  default:			moveForce = mDataBlock->runForce;		break;
+      }
+      F32 maxAcc = ((moveForce*mMoveSpeed) / getMass()) * TickSec; // Replaced mDataBlock->runForce with mRunForceMod
+// end ds
+
       if (mState == RecoverState)
          maxAcc *= mDataBlock->recoverRunForceScale;
       if (runSpeed > maxAcc)
@@ -2744,6 +3059,7 @@ void Player::updateMove(const Move* move)
    }
    else if (!mSwimming && mDataBlock->airControl > 0.0f)
    {
+PROFILE_SCOPE( Player_updateMoveOriginal_airControl );
       VectorF pv;
       pv = moveVec;
       F32 pvl = pv.len();
@@ -2771,6 +3087,7 @@ void Player::updateMove(const Move* move)
    }
    else if (mSwimming)
    {
+PROFILE_SCOPE( Player_updateMoveOriginal_mSwimming );
       // Remove acc into contact surface (should only be gravity)
       // Clear out floating point acc errors, this will allow
       // the player to "rest" on the ground.
@@ -2840,16 +3157,22 @@ void Player::updateMove(const Move* move)
       F32 swimSpeed = swimAcc.len();
 
       // Clamp acceleration.
-      F32 maxAcc = (mDataBlock->swimForce / getMass()) * TickSec;
+      F32 maxAcc = ((mDataBlock->swimForce*mMoveSpeed) / getMass()) * TickSec;
       if ( false && swimSpeed > maxAcc )
          swimAcc *= maxAcc / swimSpeed;      
 
       acc += swimAcc;
 
+      // If we are swimming, then we're not jumping
+      if (mDataBlock->isJumpAction(mActionAnimation.action))
+         mActionAnimation.action = PlayerData::NullAnimation;
+
       mContactTimer++;
    }
    else
       mContactTimer++;   
+
+PROFILE_START( Player_updateMoveOriginal_accelerationJumping );
 
    // Acceleration from Jumping
    if (move->trigger[sJumpTrigger] && canJump())// !isMounted() && 
@@ -2958,6 +3281,9 @@ void Player::updateMove(const Move* move)
       mJetting = false;
    }
 
+PROFILE_END();
+
+PROFILE_START( Player_updateMoveOriginal_physicalZones );
    // Add in force from physical zones...
    acc += (mAppliedForce / getMass()) * TickSec;
 
@@ -2965,6 +3291,9 @@ void Player::updateMove(const Move* move)
    // TG: I forgot why doesn't the TickSec multiply happen here...
    mVelocity += acc;
 
+PROFILE_END();
+
+PROFILE_START( Player_updateMoveOriginal_resistanceBuoyancyDrag );
    // apply horizontal air resistance
 
    F32 hvel = mSqrt(mVelocity.x * mVelocity.x + mVelocity.y * mVelocity.y);
@@ -3027,7 +3356,9 @@ void Player::updateMove(const Move* move)
       mWorldToObj.mulV(mVelocity,&vel);
       mFalling = vel.z < mDataBlock->fallingSpeedThreshold;
    }
-   
+PROFILE_END();
+
+PROFILE_START( Player_updateMoveOriginal_VehicleDismount );
    // Vehicle Dismount   
    if ( !isGhost() && move->trigger[sVehicleDismountTrigger] && canJump())
       mDataBlock->doDismount_callback( this );
@@ -3053,7 +3384,10 @@ void Player::updateMove(const Move* move)
             SFX->playOnce( mDataBlock->sound[PlayerData::ExitWater], &getTransform() );                     
       }
    }
+PROFILE_END();
 
+
+PROFILE_START( Player_updateMoveOriginal_PlayerPose );
    // Update the PlayerPose
    Pose desiredPose = mPose;
 
@@ -3069,7 +3403,433 @@ void Player::updateMove(const Move* move)
       desiredPose = StandPose;
 
    setPose( desiredPose );
+PROFILE_END();
 }
+
+//----------------------------------------------------------------------------
+
+void Player::updateMoveFlight(const Move* move)
+{
+// start jc
+   mFlying = true;
+// end jc
+
+
+	delta.move = *move;
+	
+	// Trigger images
+	if (mDamageState == Enabled) {
+		setImageTriggerState(0,move->trigger[0]);
+		setImageTriggerState(1,move->trigger[1]);
+	}
+	
+	// Update current orientation
+	if (mDamageState == Enabled) 
+	{
+		F32 prevZRot = mRot.z;
+		delta.headVec = mHead;
+// start jc - Dan&rsquo;s mods (turning inertia) ->
+      //Need to save this before it&rsquo;s overwritten!
+      Point3F prevHeadVec = delta.headVec;
+// end jc - Dan&rsquo;s mods (turning inertia)
+		
+		F32 p = move->pitch;
+// start jc - Dan&rsquo;s mods (turning inertia) ->
+      //If there was no movement this tick, add on some of last tick&rsquo;s movement
+      if(p == 0.0f)
+         p -= prevHeadVec.x * mDataBlock->vertTurnSpeedInertia;
+// end jc - Dan&rsquo;s mods (turning inertia)
+		if (p > M_PI_F) p -= M_2PI_F;
+		mHead.x = mClampF(mHead.x + p,mDataBlock->minLookAngle,
+						  mDataBlock->maxLookAngle);
+		
+		F32 y = move->yaw;
+// start jc - Dan&rsquo;s mods (turning inertia) ->
+      if(y == 0.0f)
+         y -= delta.rotVec.z * mDataBlock->horizTurnSpeedInertia;
+// end jc - Dan&rsquo;s mods (turning inertia)
+		if (y > M_PI_F) y -= M_2PI_F;
+		
+		GameConnection* con = getControllingClient();
+		if (move->freeLook && ((isMounted() && getMountNode() == 0) || (con && !con->isFirstPerson())))
+		{
+			mHead.z = mClampF(mHead.z + y,
+							  -mDataBlock->maxFreelookAngle,
+							  mDataBlock->maxFreelookAngle);
+		}
+		else
+		{
+			mRot.z += y;
+			// Rotate the head back to the front, center horizontal
+			// as well if we're controlling another object.
+			mHead.z *= 0.5;
+			if (mControlObject)
+				mHead.x *= 0.5;
+		}
+		
+		// constrain the range of mRot.z
+		while (mRot.z < 0)
+			mRot.z += M_2PI_F;
+		while (mRot.z > M_2PI_F)
+			mRot.z -= M_2PI_F;
+		
+		delta.rot = mRot;
+		delta.rotVec.x = delta.rotVec.y = 0;
+		delta.rotVec.z = prevZRot - mRot.z;
+		if (delta.rotVec.z > M_PI_F)
+			delta.rotVec.z -= M_2PI_F;
+		else if (delta.rotVec.z < -M_PI_F)
+			delta.rotVec.z += M_2PI_F;
+		
+		delta.head = mHead;
+		delta.headVec -= mHead;
+	}
+	MatrixF zRot;
+// start ds
+//	zRot.set(EulerF(0, 0, mRot.z));
+	zRot.set(EulerF(0.0f, 0.0f, mRot.z));
+	MatrixF xRot;
+	xRot.set(EulerF(mHead.x, 0.0f, 0.0f));
+	MatrixF moveTransform;
+	moveTransform.mul(zRot,xRot);
+// end ds
+	
+	// Desired move direction & speed
+	VectorF moveVec;
+	F32 moveSpeed;
+	if (mState == MoveState && mDamageState == Enabled)
+	{
+// start ds
+//		zRot.getColumn(0,&moveVec);
+		moveTransform.getColumn(0,&moveVec);
+// end ds
+		moveVec *= move->x;
+		VectorF tv;
+// start ds
+//		zRot.getColumn(1,&tv);
+		moveTransform.getColumn(1,&tv);
+// end ds
+		moveVec += tv * move->y;
+// start ds
+      moveTransform.getColumn(2,&tv);
+      moveVec += tv * move->z;
+// end ds
+
+		// Clamp water movement
+		if (move->y > 0)
+		{
+// start ds
+			if( mWaterCoverage >= 0.9 )
+//         	if( mWaterCoverage >= mDataBlock->swimDepth )
+// end ds
+				moveSpeed = getMax(mDataBlock->maxUnderwaterForwardSpeed * move->y,
+								   mDataBlock->maxUnderwaterSideSpeed * mFabs(move->x));
+// start ds
+			else
+				moveSpeed = getMax(mDataBlock->maxForwardSpeed * move->y,
+								   mDataBlock->maxSideSpeed * mFabs(move->x));
+/*
+         else if(mPlayerPosition == 4)
+				moveSpeed = getMax(mDataBlock->maxWalkForwardSpeed * move->y,
+							mDataBlock->maxSideSpeed * mFabs(move->x));
+			else
+				moveSpeed = getMax(mDataBlock->maxForwardSpeed * move->y,
+							mDataBlock->maxSideSpeed * mFabs(move->x));
+*/
+// end ds
+		}
+		else
+		{
+			if( mWaterCoverage >= 0.9 )
+				moveSpeed = getMax(mDataBlock->maxUnderwaterBackwardSpeed * mFabs(move->y),
+								   mDataBlock->maxUnderwaterSideSpeed * mFabs(move->x));
+// start ds
+			else
+				moveSpeed = getMax(mDataBlock->maxBackwardSpeed * mFabs(move->y),
+								   mDataBlock->maxSideSpeed * mFabs(move->x));
+/*
+         else if(mPlayerPosition == 4)
+				moveSpeed = getMax(mDataBlock->maxWalkBackwardSpeed * mFabs(move->y),
+							mDataBlock->maxSideSpeed * mFabs(move->x));
+			else
+				moveSpeed = getMax(mDataBlock->maxBackwardSpeed * mFabs(move->y),
+							mDataBlock->maxSideSpeed * mFabs(move->x));
+*/
+// end ds
+		}
+		
+		// Cancel any script driven animations if we are going to move.
+		/*if (moveVec.x + moveVec.y + moveVec.z != 0 &&
+			(mActionAnimation.action >= PlayerData::NumTableActionAnims
+		           || mActionAnimation.action == PlayerData::LandAnim))
+mActionAnimation.action = PlayerData::NullAnimation;
+*/
+	}
+	else
+	{
+      moveVec.set(0.0f,0.0f,0.0f);
+      moveSpeed = 0.0f;
+	}
+	
+	// Acceleration due to gravity
+	VectorF acc(0.0f,0.0f,mGravity * mGravityMod * TickSec);
+    //VectorF acc(0,0,0.5);
+	
+	// Determin ground contact normal. Only look for contacts if
+	// we can move.
+	VectorF contactNormal, normalZ(moveVec.x,-moveVec.z,moveVec.y);
+	bool jumpSurface = false, runSurface = false;
+	if (!isMounted())
+		findContact(&runSurface,&jumpSurface,&contactNormal);
+	if (jumpSurface)
+		mJumpSurfaceNormal = contactNormal;
+	
+	// Point3F headRotation = getHeadRotation();       
+	// acc.z = (-headRotation.x) * (mDataBlock->runForce / mMass) * TickSec;
+	
+	// Acceleration on run surface
+	if (runSurface) 
+	{
+		
+		//Con::printf("Estou em uma Run Surface");
+		mContactTimer = 0;
+		
+		// Remove acc into contact surface (should only be gravity)
+		// Clear out floating point acc errors, this will allow
+		// the player to "rest" on the ground.
+		F32 vd = -mDot(acc,contactNormal);
+		if (vd > 0.0f) {
+			VectorF dv = contactNormal * (vd + 0.002f);
+			acc += dv;
+			if (acc.len() < 0.0001f)
+				acc.set(0.0f,0.0f,0.0f);
+		}
+		
+		// Force a 0 move if there is no energy, and only drain
+		// move energy if we're moving.
+		VectorF pv;
+		if (mEnergy >= mDataBlock->minRunEnergy) {
+			if (moveSpeed)
+				mEnergy -= mDataBlock->runEnergyDrain;
+			pv = moveVec;
+		}
+		else
+			pv.set(0.0f,0.0f,0.0f);
+		
+		// Adjust the players's requested dir. to be parallel
+		// to the contact surface.
+		F32 pvl = pv.len();
+		
+		if(pvl)
+		{
+			 
+			VectorF nn;
+			mCross(pv,VectorF(0.0f,0.0f,1.0f),&nn);
+			nn *= 1 / pvl;
+			VectorF cv = contactNormal;
+			cv -= nn * mDot(nn,cv);
+			pv -= cv * mDot(pv,cv);
+			pvl = pv.len();
+		}
+		
+		
+		// Convert to acceleration
+		if (pvl)
+			pv *= moveSpeed / pvl;
+		VectorF runAcc = pv - (mVelocity + acc);
+		F32 runSpeed = runAcc.len();
+		
+		// Clamp acceleratin, player also accelerates faster when
+		// in his hard landing recover state.
+		F32 maxAcc = (mDataBlock->runForce / mMass) * TickSec;
+		if (mState == RecoverState)
+			maxAcc *= mDataBlock->recoverRunForceScale;
+		if (runSpeed > maxAcc)
+			runAcc *= maxAcc / runSpeed;
+		acc += runAcc;
+		
+		// If we are running on the ground, then we're not jumping
+		if (mDataBlock->isJumpAction(mActionAnimation.action))
+			mActionAnimation.action = PlayerData::NullAnimation;
+	}
+	else
+	{
+		F32 airControl = 1.5;
+		
+		mContactTimer=0;
+		//--- by DJMystic ---
+		VectorF pv;
+		pv = moveVec;
+		
+		F32 pvl = pv.len();
+		
+		if (pvl)
+			pv *= moveSpeed / pvl;
+		
+		VectorF runAcc = pv - ( mVelocity + acc);
+		runAcc.z = runAcc.z * airControl;
+		runAcc.x = runAcc.x * airControl;
+		runAcc.y = runAcc.y * airControl;
+		
+		F32 runSpeed = runAcc.len();
+		
+		F32 maxAcc = (mDataBlock->runForce / mMass) * TickSec * airControl;
+		if (runSpeed > maxAcc)
+			runAcc *= maxAcc / runSpeed;
+		acc += runAcc;
+		//--- end by DJMystic ---
+    }
+// start jc - todo: check this
+
+     Point3F headRotation = getHeadRotation();       
+	 acc.z = (-headRotation.x) * (mDataBlock->runForce / mMass) * TickSec;
+
+// end jc
+
+	
+	// Acceleration from Jumping
+	if (move->trigger[2] && !isMounted() && canJump()) 
+	{
+		// Scale the jump impulse base on maxJumpSpeed
+		F32 zSpeedScale = mVelocity.z;
+		if (zSpeedScale <= mDataBlock->maxJumpSpeed) {
+			zSpeedScale = (zSpeedScale <= mDataBlock->minJumpSpeed)? 1:
+            1 - (zSpeedScale - mDataBlock->minJumpSpeed) /
+            (mDataBlock->maxJumpSpeed - mDataBlock->minJumpSpeed);
+			
+			// Desired jump direction
+			VectorF pv = moveVec;
+			F32 len = pv.len();
+			if (len > 0)
+				pv *= 1 / len;
+			
+			// We want to scale the jump size by the player size, somewhat
+			// in reduced ratio so a smaller player can jump higher in
+			// proportion to his size, than a larger player.
+			F32 scaleZ = (getScale().z * 0.25) + 0.75;
+			
+			// If we are facing into the surface jump up, otherwise
+			// jump away from surface.
+			F32 dot = mDot(pv,mJumpSurfaceNormal);
+			F32 impulse = mDataBlock->jumpForce / mMass;
+			if (dot <= 0)
+				acc.z += mJumpSurfaceNormal.z * scaleZ * impulse * zSpeedScale;
+			else {
+				acc.x += pv.x * impulse * dot;
+				acc.y += pv.y * impulse * dot;
+				acc.z += mJumpSurfaceNormal.z * scaleZ * impulse * zSpeedScale;
+			}
+			
+			mJumpDelay = mDataBlock->jumpDelay;
+			mEnergy -= mDataBlock->jumpEnergyDrain;
+			
+			setActionThread((mVelocity.len() < 0.5)?
+							PlayerData::StandJumpAnim: PlayerData::JumpAnim, true, false, true);
+			mJumpSurfaceLastContact = JumpSkipContactsMax;
+		}
+	}
+	else
+	{
+		if (jumpSurface) 
+		{
+			if (mJumpDelay > 0)
+				mJumpDelay--;
+			mJumpSurfaceLastContact = 0;
+		}
+		else
+			mJumpSurfaceLastContact++;
+	}
+	
+	
+
+	
+	
+	// Add in force from physical zones...
+	acc += (mAppliedForce / mMass) * TickSec;
+	
+	// Adjust velocity with all the move & gravity acceleration
+	// TG: I forgot why doesn't the TickSec multiply happen here...
+	mVelocity += acc;
+	
+	// apply horizontal air resistance
+	
+	F32 hvel = mSqrt(mVelocity.x * mVelocity.x + mVelocity.y * mVelocity.y);
+	
+	if(hvel > mDataBlock->horizResistSpeed)
+	{
+		F32 speedCap = hvel;
+		if(speedCap > mDataBlock->horizMaxSpeed)
+			speedCap = mDataBlock->horizMaxSpeed;
+		speedCap -= mDataBlock->horizResistFactor * TickSec * (speedCap - mDataBlock->horizResistSpeed);
+		F32 scale = speedCap / hvel;
+		mVelocity.x *= scale;
+		mVelocity.y *= scale;
+	}
+	
+	if(mVelocity.z > mDataBlock->upResistSpeed)
+	{
+		if(mVelocity.z > mDataBlock->upMaxSpeed)
+			mVelocity.z = mDataBlock->upMaxSpeed;
+		mVelocity.z -= mDataBlock->upResistFactor * TickSec * (mVelocity.z - mDataBlock->upResistSpeed);
+	}
+	
+	// Container buoyancy & drag
+	if (mBuoyancy != 0) 
+	{     // Applying buoyancy when standing still causing some jitters- 
+		if (mBuoyancy > 1.0 || !runSurface) // || !mVelocity.isZero() )
+			mVelocity.z -= mBuoyancy * mGravity * mGravityMod * TickSec;
+	}
+	mVelocity   -= mVelocity * mDrag * TickSec;
+	
+	// If we are not touching anything and have sufficient -z vel,
+	// we are falling.
+   if (runSurface)
+      mFalling = false;
+   else
+   {
+      VectorF vel;
+      mWorldToObj.mulV(mVelocity,&vel);
+      mFalling = vel.z < mDataBlock->fallingSpeedThreshold;
+   }
+	
+	if (!isGhost()) 
+	{
+		// Vehicle Dismount
+		if(move->trigger[2] && isMounted())
+			//Con::executef(mDataBlock,2,"doDismount",scriptThis());
+         mDataBlock->doDismount_callback( this );
+		
+		if(!mSwimming && mWaterCoverage != 0.0f) 
+		{
+			//Con::executef(mDataBlock,4,"onEnterLiquid",scriptThis(), Con::getFloatArg(mWaterCoverage), Con::getIntArg(mLiquidType));
+			mDataBlock->onEnterLiquid_callback( this, mWaterCoverage, mLiquidType.c_str() );
+         mSwimming = true;
+		}
+		else if(mSwimming && mWaterCoverage == 0.0f) 
+		{
+			//Con::executef(mDataBlock,3,"onLeaveLiquid",scriptThis(), Con::getIntArg(mLiquidType));
+			mDataBlock->onLeaveLiquid_callback( this, mLiquidType.c_str() );
+         mSwimming = false;
+		}
+	}
+	else 
+	{
+		if(!mSwimming && mWaterCoverage >= 1.0f) 
+		{
+			
+			mSwimming = true;
+		}   
+		else 
+			if(mSwimming && mWaterCoverage < 0.8f) 
+			{
+				if(getVelocity().len() >= mDataBlock->exitSplashSoundVel && !isMounted())
+					//alxPlay(mDataBlock->sound[PlayerData::ExitWater], &getTransform());
+               SFX->playOnce( mDataBlock->sound[PlayerData::ExitWater], &getTransform() );
+				mSwimming = false;
+			}
+	}
+}
+
 
 
 //----------------------------------------------------------------------------
@@ -3562,7 +4322,10 @@ bool Player::setActionThread(const char* sequence,bool hold,bool wait,bool fsp)
       PlayerData::ActionAnimation &anim = mDataBlock->actionList[i];
       if (!dStricmp(anim.name,sequence))
       {
-         setActionThread(i,true,hold,wait,fsp);
+// start ds
+//         setActionThread(i,true,hold,wait,fsp);
+         setActionThread(i,true,hold,wait,fsp,true);
+// end ds
          setMaskBits(ActionMask);
          return true;
       }
@@ -3582,6 +4345,12 @@ void Player::setActionThread(U32 action,bool forward,bool hold,bool wait,bool fs
    }
 
    PlayerData::ActionAnimation &anim = mDataBlock->actionList[action];
+// start ds 
+//   if (anim.sequence == -1)
+//   {
+//      anim = mDataBlock->actionList[PlayerData::RootAnim];
+//   }
+// end ds
    if (anim.sequence != -1)
    {
       U32 lastAction = mActionAnimation.action;
@@ -3745,6 +4514,8 @@ void Player::updateActionThread()
 
    if (mActionAnimation.action == PlayerData::NullAnimation ||
        ((!mActionAnimation.waitForEnd || mActionAnimation.atEnd)) &&
+// start ds - call script callback when finished even if holding
+/*
        !mActionAnimation.holdAtEnd && (mActionAnimation.delayTicks -= !mMountPending) <= 0)
    {
       //The scripting language will get a call back when a script animation has finished...
@@ -3752,6 +4523,18 @@ void Player::updateActionThread()
       if ( isServerObject() && mActionAnimation.action >= PlayerData::NumTableActionAnims )
          mDataBlock->animationDone_callback( this );
       pickActionAnimation();
+*/
+       (mActionAnimation.delayTicks -= !mMountPending) <= 0)
+   {
+      // pick an animation first so that script may override it
+      if (!mActionAnimation.holdAtEnd)
+         pickActionAnimation();
+      //The scripting language will get a call back when a script animation has finished...
+      //  example: When the chat menu animations are done playing...
+      if ( isServerObject() && mActionAnimation.action >= PlayerData::NumTableActionAnims )
+         mDataBlock->animationDone_callback( this );
+      
+// end ds
    }
 
    if ( (mActionAnimation.action != PlayerData::LandAnim) &&
@@ -3784,7 +4567,10 @@ void Player::pickBestMoveAction(U32 startAnim, U32 endAnim, U32 * action, bool *
    VectorF vel;
    mWorldToObj.mulV(mVelocity,&vel);
 
-   if (vel.lenSquared() > 0.01f)
+// start jc
+  // if (vel.lenSquared() > 0.01f)
+   if (vel.lenSquared() > 0.002f)
+// end jc
    {
       // Bias the velocity towards picking the forward/backward anims over
       // the sideways ones to prevent oscillation between anims.
@@ -3792,7 +4578,10 @@ void Player::pickBestMoveAction(U32 startAnim, U32 endAnim, U32 * action, bool *
 
       // Pick animation that is the best fit for our current (local) velocity.
       // Assumes that the root (stationary) animation is at startAnim.
-      F32 curMax = -0.1f;
+// start jc
+   //   F32 curMax = -0.1f;
+      F32 curMax = -0.01f;
+// end jc
       for (U32 i = startAnim+1; i <= endAnim; i++)
       {
          const PlayerData::ActionAnimation &anim = mDataBlock->actionList[i];
@@ -4829,10 +5618,20 @@ bool Player::updatePos(const F32 travelTime)
 
    if ( mPhysicsRep )
    {
+	  PROFILE_SCOPE(Player_UpdatePos_mPhysicsRep_True); // start jc
+
       static CollisionList collisionList;
       collisionList.clear();
 
-      newPos = mPhysicsRep->move( mVelocity * travelTime, collisionList );
+	  PROFILE_START(Player_UpdatePos_mPhysicsRep_move); // start jc
+// start jc
+//      newPos = mPhysicsRep->move( mVelocity * travelTime, collisionList );
+	  VectorF disp(mVelocity * travelTime);
+	  if (!mSwimming && !mFlying && mIsZero(disp.z))
+	    disp.z = 0.0f;
+      newPos = mPhysicsRep->move( disp, collisionList );
+// end jc
+	  PROFILE_END(); // start jc
 
       bool haveCollisions = false;
       bool wasFalling = mFalling;
@@ -4861,7 +5660,11 @@ bool Player::updatePos(const F32 travelTime)
             }
          }
 
+	  PROFILE_START(Player_UpdatePos_mPhysicsRep_doCollisionImpact); // start jc
          _doCollisionImpact( collision, wasFalling );
+	  PROFILE_END(); // start jc
+
+	  PROFILE_START(Player_UpdatePos_mPhysicsRep_handleCollision); // start jc
 
          // Modify our velocity based on collisions
          for (U32 i=0; i<collisionList.getCount(); ++i)
@@ -4896,10 +5699,14 @@ bool Player::updatePos(const F32 travelTime)
          }
 
          _handleCollision( col );
+
+		PROFILE_END(); // start jc
+
       }
    }
    else
    {
+	  PROFILE_SCOPE(Player_UpdatePos_mPhysicsRep_False); // start jc
       if ( mVelocity.isZero() )
          newPos = delta.posVec;
       else
@@ -4941,8 +5748,8 @@ bool Player::updatePos(const F32 travelTime)
    //  we moved a fair amount...
    //if (totalMotion >= (0.001f * initialSpeed))
       return true;
-   //else
-      //return false;
+  // else
+   //   return false;
 }
 
 
@@ -5197,8 +6004,56 @@ void Player::setPosition(const Point3F& pos,const Point3F& rot)
       mat.mul(nmat,zrot);
    }
    else {
-      mat.set(EulerF(0.0f, 0.0f, rot.z));
-      mat.setColumn(3,pos);
+// start ds - conform to ground
+//      mat.set(EulerF(0.0f, 0.0f, rot.z));
+//      mat.setColumn(3,pos);
+
+      if (mDataBlock && mDataBlock->conformToGround)
+      {
+         if(mFlying || mSwimming)
+         {
+            
+            /*
+            MatrixF xRot, zRot;
+            xRot.set(EulerF(mHead.x, 0, 0));
+            zRot.set(EulerF(0, 0, rot.z));
+            //MatrixF rotMat;
+            mat.mul(zRot, xRot);
+            mat.setColumn(3,pos);
+            */
+            mat.set(EulerF(0.0f, 0.0f, rot.z));
+            mat.setColumn(3,pos);
+            
+         }
+         else
+         {
+            mat.set(EulerF(0.0f, 0.0f, rot.z));
+            mat.setColumn(3,pos);
+
+            RayInfo surfaceInfo;
+            Point3F above = Point3F(pos.x,pos.y,pos.z + 0.5f);
+            Point3F below = Point3F(pos.x,pos.y,pos.z - 100.0f);
+            if (gClientContainer.castRay(above,below,sCollisionMoveMask,&surfaceInfo))
+            {
+               Point3F x,y,z;
+               z = surfaceInfo.normal;
+               z.normalize();
+               mat.getColumn(1,&y);
+               mCross(y,z,&x);
+               x.normalize();
+               mCross(z,x,&y);
+               mat.setColumn(0,x);
+               mat.setColumn(1,y);
+               mat.setColumn(2,z);
+            }
+         }
+      }
+      else
+      {
+         mat.set(EulerF(0.0f, 0.0f, rot.z));
+         mat.setColumn(3,pos);
+      }
+// end ds
    }
    Parent::setTransform(mat);
    mRot = rot;
@@ -5208,9 +6063,14 @@ void Player::setPosition(const Point3F& pos,const Point3F& rot)
 }
 
 
-void Player::setRenderPosition(const Point3F& pos, const Point3F& rot, F32 dt)
+void Player::setRenderPosition(const Point3F& cpos, const Point3F& rot, F32 dt)
 {
    MatrixF mat;
+
+// start ds - offset collision box
+	Point3F pos = cpos + mDataBlock->renderOffset;
+// end ds
+
    if (isMounted()) {
       // Use transform from mounted object
       MatrixF nmat,zrot;
@@ -5221,8 +6081,10 @@ void Player::setRenderPosition(const Point3F& pos, const Point3F& rot, F32 dt)
    else {
       EulerF   orient(0.0f, 0.0f, rot.z);
 
-      mat.set(orient);
-      mat.setColumn(3, pos);
+// start ds - conform to ground
+//      mat.set(orient);
+//      mat.setColumn(3, pos);
+// end ds
 
       if (inDeathAnim()) {
          F32   boxRad = (mDataBlock->boxSize.x * 0.5f);
@@ -5231,8 +6093,55 @@ void Player::setRenderPosition(const Point3F& pos, const Point3F& rot, F32 dt)
       }
       else
          mDeath.initFall();
+// start ds - conform to ground
+      if (mDataBlock && mDataBlock->conformToGround)
+      {
+         if(mFlying || mSwimming)
+         {
+//            mat.set(rot);
+//            mat.setColumn(3, pos);
+            MatrixF xRot, zRot;
+            xRot.set(EulerF(mHead.x, 0, 0));
+            zRot.set(EulerF(0, 0, rot.z));
+
+            mat.mul(zRot, xRot);
+            mat.setColumn(3,pos);
+         }
+         else
+         {
+            mat.set(orient);
+            mat.setColumn(3, pos);
+
+            Point3F x,y,z;
+            RayInfo surfaceInfo;
+            Point3F above = Point3F(pos.x,pos.y,pos.z + 0.5f);
+            Point3F below = Point3F(pos.x,pos.y,pos.z - 100.0f);
+            if (gClientContainer.castRay(above,below,sCollisionMoveMask,&surfaceInfo))
+            {
+               z = surfaceInfo.normal;
+               z.normalize();
+               mat.getColumn(1,&y);
+               mCross(y,z,&x);
+               x.normalize();
+               mCross(z,x,&y);
+               mat.setColumn(0,x);
+               mat.setColumn(1,y);
+               mat.setColumn(2,z);
+            }
+         }
+      }
+      else
+      {
+         mat.set(orient);
+         mat.setColumn(3, pos);
+      }
+// end ds
    }
-   Parent::setRenderTransform(mat);
+
+// start ds - conform to ground
+   //Parent::setRenderTransform(mat);
+   setRenderTransform(mat);
+// end ds
 }
 
 //----------------------------------------------------------------------------
@@ -5250,6 +6159,49 @@ void Player::setTransform(const MatrixF& mat)
    setPosition(pos,rot);
    setMaskBits(MoveMask | NoWarpMask);
 }
+// start ds - conform to ground
+void Player::setRenderTransform(const MatrixF & mat)
+{
+   if (mDataBlock && mDataBlock->smoothCamera>0.0001f)
+   {
+      Point3F pos, x,y,z;
+      mat.getColumn(3,&pos);
+
+      // keep compass direction (assume not looking straight up)
+      mat.getColumn(1,&y);
+      y.z = 0;
+      y.normalize();
+
+      // smooth out camera
+      MatrixF mat2 = getRenderTransform();
+      QuatF q1(mat);
+      QuatF q2(mat2);
+      F32 k = mDataBlock->smoothCamera;
+
+      q2.x = q2.x * k + (1.0f-k) * q1.x;
+      q2.y = q2.y * k + (1.0f-k) * q1.y;
+      q2.z = q2.z * k + (1.0f-k) * q1.z;
+      q2.w = q2.w * k + (1.0f-k) * q1.w;
+      q2.normalize();
+      q2.setMatrix(&mat2);
+      mat2.setColumn(3,pos);
+   
+ 
+      // keep up-vector, refigure y & z based on saved off y
+      mat2.getColumn(2,&z);
+      mCross(y,z,&x);
+      x.normalize();
+      mCross(z,x,&y);
+      mat2.setColumn(0,x);
+      mat2.setColumn(1,y);
+   
+
+      Parent::setRenderTransform(mat2);
+   }
+   else
+      Parent::setRenderTransform(mat);
+}
+// end ds
 
 void Player::getEyeTransform(MatrixF* mat)
 {
@@ -5831,6 +6783,9 @@ void Player::writePacketData(GameConnection *connection, BitStream *stream)
    Parent::writePacketData(connection, stream);
 
    stream->writeInt(mState,NumStateBits);
+// start jc
+//   stream->writeInt(mPose, NumPoseBits);   // Mquaker :: add net logic for mPose  
+// end jc
    if (stream->writeFlag(mState == RecoverState))
       stream->writeInt(mRecoverTicks,PlayerData::RecoverDelayBits);
    if (stream->writeFlag(mJumpDelay > 0))
@@ -5880,6 +6835,11 @@ void Player::readPacketData(GameConnection *connection, BitStream *stream)
    Parent::readPacketData(connection, stream);
 
    mState = (ActionState)stream->readInt(NumStateBits);
+// start jc
+//   mPose = (Pose)stream->readInt(NumPoseBits);   // Mquaker :: add net logic for mPose  
+//	  Pose pose = (Pose)stream->readInt(NumPoseBits);
+//      setPose(pose);
+// end jc
    if (stream->readFlag())
       mRecoverTicks = stream->readInt(PlayerData::RecoverDelayBits);
    if (stream->readFlag())
@@ -5975,11 +6935,51 @@ U32 Player::packUpdate(NetConnection *con, U32 mask, BitStream *stream)
    if(stream->writeFlag(getControllingClient() == con && !(mask & InitialUpdateMask)))
       return(retMask);
 
+   // start ds
+   /*
+   if (stream->writeFlag(mask & MoveStateMask))
+   {
+	   stream->writeFlag(mFrozen);
+  
+      // Variable Movement -- Zshazz
+      // Makes it so that everyone is synced up correctly
+      stream->write(mRunForceMod);
+      stream->write(mMaxForwardSpeedMod);
+      stream->write(mMaxBackwardSpeedMod);
+      stream->write(mMaxWalkForwardSpeedMod);
+      stream->write(mMaxWalkBackwardSpeedMod);
+      stream->write(mMaxSideSpeedMod);
+   }
+   */
+   // end ds
+
    if (stream->writeFlag(mask & MoveMask))
    {
       stream->writeFlag(mFalling);
+// start ds
+      stream->writeFlag(mContactTimer == 0);
+      stream->writeFlag(mSwimming);
+      stream->writeFlag(mFlying);
+//   	  stream->writeInt(getPose(),5);
+      stream->writeFlag(mFrozen);
+// end ds
+
+   // start ds
+	/*
+      // Variable Movement -- Zshazz
+      // Makes it so that everyone is synced up correctly
+      stream->write(mForceMod);
+      stream->write(mMaxForwardSpeedMod);
+      stream->write(mMaxBackwardSpeedMod);
+      stream->write(mMaxSideSpeedMod);
+	*/
+      stream->write(mMoveSpeed);
+   // end ds
 
       stream->writeInt(mState,NumStateBits);
+   // start jc
+   //   stream->writeInt(mPose, NumPoseBits);   // Mquaker :: add net logic for mPose  
+   // end jc
       if (stream->writeFlag(mState == RecoverState))
          stream->writeInt(mRecoverTicks,PlayerData::RecoverDelayBits);
 
@@ -5997,9 +6997,14 @@ U32 Player::packUpdate(NetConnection *con, U32 mask, BitStream *stream)
             len = 8191;
          stream->writeInt((S32)len, 13);
       }
-      stream->writeFloat(mRot.z / M_2PI_F, 7);
+  // start jc
+    //  stream->writeFloat(mRot.z / M_2PI_F, 7);
+    //  stream->writeSignedFloat(mHead.x / mDataBlock->maxLookAngle, 6);
+    //  stream->writeSignedFloat(mHead.z / mDataBlock->maxFreelookAngle, 6);
+      stream->writeFloat(mRot.z / M_2PI_F, 9);
       stream->writeSignedFloat(mHead.x / mDataBlock->maxLookAngle, 6);
-      stream->writeSignedFloat(mHead.z / mDataBlock->maxFreelookAngle, 6);
+      stream->writeSignedFloat(mHead.z / mDataBlock->maxFreelookAngle, 9);
+  // end jc
       delta.move.pack(stream);
       stream->writeFlag(!(mask & NoWarpMask));
    }
@@ -6027,7 +7032,12 @@ void Player::unpackUpdate(NetConnection *con, BitStream *stream)
          animPos = stream->readSignedFloat(6);
 
       if (isProperlyAdded()) {
+// start ds
+/*
          setActionThread(action,true,hold,true,fsp);
+*/
+         setActionThread(action,true,hold,true,fsp,true);
+// end ds
          bool  inDeath = inDeathAnim();
          if (atEnd)
          {
@@ -6072,8 +7082,37 @@ void Player::unpackUpdate(NetConnection *con, BitStream *stream)
    if (stream->readFlag()) {
       mPredictionCount = sMaxPredictionTicks;
       mFalling = stream->readFlag();
+// start ds
+   if(stream->readFlag())
+      mContactTimer = 0;
+   else
+      mContactTimer ++;
+
+	  mSwimming = stream->readFlag(); // fafhrd, swim code
+	  mFlying = stream->readFlag();
+//     setPose((Player::Pose)stream->readInt(5));
+// end ds
+// start ds
+		mFrozen = stream->readFlag();
+// end ds
+// start ds
+   // Variable Movement -- Zshazz
+      /*
+		stream->read(&mRunForceMod);
+		stream->read(&mMaxForwardSpeedMod);
+		stream->read(&mMaxBackwardSpeedMod);
+		stream->read(&mMaxWalkForwardSpeedMod);
+		stream->read(&mMaxWalkBackwardSpeedMod);
+		stream->read(&mMaxSideSpeedMod);
+      */
+		stream->read(&mMoveSpeed);
+// end ds
 
       ActionState actionState = (ActionState)stream->readInt(NumStateBits);
+   // start jc - Mquaker :: add net logic for mPose >>>
+   //   Pose pose = (Pose)stream->readInt(NumPoseBits);
+   //   setPose(pose);
+   // end jc - Mquaker :: add net logic for mPose <<<
       if (stream->readFlag()) {
          mRecoverTicks = stream->readInt(PlayerData::RecoverDelayBits);
          setState(actionState, mRecoverTicks);
@@ -6088,6 +7127,14 @@ void Player::unpackUpdate(NetConnection *con, BitStream *stream)
       {
          stream->readNormalVector(&mVelocity, 10);
          mVelocity *= stream->readInt(13) / 32.0f;
+// start ds
+// todo: find out what this does
+         if ((mActionAnimation.action >= PlayerData::NumTableActionAnims
+               || mActionAnimation.action == PlayerData::LandAnim))
+         {
+            mActionAnimation.action = PlayerData::NullAnimation;
+         }
+// end ds
       }
       else
       {
@@ -6095,9 +7142,14 @@ void Player::unpackUpdate(NetConnection *con, BitStream *stream)
       }
       
       rot.y = rot.x = 0.0f;
-      rot.z = stream->readFloat(7) * M_2PI_F;
+  // start jc
+  //    rot.z = stream->readFloat(7) * M_2PI_F;
+  //    mHead.x = stream->readSignedFloat(6) * mDataBlock->maxLookAngle;
+  //    mHead.z = stream->readSignedFloat(6) * mDataBlock->maxFreelookAngle;
+      rot.z = stream->readFloat(9) * M_2PI_F;
       mHead.x = stream->readSignedFloat(6) * mDataBlock->maxLookAngle;
-      mHead.z = stream->readSignedFloat(6) * mDataBlock->maxFreelookAngle;
+      mHead.z = stream->readSignedFloat(9) * mDataBlock->maxFreelookAngle;
+  // end jc
       delta.move.unpack(stream);
 
       delta.head = mHead;
@@ -6120,12 +7172,40 @@ void Player::unpackUpdate(NetConnection *con, BitStream *stream)
             delta.warpOffset /= (F32)delta.warpTicks;
 
             delta.rotOffset = rot - delta.rot;
-
+		// start jc - http://www.garagegames.com/community/forums/viewthread/123597
+/*
             // Ignore small rotation differences
             if (mFabs(delta.rotOffset.z) < 0.001f)
                delta.rotOffset.z = 0;
 
             // Wrap rotation to +/-PI
+*/
+
+
+			// ignore small offsets
+			if(delta.rotOffset.z>0 && delta.rotOffset.z<0.001f)
+					delta.rotOffset.z = 0;
+			if(delta.rotOffset.z<0 && delta.rotOffset.z>-0.001f)
+					delta.rotOffset.z = 0;
+			if(delta.rotOffset.y>0 && delta.rotOffset.y<0.001f)
+					delta.rotOffset.y = 0;
+			if(delta.rotOffset.y<0 && delta.rotOffset.y>-0.001f)
+					delta.rotOffset.y = 0;
+			if(delta.rotOffset.x>0 && delta.rotOffset.x<0.001f)
+					delta.rotOffset.x = 0;
+			if(delta.rotOffset.x<0 && delta.rotOffset.x>-0.001f)
+					delta.rotOffset.x = 0;
+
+            if(delta.rotOffset.x < - M_PI_F)
+               delta.rotOffset.x += M_2PI_F;
+            else if(delta.rotOffset.x > M_PI_F)
+               delta.rotOffset.x -= M_2PI_F;
+            if(delta.rotOffset.y < - M_PI_F)
+               delta.rotOffset.y += M_2PI_F;
+            else if(delta.rotOffset.y > M_PI_F)
+               delta.rotOffset.y -= M_2PI_F;
+		// end jc
+
             if(delta.rotOffset.z < - M_PI_F)
                delta.rotOffset.z += M_2PI_F;
             else if(delta.rotOffset.z > M_PI_F)
@@ -6148,6 +7228,8 @@ void Player::unpackUpdate(NetConnection *con, BitStream *stream)
             {
                F32 dti = 1.0f / delta.dt;
                delta.posVec = (cp - pos) * dti;
+		    // start jc
+			/*
                delta.rotVec.z = mRot.z - rot.z;
 
                if(delta.rotVec.z > M_PI_F)
@@ -6156,6 +7238,24 @@ void Player::unpackUpdate(NetConnection *con, BitStream *stream)
                   delta.rotVec.z += M_2PI_F;
 
                delta.rotVec.z *= dti;
+			*/
+               delta.rotVec = mRot - rot;
+
+				if(delta.rotVec.x < - M_PI_F)
+				   delta.rotVec.x += M_2PI_F;
+				else if(delta.rotVec.x > M_PI_F)
+				   delta.rotVec.x -= M_2PI_F;
+				if(delta.rotVec.y < - M_PI_F)
+				   delta.rotVec.y += M_2PI_F;
+				else if(delta.rotVec.y > M_PI_F)
+				   delta.rotVec.y -= M_2PI_F;
+				if(delta.rotVec.z < - M_PI_F)
+				   delta.rotVec.z += M_2PI_F;
+				else if(delta.rotVec.z > M_PI_F)
+				   delta.rotVec.z -= M_2PI_F;
+
+               delta.rotVec *= dti;
+		    // end jc
             }
             delta.pos = pos;
             delta.rot = rot;
@@ -6506,6 +7606,12 @@ DefineEngineMethod( Player, checkDismountPoint, bool, ( Point3F oldPos, Point3F 
    return object->checkDismountPosition(oldPosMat, posMat);
 }
 
+// start ds
+DefineEngineMethod( Player, setFrozen, void, (bool frozen),, "setFrozen(frozen)" )
+{
+   object->setFrozen(frozen);
+}
+// end ds
 DefineEngineMethod( Player, getNumDeathAnimations, S32, ( ),,
    "@brief Get the number of death animations available to this player.\n\n"
    "Death animations are assumed to be named death1-N using consecutive indices." )

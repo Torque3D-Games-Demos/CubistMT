@@ -40,7 +40,11 @@ const F32 Float_Inf = std::numeric_limits< F32 >::infinity();
 #ifndef TORQUE_TOOLS
 S32 sgBackgroundProcessSleepTime = 25;
 #else
-S32 sgBackgroundProcessSleepTime = 200;
+// start jc - keep it fast for touch testing
+//S32 sgBackgroundProcessSleepTime = 200;
+//S32 sgBackgroundProcessSleepTime = 25;
+S32 sgBackgroundProcessSleepTime = 1;
+// end jc
 #endif
 S32 sgTimeManagerProcessInterval = 1;
 

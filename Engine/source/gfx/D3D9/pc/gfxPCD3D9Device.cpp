@@ -283,6 +283,9 @@ void GFXPCD3D9Device::enumerateAdapters( Vector<GFXAdapter*> &adapterList )
             vmAdd.fullScreen  = true;
             vmAdd.refreshRate = mode.RefreshRate;
             vmAdd.resolution  = Point2I( mode.Width, mode.Height );
+         // start jc
+            vmAdd.position  = Point2I( 0, 0 );
+         // end jc
             vmAdd.antialiasLevel = MaxSampleQualities;
 
             toAdd->mAvailableModes.push_back( vmAdd );
@@ -1047,7 +1050,12 @@ GFXWindowTarget * GFXPCD3D9Device::allocWindowTarget( PlatformWindow *window )
       // And the second case:
       // Initialized device, create an additional swap chain.
       gdwt->mImplicit = false;
+
+   // start jc
+   //   gdwt->createAdditionalSwapChain();    
+      if(!dynamic_cast<Win32Window*>(gdwt->getWindow())->isFullscreen())
       gdwt->createAdditionalSwapChain();         
+   // end jc
    }
 
    gdwt->registerResourceWithDevice(this);

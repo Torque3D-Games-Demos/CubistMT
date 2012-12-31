@@ -46,6 +46,9 @@ struct CameraScopeQuery
    F32 sinFov;              ///< sin(fov/2);
    F32 cosFov;              ///< cos(fov/2);
    F32 visibleDistance;     ///< Visible distance.
+// start jc
+   Point4F offset;			///< Frustum offset
+// end jc
 };
 
 struct GhostInfo;
@@ -269,6 +272,9 @@ protected:
       ScopeAlways       =  BIT(6),  ///< Object always ghosts to clients.
       ScopeLocal        =  BIT(7),  ///< Ghost only to local client.
       Ghostable         =  BIT(8),  ///< Set if this object CAN ghost.
+   // start jc
+      NoAutoScope       =  BIT(9),  ///< Set if this object CAN ghost.
+   // end jc
 
       MaxNetFlagBit     =  15
    };
@@ -311,6 +317,17 @@ public:
    ///  all active connections.  This function has no effect if the object
    ///  is not marked as Ghostable.
    void setScopeAlways();
+
+// start jc
+   void updateScope();
+
+   void setNoAutoScope();
+   void clearNoAutoScope();
+   bool isNoAutoScope()   { 
+      return mNetFlags.test(NoAutoScope);   
+   };
+// end jc
+
 
    /// Stop scoping the object to all connections.
    ///

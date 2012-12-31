@@ -86,6 +86,10 @@ mFullscreen(false)
 	mVideoMode.fullScreen = false;
 	mVideoMode.refreshRate = 60;
 	mVideoMode.resolution.set(800,600);
+// start jc
+	mVideoMode.position.set(0,0);
+	mVideoMode.borderless = false;
+// end jc
 
 	_registerWindowClass();
 }
@@ -130,7 +134,10 @@ void Win32Window::setVideoMode( const GFXVideoMode &mode )
 	if(needCurtain)
    {
 		Con::errorf("Win32Window::setVideoMode - invoking curtain");
-      mOwningManager->lowerCurtain();
+   // start jc
+	//	mOwningManager->lowerCurtain();
+		mOwningManager->lowerCurtain(getHWND());
+   // end jc
    }
 
 	mVideoMode = mode;
@@ -188,6 +195,10 @@ void Win32Window::setVideoMode( const GFXVideoMode &mode )
             SetMenu(getHWND(), mMenuHandle);
          }
       }
+   //start jc
+   //   setSize(mode.resolution);
+		setSize(mode.resolution, mode.position);
+   // end jc
 
       // Make sure we're the correct resolution for web deployment
       if (!Platform::getWebDeployment() || !mOwningManager->getParentWindow() || mOffscreenRender)
@@ -215,7 +226,13 @@ void Win32Window::setVideoMode( const GFXVideoMode &mode )
       {
 		   // We have to force Win32 to update the window frame and make the window
 		   // visible and no longer topmost - this code might be possible to simplify.
-		   SetWindowPos( getHWND(), HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED);
+      // start jc
+	   //	SetWindowPos( getHWND(), HWND_NOTOPMOST, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED);
+		   if(mVideoMode.borderless)
+		      SetWindowPos( getHWND(), HWND_TOPMOST, mode.position.x, mode.position.y, mode.position.x+mode.resolution.x, mode.position.y+mode.resolution.y, SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED);
+		   else
+		      SetWindowPos( getHWND(), HWND_NOTOPMOST, mode.position.x, mode.position.y, mode.position.x+mode.resolution.x, mode.position.y+mode.resolution.y, SWP_NOMOVE | SWP_NOSIZE | SWP_FRAMECHANGED);
+      // end jc
 		   ShowWindow( getHWND(), SW_SHOWNORMAL);
       }
 
@@ -224,8 +241,11 @@ void Win32Window::setVideoMode( const GFXVideoMode &mode )
 
 	mSuppressReset = false;
 
-	if(needCurtain)
-		mOwningManager->raiseCurtain();
+	if(!needCurtain)
+   // start jc
+	//	mOwningManager->raiseCurtain();
+		mOwningManager->raiseCurtain(getHWND());
+   // end jc
 
 	SetForegroundWindow(getHWND());
 }
@@ -258,10 +278,19 @@ void Win32Window::_setFullscreen(const bool fullscreen)
       if (!mOffscreenRender)
       {
 	      SetWindowLong( getHWND(), GWL_STYLE, mWindowedWindowStyle);
-	      SetWindowPos( getHWND(), HWND_NOTOPMOST, 0, 0, mVideoMode.resolution.x, mVideoMode.resolution.y, SWP_FRAMECHANGED | SWP_SHOWWINDOW);         
+      // start jc
+	   //   SetWindowPos( getHWND(), HWND_NOTOPMOST, 0, 0, mVideoMode.resolution.x, mVideoMode.resolution.y, SWP_FRAMECHANGED | SWP_SHOWWINDOW);         
+         if(mVideoMode.borderless)
+            SetWindowPos( getHWND(), HWND_TOPMOST, mVideoMode.position.x, mVideoMode.position.y, mVideoMode.position.x+mVideoMode.resolution.x, mVideoMode.position.y+mVideoMode.resolution.y, SWP_FRAMECHANGED | SWP_SHOWWINDOW);   
+         else
+            SetWindowPos( getHWND(), HWND_NOTOPMOST, mVideoMode.position.x, mVideoMode.position.y, mVideoMode.position.x+mVideoMode.resolution.x, mVideoMode.position.y+mVideoMode.resolution.y, SWP_FRAMECHANGED | SWP_SHOWWINDOW);   
+      // end jc
       }
 
-      setSize(mVideoMode.resolution);
+   // start jc
+   //   setSize(mVideoMode.resolution);
+      setSize(mVideoMode.resolution, mVideoMode.position);
+   // end jc
 
 	}
 	Con::printf("Win32Window::setFullscreen exit");   
@@ -342,7 +371,13 @@ const RectI Win32Window::getBounds() const
 
 void Win32Window::setPosition( const Point2I newPosition )
 {
+// start jc
+//	SetWindowPos( mWindowHandle, HWND_NOTOPMOST, newPosition.x, newPosition.y, 0, 0, SWP_NOSIZE | SWP_NOACTIVATE );
+   if(mVideoMode.borderless)
+      SetWindowPos( mWindowHandle, HWND_TOPMOST, newPosition.x, newPosition.y, 0, 0, SWP_NOSIZE | SWP_NOACTIVATE );
+   else
 	SetWindowPos( mWindowHandle, HWND_NOTOPMOST, newPosition.x, newPosition.y, 0, 0, SWP_NOSIZE | SWP_NOACTIVATE );
+// end jc
 }
 
 const Point2I Win32Window::getPosition()
@@ -427,12 +462,28 @@ void Win32Window::centerWindow()
 		mTarget->resetMode();
 }
 
+// start jc
+/*
 bool Win32Window::setSize( const Point2I &newSize )
 {
 	// Create the window rect (screen centered if not owned by a parent)
 	RECT newRect;
 	newRect.left = 0;
 	newRect.top  = 0;
+*/
+bool Win32Window::setSize( const Point2I &newSize )
+{
+   const Point2I zeroPos(0,0);
+   return setSize(newSize, zeroPos);
+}
+bool Win32Window::setSize( const Point2I &newSize, const Point2I &newPos )
+{
+	// Create the window rect (screen centered if not owned by a parent)
+	RECT newRect;
+	newRect.left = newPos.x;
+	newRect.top  = newPos.y;
+// end jc
+
 	newRect.bottom = newRect.top + newSize.y;
 	newRect.right  = newRect.left + newSize.x;
 

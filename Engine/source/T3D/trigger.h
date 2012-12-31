@@ -127,6 +127,11 @@ class Trigger : public GameBase
    void onRemove();
    void onDeleteNotify(SimObject*);
    void inspectPostApply();
+ 
+// start pg
+   Point3F  mDirection;
+   Point3F  getDirection(){return mDirection;}
+// end pg
 
    // NetObject
    U32  packUpdate  (NetConnection *conn, U32 mask, BitStream* stream);
@@ -148,6 +153,9 @@ class Trigger : public GameBase
    const Vector<GameBase*>& getObjects() const { return mObjects; }
 
    void renderObject( ObjectRenderInst *ri, SceneRenderState *state, BaseMatInstance *overrideMat );
+// start pg
+   void renderTransform( ObjectRenderInst *ri, SceneRenderState *state, BaseMatInstance *overrideMat );
+// end pg
 
    bool castRay(const Point3F &start, const Point3F &end, RayInfo* info);
 };

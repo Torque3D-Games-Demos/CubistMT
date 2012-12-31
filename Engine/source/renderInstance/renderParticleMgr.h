@@ -110,7 +110,11 @@ protected:
       GFXShaderConstHandle *mPrePassTargetParamsSC;
       GFXShaderConstHandle *mAlphaFactorSC;
       GFXShaderConstHandle *mAlphaScaleSC;
-
+   // start jc
+      GFXShaderConstHandle *mEyePosSC;
+      GFXShaderConstHandle *mFogDataSC;
+      GFXShaderConstHandle *mFogColorSC;
+   // end jc
    } mParticleShaderConsts;
 
    struct CompositeShaderConsts

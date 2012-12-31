@@ -151,7 +151,10 @@ DefineConsoleMethod( SimDataBlock, reloadOnLocalClient, void, (),,
    // Make sure we're running a local client.
 
    GameConnection* localClient = GameConnection::getLocalClientConnection();
-   if( !localClient )
+// start jc
+//   if( !localClient )
+   if( !localClient && !object->isClientOnly() )
+// end jc
       return;
 
    // Do an in-place pack/unpack/preload.

@@ -282,6 +282,12 @@ void GuiControl::initPersistFields()
       addField("accelerator",       TypeString,       Offset(mAcceleratorKey, GuiControl),
          "Key combination that triggers the control's primary action when the control is on the canvas." );
 
+  // start jc
+      addField( "canHit", TypeBool,         Offset(mCanHit, GuiControl),
+         "Collect mouse and touch events, or not." );
+	  
+  // end jc
+
    endGroup( "Control" );	
    
    addGroup( "ToolTip" );
@@ -944,6 +950,16 @@ bool GuiControl::onKeyUp(const GuiEvent &event)
 
 void GuiControl::onMouseUp(const GuiEvent &event)
 {
+// start jc
+   //if this control is a dead end, make sure the event stops here
+   if ( !mVisible || !mAwake )
+      return;
+
+   //pass the event to the parent
+   GuiControl *parent = getParent();
+   if ( parent )
+      parent->onMouseUp( event );
+// end jc
 }
 
 //-----------------------------------------------------------------------------
@@ -953,6 +969,19 @@ void GuiControl::onMouseDown(const GuiEvent &event)
 	if ( !mVisible || !mAwake )
       return;
 	
+// start jc
+   
+   if( mConsoleCommand.isEmpty() )
+   {
+      //pass the event to the parent
+      // todo: fix for windows: better
+      GuiControl *parent = getParent();
+      if ( parent && !reinterpret_cast<GuiWindowCtrl*>(parent) )
+         parent->onMouseDown( event );
+      return;
+   }
+   
+// end jc
 	execConsoleCallback();
 }
 
@@ -974,18 +1003,48 @@ void GuiControl::onMouseMove(const GuiEvent &event)
 
 void GuiControl::onMouseDragged(const GuiEvent &event)
 {
+// start jc
+   //if this control is a dead end, make sure the event stops here
+   if ( !mVisible || !mAwake )
+      return;
+
+   //pass the event to the parent
+   GuiControl *parent = getParent();
+   if ( parent )
+      parent->onMouseDragged( event );
+// end jc
 }
 
 //-----------------------------------------------------------------------------
 
 void GuiControl::onMouseEnter(const GuiEvent &event)
 {
+// start jc
+   //if this control is a dead end, make sure the event stops here
+   if ( !mVisible || !mAwake )
+      return;
+
+   //pass the event to the parent
+   GuiControl *parent = getParent();
+   if ( parent )
+      parent->onMouseEnter( event );
+// end jc
 }
 
 //-----------------------------------------------------------------------------
 
 void GuiControl::onMouseLeave(const GuiEvent &event)
 {
+// start jc
+   //if this control is a dead end, make sure the event stops here
+   if ( !mVisible || !mAwake )
+      return;
+
+   //pass the event to the parent
+   GuiControl *parent = getParent();
+   if ( parent )
+      parent->onMouseLeave( event );
+// end jc
 }
 
 //-----------------------------------------------------------------------------
@@ -1022,38 +1081,98 @@ bool GuiControl::onMouseWheelDown( const GuiEvent &event )
 
 //-----------------------------------------------------------------------------
 
-void GuiControl::onRightMouseDown(const GuiEvent &)
+void GuiControl::onRightMouseDown(const GuiEvent &event)
 {
+// start jc
+   //if this control is a dead end, make sure the event stops here
+   if ( !mVisible || !mAwake )
+      return;
+
+   //pass the event to the parent
+   GuiControl *parent = getParent();
+   if ( parent )
+      parent->onRightMouseDown( event );
+// end jc
 }
 
 //-----------------------------------------------------------------------------
 
-void GuiControl::onRightMouseUp(const GuiEvent &)
+void GuiControl::onRightMouseUp(const GuiEvent &event)
 {
+// start jc
+   //if this control is a dead end, make sure the event stops here
+   if ( !mVisible || !mAwake )
+      return;
+
+   //pass the event to the parent
+   GuiControl *parent = getParent();
+   if ( parent )
+      parent->onRightMouseUp( event );
+// end jc
 }
 
 //-----------------------------------------------------------------------------
 
-void GuiControl::onRightMouseDragged(const GuiEvent &)
+void GuiControl::onRightMouseDragged(const GuiEvent &event)
 {
+// start jc
+   //if this control is a dead end, make sure the event stops here
+   if ( !mVisible || !mAwake )
+      return;
+
+   //pass the event to the parent
+   GuiControl *parent = getParent();
+   if ( parent )
+      parent->onRightMouseDragged( event );
+// end jc
 }
 
 //-----------------------------------------------------------------------------
 
-void GuiControl::onMiddleMouseDown(const GuiEvent &)
+void GuiControl::onMiddleMouseDown(const GuiEvent &event)
 {
+// start jc
+   //if this control is a dead end, make sure the event stops here
+   if ( !mVisible || !mAwake )
+      return;
+
+   //pass the event to the parent
+   GuiControl *parent = getParent();
+   if ( parent )
+      parent->onMiddleMouseDown( event );
+// end jc
 }
 
 //-----------------------------------------------------------------------------
 
-void GuiControl::onMiddleMouseUp(const GuiEvent &)
+void GuiControl::onMiddleMouseUp(const GuiEvent &event)
 {
+// start jc
+   //if this control is a dead end, make sure the event stops here
+   if ( !mVisible || !mAwake )
+      return;
+
+   //pass the event to the parent
+   GuiControl *parent = getParent();
+   if ( parent )
+      parent->onMiddleMouseUp( event );
+// end jc
 }
 
 //-----------------------------------------------------------------------------
 
-void GuiControl::onMiddleMouseDragged(const GuiEvent &)
+void GuiControl::onMiddleMouseDragged(const GuiEvent &event)
 {
+// start jc
+   //if this control is a dead end, make sure the event stops here
+   if ( !mVisible || !mAwake )
+      return;
+
+   //pass the event to the parent
+   GuiControl *parent = getParent();
+   if ( parent )
+      parent->onMiddleMouseDragged( event );
+// end jc
 }
 
 //-----------------------------------------------------------------------------
@@ -1149,6 +1268,52 @@ bool GuiControl::onGamepadTrigger(const GuiEvent &event)
       return false;
    }
 }
+
+// start jc
+//-----------------------------------------------------------------------------
+
+bool GuiControl::onTouchDown(const GuiTouchEvent &event)
+{
+//	if ( !mVisible || !mAwake )
+//      return;
+	
+//	execConsoleCallback();
+   //if this control is a dead end, make sure the event stops here
+   if ( !mVisible || !mAwake )
+      return false;
+
+   //pass the event to the parent
+   GuiControl *parent = getParent();
+   if ( parent && !reinterpret_cast<GuiWindowCtrl*>(parent) )
+      return parent->onTouchDown( event );
+
+   return false;
+}
+bool GuiControl::onTouchMove(const GuiTouchEvent &event)
+{
+   //if this control is a dead end, make sure the event stops here
+   if ( !mVisible || !mAwake )
+      return false;
+
+   //pass the event to the parent
+   GuiControl *parent = getParent();
+   if ( parent && !reinterpret_cast<GuiWindowCtrl*>(parent) )
+      return parent->onTouchMove( event );
+   return false;
+}
+bool GuiControl::onTouchUp(const GuiTouchEvent &event)
+{
+   //if this control is a dead end, make sure the event stops here
+   if ( !mVisible || !mAwake )
+      return false;
+
+   //pass the event to the parent
+   GuiControl *parent = getParent();
+   if ( parent && !reinterpret_cast<GuiWindowCtrl*>(parent) )
+      return parent->onTouchUp( event );
+   return false;
+}
+// end jc
 
 //-----------------------------------------------------------------------------
 
@@ -1863,6 +2028,22 @@ bool GuiControl::acceptsAsChild( SimObject* object ) const
 {
    return ( dynamic_cast< GuiControl* >( object ) != NULL );
 }
+// start jc
+bool  GuiControl::controlExists(GuiControl *c)
+{
+   iterator i = end(); // find in z order (last to first)
+
+   while (i != begin())
+   {
+      i--;
+      GuiControl *ctrl = static_cast<GuiControl *>(*i);
+      if(ctrl==c){
+         return true;
+      }
+   }
+   return false;
+}
+// end jc
 
 //-----------------------------------------------------------------------------
 
@@ -2257,6 +2438,45 @@ void GuiControl::mouseUnlock()
    if (root)
       root->mouseUnlock(this);
 }
+
+// start jc
+//-----------------------------------------------------------------------------
+
+
+bool GuiControl::isTouchIDLocked(U32 touchID)
+{
+   GuiCanvas *root = getRoot();
+   return root ? root->getTouchIDLockedControl(touchID) == this : false;
+}
+
+//-----------------------------------------------------------------------------
+
+void GuiControl::touchIDLock(U32 touchID,GuiControl *lockingControl)
+{
+   GuiCanvas *root = getRoot();
+   if (root)
+      root->touchIDLock(touchID, lockingControl);
+}
+
+//-----------------------------------------------------------------------------
+
+void GuiControl::touchIDLock(U32 touchID)
+{
+   GuiCanvas *root = getRoot();
+   if (root)
+      root->touchIDLock(touchID, this);
+}
+
+//-----------------------------------------------------------------------------
+
+void GuiControl::touchIDUnlock(U32 touchID)
+{
+   GuiCanvas *root = getRoot();
+   if (root)
+      root->touchIDUnlock(touchID, this);
+}
+
+// end jc
 
 //=============================================================================
 //    Misc.

@@ -102,6 +102,8 @@ void GuiButtonCtrl::onRender(Point2I      offset,
    {
       S32 indexMultiplier = 1;
       
+   // start jc
+   /*
       if( !mActive )
          indexMultiplier = 4;
       else if ( mDepressed || mStateOn )
@@ -109,6 +111,14 @@ void GuiButtonCtrl::onRender(Point2I      offset,
       else if ( mMouseOver )
          indexMultiplier = 3;
 
+   */
+      if( !mActive )
+         indexMultiplier = 4;
+      else if ( mMouseOver && !mDepressed)
+         indexMultiplier = 3;
+      else if ( mDepressed || mStateOn )
+         indexMultiplier = 2;
+   // end jc
       renderSizableBitmapBordersFilled( boundsRect, indexMultiplier, mProfile );
    }
 

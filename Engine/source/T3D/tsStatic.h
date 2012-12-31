@@ -38,12 +38,21 @@
 #ifndef _TSSHAPE_H_
 #include "ts/tsShape.h"
 #endif
+// start jc
+#ifndef _SHAPEBASE_H_
+   #include "T3D/shapeBase.h"
+#endif
+// end jc
 
 class TSShapeInstance;
 class TSThread;
 class TSStatic;
 class PhysicsBody;
 struct ObjectRenderInst;
+// start jc
+class WebViewData;
+// end jc
+
 
 
 class TSStaticPolysoupConvex : public Convex
@@ -174,6 +183,16 @@ protected:
    F32 mRenderNormalScalar;
    S32 mForceDetail;
 
+// start jc
+   WebViewData* mWebViewData;
+   S32 mWebViewID;
+
+   bool mEnableInputEvents;
+   ShapeBase::InputEventsMethod mInputEventsMethod;
+
+   bool mCastShadowsOnly;
+// end jc
+
 public:
 
    TSStatic();
@@ -198,6 +217,16 @@ public:
    void prepRenderImage( SceneRenderState *state );
    void inspectPostApply();
 
+// start jc
+   bool onAddClient()
+   {
+      mNetFlags.clear(Ghostable | ScopeAlways);
+      mNetFlags.set(IsGhost);
+      return this->onAdd();
+   }
+   ShapeBase::InputEventsMethod getInputEventsMethod() { return mInputEventsMethod; }
+// end jc
+
    /// The type of mesh data use for collision queries.
    MeshType getCollisionType() const { return mCollisionType; }
 
@@ -211,6 +240,41 @@ public:
    const Vector<S32>& getCollisionDetails() const { return mCollisionDetails; }
 
    const Vector<S32>& getLOSDetails() const { return mLOSDetails; }
+
+// start jc
+   void webSkin();
+
+   void setEnableInputEvents( bool enable );
+
+	  DECLARE_CALLBACK( void, onMouseDown, ( U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+  	  DECLARE_CALLBACK( void, onMouseUp, ( U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+  	  DECLARE_CALLBACK( void, onMouseMove, ( U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+  	  DECLARE_CALLBACK( void, onMouseDragged, ( U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+  	  DECLARE_CALLBACK( void, onMouseEnter, ( U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+  	  DECLARE_CALLBACK( void, onMouseLeave, ( U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+	  DECLARE_CALLBACK( void, onRightMouseDown, ( U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+	  DECLARE_CALLBACK( void, onRightMouseUp, ( U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+	  DECLARE_CALLBACK( void, onRightMouseDragged, ( U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+
+     DECLARE_CALLBACK( bool, onTouchDown, ( S32 id, Point2I touchPoint, Point3F pos, Point3F vec, Point2F touchUVCoord ));
+	  DECLARE_CALLBACK( bool, onTouchMove, ( S32 id, Point2I touchPoint, Point3F pos, Point3F vec, Point2F touchUVCoord ));
+	  DECLARE_CALLBACK( bool, onTouchUp, ( S32 id, Point2I touchPoint, Point3F pos, Point3F vec, Point2F touchUVCoord ));
+
+
+     virtual void onMouseDown(const ShapeInputEvent & event);
+     virtual void onMouseUp(const ShapeInputEvent & event);
+     virtual void onMouseMove(const ShapeInputEvent & event);
+     virtual void onMouseDragged(const ShapeInputEvent & event);
+     virtual void onMouseEnter(const ShapeInputEvent & event);
+     virtual void onMouseLeave(const ShapeInputEvent & event);
+     virtual void onRightMouseDown(const ShapeInputEvent & event);
+     virtual void onRightMouseUp(const ShapeInputEvent & event);
+     virtual void onRightMouseDragged(const ShapeInputEvent & event);
+
+     virtual bool onTouchDown(const ShapeTouchEvent & event);
+     virtual bool onTouchMove(const ShapeTouchEvent & event);
+     virtual bool onTouchUp(const ShapeTouchEvent & event);
+// end jc
 
 };
 

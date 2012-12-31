@@ -1825,6 +1825,11 @@ void ShapeBase::scriptCallback(U32 imageSlot,const char* function)
 
 void ShapeBase::getMountTransform( S32 index, const MatrixF &xfm, MatrixF *outMat )
 {
+// start jc
+	if(isServerObject())
+		mShapeInstance->animate(0);
+// end jc
+
    // Returns mount point to world space transform
    if ( index >= 0 && index < SceneObject::NumMountPoints) {
       S32 ni = mDataBlock->mountPointNode[index];

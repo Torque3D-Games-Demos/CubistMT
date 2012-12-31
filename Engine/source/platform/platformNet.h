@@ -141,6 +141,10 @@ struct Net
    static Error setBroadcast(NetSocket socket, bool broadcastEnable);
    static Error setBlocking(NetSocket socket, bool blockingIO);
 
+// start jc
+//   static String Net::getLocalIPAddress(U32 adaptorIndex = 0, U32 ipIndex = 0);
+   static String Net::getLocalComputerName();
+// end jc
 
 private:
    static void process();

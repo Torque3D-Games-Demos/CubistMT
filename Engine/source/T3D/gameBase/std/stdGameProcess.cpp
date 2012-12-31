@@ -36,6 +36,9 @@
 #include "T3D/gameBase/gameConnection.h"
 #include "T3D/gameBase/std/stdMoveList.h"
 #include "T3D/fx/cameraFXMgr.h"
+// start jc
+#include "T3D/aiClient.h"
+// end jc
 
 MODULE_BEGIN( ProcessList )
 
@@ -331,6 +334,11 @@ void StdServerProcessList::onTickObject( ProcessObject *pobj )
       // For debugging it can be useful to know when this happens.
       //if ( numMoves > 1 )
       //   Con::printf( "numMoves: %i", numMoves );
+// start jc
+	  //Midhir was here.
+	  if (con->isAIControlled())
+		dynamic_cast<AIConnection*>(con)->getMoveList(&movePtr, &numMoves);
+// end jc
 
       // Do we really need to test the control object each iteration? Does it change?
       for ( m = 0; m < numMoves && con && con->getControlObject() == obj; m++, movePtr++ )
@@ -366,8 +374,11 @@ void StdServerProcessList::onTickObject( ProcessObject *pobj )
             }
          }
       }
-
-      con->mMoveList->clearMoves( m );
+// start jc
+	  //Midhir was here.  
+      if (!con->isAIControlled()) con->mMoveList->clearMoves(m);
+      //con->mMoveList->clearMoves( m );
+// end jc
    }
    else if ( pobj->isTicking() )
       pobj->processTick( 0 );

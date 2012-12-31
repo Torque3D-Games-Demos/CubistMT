@@ -115,6 +115,90 @@ GBitmap::GBitmap(const U32  in_width,
    }
 }
 
+// start jc
+
+
+GBitmap::GBitmap(const U32  in_width,
+                 const U32  in_height,
+                 const GFXFormat in_format,
+                 const U8*  data,
+                 const bool padded)
+ : mBits(NULL),
+   mByteSize(0)
+{
+
+   U32 newWidth = in_width;
+   U32 newHeight = in_height;
+   if(padded)
+   {
+      newWidth = getNextPow2(in_width);
+      newHeight = getNextPow2(in_height);
+   }
+
+   allocateBitmap(newWidth, newHeight, false, GFXFormatR8G8B8A8);
+
+   mHasTransparency = false;
+
+   switch(in_format)
+   {
+   case GFXFormatR8G8B8:
+      for (U32 x = 0; x < in_width; x++)
+      {
+         for (U32 y = 0; y < in_height; y++)
+         {
+            U32 offset = (x + y * in_width) * 3;
+
+            ColorI color(data[offset],
+                         data[offset + 1],
+                         data[offset + 2]);
+
+            setColor(x, y, color);
+         }
+      }
+      break;
+
+   case GFXFormatR8G8B8A8:
+      for (U32 x = 0; x < in_width; x++)
+      {
+         for (U32 y = 0; y < in_height; y++)
+         {
+            U32 offset = (x + y * in_width) * 4;
+
+            ColorI color(data[offset],
+                         data[offset + 1],
+                         data[offset + 2],
+                         data[offset + 3]);
+
+            if (color.alpha < 255)
+               mHasTransparency = true;
+
+            setColor(x, y, color);
+         }
+      }
+      break;
+
+   case GFXFormatB8G8R8A8:
+      for (U32 x = 0; x < in_width; x++)
+      {
+         for (U32 y = 0; y < in_height; y++)
+         {
+            U32 offset = (x + y * in_width) * 4;
+
+            ColorI color(data[offset + 2],
+                         data[offset + 1],
+                         data[offset],
+                         data[offset + 3]);
+
+            if (color.alpha < 255)
+               mHasTransparency = true;
+
+            setColor(x, y, color);
+         }
+      }
+      break;
+   }
+}
+//  end jc
 
 //--------------------------------------------------------------------------
 

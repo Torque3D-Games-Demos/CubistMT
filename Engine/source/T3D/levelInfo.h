@@ -58,6 +58,9 @@ class LevelInfo : public NetObject
       F32 mDecalBias;
 
       ColorI mCanvasClearColor;
+// start jc
+	  Point4F mFrustumOffset;
+// end jc
 
       /// @name Lighting Properties
       /// @{
@@ -97,7 +100,9 @@ class LevelInfo : public NetObject
       void _onLMActivate(const char *lm, bool enable);
 
    public:
-
+   // start jc
+	  void setNearClip( F32 nearClip ); // MACSK ++
+   // end jc
       LevelInfo();
       virtual ~LevelInfo();
 

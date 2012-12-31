@@ -51,6 +51,9 @@
 class GuiCanvas;
 class GuiEditCtrl;
 class GuiWindowCtrl;
+// start jc
+struct GuiTouchEvent;
+// end jc
 
 
 DECLARE_SCOPE( GuiAPI );
@@ -135,7 +138,9 @@ class GuiControl : public SimGroup
          vertResizeRelative,      ///< resize relative
          vertResizeWindowRelative ///< resize window relative
       };
-      
+// start jc
+      bool  controlExists(GuiControl *c);
+// end jc
    private:
    
       SimGroup               *mAddGroup;   ///< The internal name of a SimGroup child of the global GuiGroup in which to organize this gui on creation
@@ -589,6 +594,21 @@ class GuiControl : public SimGroup
       bool isMouseLocked();
       /// @}
       
+// start jc
+      /// Lock the mouse within the provided control
+      /// @param   lockingControl   Control to lock the mouse within
+      void touchIDLock(U32 touchID, GuiControl *lockingControl);
+      
+      /// Turn on mouse locking with last used lock control
+      void touchIDLock(U32 touchID);
+      
+      /// Unlock the mouse
+      void touchIDUnlock(U32 touchID);
+      
+      /// Returns true if the mouse is locked
+      bool isTouchIDLocked(U32 touchID);
+      /// @}
+// end jc
       
       /// General input handler.
       virtual bool onInputEvent(const InputEventInfo &event);
@@ -615,7 +635,18 @@ class GuiControl : public SimGroup
       virtual void onMiddleMouseUp(const GuiEvent &event);
       virtual void onMiddleMouseDragged(const GuiEvent &event);
       /// @}
+   // start jc
+      /// @name Mouse Events
+      /// These functions are called when the input event which is
+      /// in the name of the function occurs.
+      /// @{
+   //   virtual void onMultiTouchEvent(const GuiEvent &event);
+      virtual bool onTouchDown(const GuiTouchEvent &event);
+      virtual bool onTouchMove(const GuiTouchEvent &event);
+      virtual bool onTouchUp(const GuiTouchEvent &event);
       
+      /// @}
+   // end jc
       /// @name Gamepad Events
       /// These functions are called when the input event which is in the name of
       /// the function occurs.

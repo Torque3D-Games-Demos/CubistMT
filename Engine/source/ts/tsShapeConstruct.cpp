@@ -2059,6 +2059,27 @@ DefineTSShapeConstructorMethod( removeTrigger, bool, ( const char* name, S32 key
    return true;
 }}
 
+// start jc
+DefineTSShapeConstructorMethod( addVisibility, bool, ( const char* name, S32 startFrame, S32 endFrame, U32 objectIndex, bool visible ),,
+   ( name, startFrame, endFrame, objectIndex, visible ), false,
+   "Add a new trigger to the sequence.\n"
+   "@param name name of the sequence to modify\n"
+   "@param keyframe keyframe of the new trigger\n"
+   "@param state of the new trigger\n"
+   "@return true if successful, false otherwise\n\n"
+   "@tsexample\n"
+   "%this.addTrigger( \"walk\", 3, 1 );\n"
+   "%this.addTrigger( \"walk\", 5, -1 );\n"
+   "@endtsexample\n" )
+{
+   if ( !mShape->addVisibility( name, startFrame, endFrame, objectIndex, visible ) )
+      return false;
+
+   ADD_TO_CHANGE_SET();
+   return true;
+}}
+
+// end jc
 
 //-----------------------------------------------------------------------------
 // Change-Set manipulation
@@ -2101,6 +2122,9 @@ TSShapeConstructor::ChangeSet::eCommandType TSShapeConstructor::ChangeSet::getCm
 
    else RETURN_IF_MATCH(AddTrigger);
    else RETURN_IF_MATCH(RemoveTrigger);
+// start jc
+   else RETURN_IF_MATCH(AddVisibility);
+// end jc
 
    else return CmdInvalid;
 
@@ -2232,6 +2256,9 @@ void TSShapeConstructor::ChangeSet::add( TSShapeConstructor::ChangeSet::Command&
 
    case CmdAddTrigger:              addCommand = addCmd_addTrigger( cmd );                break;
    case CmdRemoveTrigger:           addCommand = addCmd_removeTrigger( cmd );             break;
+// start jc
+   case CmdAddVisibility:           addCommand = addCmd_addVisibility( cmd );             break;
+// end jc
 
    // Other commands that do not have optimizations
    default:
@@ -2668,6 +2695,7 @@ bool TSShapeConstructor::ChangeSet::addCmd_removeSequence( const TSShapeConstruc
       case CmdSetSequenceBlend:
       case CmdAddTrigger:
       case CmdRemoveTrigger:
+      case CmdAddVisibility: // start jc
          if ( namesEqual( cmd.argv[0], seqName ) )
             mCommands.erase( index );           // Remove any commands that reference the removed sequence
          break;
@@ -2745,6 +2773,32 @@ bool TSShapeConstructor::ChangeSet::addCmd_removeTrigger( const TSShapeConstruct
 
    return true;
 }
+
+// start jc
+bool TSShapeConstructor::ChangeSet::addCmd_addVisibility( const TSShapeConstructor::ChangeSet::Command& newCmd )
+{
+   // Remove a matching removeTrigger command, but stop if the sequence is used as
+   // a source for addSequence (since triggers are copied).
+
+   for ( S32 index = mCommands.size()-1; index >= 0; index-- )
+   {
+      Command& cmd = mCommands[index];
+      switch ( cmd.type )
+      {
+
+      case CmdAddSequence:
+         if ( namesEqual( cmd.argv[1], newCmd.argv[0] ) )
+            return true;                        // Sequence is used as a source => cannot go back further
+         break;
+
+      default:
+         break;
+      }
+   }
+
+   return true;
+}
+// end jc
 
 //-----------------------------------------------------------------------------
 // MESH COMMANDS

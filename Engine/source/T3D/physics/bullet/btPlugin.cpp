@@ -36,7 +36,10 @@ AFTER_MODULE_INIT( Sim )
 {
    NamedFactory<PhysicsPlugin>::add( "Bullet", &BtPlugin::create );
 
-   #if defined(TORQUE_OS_MAC)
+// start jc
+//   #if defined(TORQUE_OS_MAC)
+   #if defined(TORQUE_OS_MAC) || defined(TORQUE_PHYSICS_BULLET)
+// end jc
       NamedFactory<PhysicsPlugin>::add( "default", &BtPlugin::create );
    #endif   
 }

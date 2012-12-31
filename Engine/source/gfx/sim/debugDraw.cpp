@@ -132,6 +132,13 @@ void DebugDrawer::setupStateBlocks()
    
    d.setZReadWrite(false);
    mRenderZOffSB = GFX->createStateBlock(d);
+
+   //start pg
+   d.setCullMode(GFXCullCCW);
+   d.setZReadWrite(true, false);
+   d.setBlend(true);
+   mRenderAlpha = GFX->createStateBlock(d);
+   //end pg
 }
 
 void DebugDrawer::render()
@@ -159,10 +166,13 @@ void DebugDrawer::render()
 
       // Set up the state block...
       GFXStateBlockRef currSB;
-      if(p->useZ)
+      if(p->type==DebugPrim::Capsule){ //pghack
+         currSB = mRenderAlpha;
+      }else if(p->useZ){
          currSB = mRenderZOnSB;
-      else
+      }else{
          currSB = mRenderZOffSB;
+      }
       GFX->setStateBlock( currSB );
 
       Point3F d;
@@ -195,6 +205,49 @@ void DebugDrawer::render()
 
          PrimBuild::end();
          break;
+   //start pg
+      case DebugPrim::DirectionLine:
+         {
+            const static   F32      ARROW_LENGTH = 0.2f, ARROW_RADIUS = 0.035f, CYLINDER_RADIUS = 0.008f;
+            Point3F  &start = p->a, &end = p->b;
+            Point3F  direction = end - start;
+            F32      length = direction.len();
+            if( length>ARROW_LENGTH ){
+               //cylinder with arrow on end
+               direction *= (1.0f/length);
+               Point3F  baseArrow = end - (direction*ARROW_LENGTH);
+               GFX->getDrawUtil()->drawCone(currSB->getDesc(),  baseArrow, end, ARROW_RADIUS, p->color);
+               GFX->getDrawUtil()->drawCylinder(currSB->getDesc(),  start, baseArrow, CYLINDER_RADIUS, p->color);
+            }else if( length>0 ){
+               //short, so just draw arrow
+               GFX->getDrawUtil()->drawCone(currSB->getDesc(), start, end, ARROW_RADIUS, p->color);
+            }
+         }
+         break;
+      case DebugPrim::Capsule:
+         GFX->getDrawUtil()->drawCapsule(currSB->getDesc(),  p->a, p->b.x, p->b.y, p->color);
+         break;
+      case DebugPrim::OutlinedText:
+         {
+            GFXTransformSaver saver;            
+            Point3F result;
+            if (MathUtils::mProjectWorldToScreen(p->a, &result, GFX->getViewport(), GFX->getWorldMatrix(), GFX->getProjectionMatrix()))
+            {
+               GFX->setClipRect(GFX->getViewport());
+               Point2I  where = Point2I(result.x, result.y);
+
+               GFX->getDrawUtil()->setBitmapModulation(p->color2); 
+               GFX->getDrawUtil()->drawText(mFont, Point2I(where.x-1, where.y), p->mText);
+               GFX->getDrawUtil()->drawText(mFont, Point2I(where.x+1, where.y), p->mText);
+               GFX->getDrawUtil()->drawText(mFont, Point2I(where.x, where.y-1), p->mText);
+               GFX->getDrawUtil()->drawText(mFont, Point2I(where.x, where.y+1), p->mText);
+
+               GFX->getDrawUtil()->setBitmapModulation(p->color); 
+               GFX->getDrawUtil()->drawText(mFont, where, p->mText);
+            }
+         }
+         break;
+   //end pg
       case DebugPrim::Text:
          {
             GFXTransformSaver saver;            
@@ -262,6 +315,61 @@ void DebugDrawer::drawLine(const Point3F &a, const Point3F &b, const ColorF &col
    n->next = mHead;
    mHead = n;
 }
+void DebugDrawer::drawCapsule(const Point3F &a, const F32 &radius, const F32 &height, const ColorF &color)
+{
+   if(isFrozen || !isDrawing)
+      return;
+
+   DebugPrim *n = mPrimChunker.alloc();
+
+   n->useZ = true;
+   n->dieTime = 0;
+   n->a = a;
+   n->b.x = radius;
+   n->b.y = height;
+   n->color = color;
+   n->type = DebugPrim::Capsule;
+
+   n->next = mHead;
+   mHead = n;
+
+}
+void DebugDrawer::drawDirectionLine(const Point3F &a, const Point3F &b, const ColorF &color)
+{
+   if(isFrozen || !isDrawing)
+      return;
+
+   DebugPrim *n = mPrimChunker.alloc();
+
+   n->useZ = true;
+   n->dieTime = 0;
+   n->a = a;
+   n->b = b;
+   n->color = color;
+   n->type = DebugPrim::DirectionLine;
+
+   n->next = mHead;
+   mHead = n;
+}
+void DebugDrawer::drawOutlinedText(const Point3F& pos, const String& text, const ColorF &color, const ColorF &colorOutline)
+{
+   if(isFrozen || !isDrawing)
+      return;
+
+   DebugPrim *n = mPrimChunker.alloc();
+
+   n->useZ = false;
+   n->dieTime = 0;
+   n->a = pos;
+   n->color = color;
+   n->color2 = colorOutline;
+   dStrncpy(n->mText, text.c_str(), 256);   
+   n->type = DebugPrim::OutlinedText;
+
+   n->next = mHead;
+   mHead = n;
+}
+
 
 void DebugDrawer::drawTri(const Point3F &a, const Point3F &b, const Point3F &c, const ColorF &color)
 {

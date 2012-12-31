@@ -55,7 +55,11 @@ class Frustum;
 class Point3F;
 
 struct RayInfo;
-
+// start jc
+struct Collision;
+struct ShapeInputEvent;
+struct ShapeTouchEvent;
+// end jc
 
 template< typename T >
 class SceneObjectRefBase
@@ -135,6 +139,9 @@ class SceneContainer
       {
          CollisionGeometry,
          RenderedGeometry,
+      // start jc
+         HybridGeometry
+      // end jc
       };
 
    public:
@@ -181,6 +188,12 @@ class SceneContainer
 
       /// Vector that contains just the terrain objects in the container.
       Vector< SceneObject* > mTerrains;
+
+// start jc
+	/// A vector that contains just the objects reciving input events
+	/// object types which is used to optimize searches.
+	Vector<SceneObject*> mEventObjects;
+// end jc
 
       static const U32 csmNumBins;
       static const F32 csmBinSize;
@@ -240,6 +253,11 @@ class SceneContainer
       /// Test against rendered geometry -- slow.
       bool castRayRendered( const Point3F &start, const Point3F &end, U32 mask, RayInfo* info, CastRayCallback callback = NULL );
 
+   // start ds
+      bool castRayHybrid( const Point3F& start, const Point3F& end, U32 mask, RayInfo* info, CastRayCallback callback = NULL );
+      bool castRect(const Point3F &start, const Point3F &finish, const F32 width, const F32 height, U32 mask, Collision *closest, F32 *time = NULL);
+   // end jc
+
       bool collideBox(const Point3F &start, const Point3F &end, U32 mask, RayInfo* info);
 
       /// @}
@@ -297,6 +315,11 @@ class SceneContainer
 
       void _findSpecialObjects( const Vector< SceneObject* >& vector, U32 mask, FindCallback, void *key = NULL );
       void _findSpecialObjects( const Vector< SceneObject* >& vector, const Box3F &box, U32 mask, FindCallback callback, void *key = NULL );   
+
+// start jc
+   void _findInputEventObjects( U32 mask, FindCallback, void *key = NULL );
+   void _findInputEventObjects( const Box3F &box, U32 mask, FindCallback callback, void *key = NULL );   
+// end jc
 
       static void getBinRange( const F32 min, const F32 max, U32& minBin, U32& maxBin );
 };

@@ -449,6 +449,9 @@ bool GFXD3D9TextureManager::_loadTexture( GFXTextureObject *inTex, void *raw )
          break;
       case GFXFormatR8G8B8A8:
       case GFXFormatR8G8B8X8:
+// start jc
+      case GFXFormatB8G8R8A8:
+// end jc
          bytesPerPix = 4;
          break;
    }

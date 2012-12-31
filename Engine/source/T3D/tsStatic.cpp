@@ -22,6 +22,11 @@
 
 #include "platform/platform.h"
 #include "T3D/tsStatic.h"
+// start jc
+#include "gui/controls/guiWebViewCtrl.h"
+#include "gfx/video/webTexture.h"
+#include "console/simTUIO.h"
+// end jc
 
 #include "core/resourceManager.h"
 #include "core/stream/bitStream.h"
@@ -48,6 +53,10 @@
 #include "materials/materialFeatureData.h"
 #include "materials/materialFeatureTypes.h"
 #include "console/engineAPI.h"
+// start jc
+#include "T3D/shapeBase.h"
+// end jc
+
 
 extern bool gEditingMission;
 
@@ -87,7 +96,304 @@ ConsoleDocClass( TSStatic,
    "@ingroup gameObjects\n"
 );
 
-TSStatic::TSStatic()
+// start jc
+IMPLEMENT_CALLBACK( TSStatic, onMouseDown, void, ( U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ),
+														  ( modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the mouse is pressed down while in this control.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Mouse was pressed down in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onMouseDown(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( TSStatic, onMouseUp, void, ( U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ),
+													    ( modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the mouse is released while in this control.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Mouse was released in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onMouseUp(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( TSStatic, onMouseMove, void, ( U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord  ),
+												   ( modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the mouse is moved (without dragging) while in this control.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Mouse was moved in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onMouseMove(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( TSStatic, onMouseDragged, void, (  U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord  ),
+												   ( modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the mouse is dragged while in this control.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Mouse was dragged in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onMouseDragged(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( TSStatic, onMouseEnter, void, (  U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord  ),
+												   ( modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the mouse enters this control.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Mouse entered this control, causing the callback\n"
+   "GuiMouseEventCtrl::onMouseEnter(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( TSStatic, onMouseLeave, void, (  U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord  ),
+												   ( modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the mouse leaves this control.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Mouse left this control, causing the callback\n"
+   "GuiMouseEventCtrl::onMouseLeave(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( TSStatic, onRightMouseDown, void, (  U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord  ),
+												   ( modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the right mouse button is pressed while in this control.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Right mouse button was pressed in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onRightMouseDown(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( TSStatic, onRightMouseUp, void, (  U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord  ),
+												   ( modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the right mouse button is released while in this control.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Right mouse button was released in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onRightMouseUp(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( TSStatic, onRightMouseDragged, void, (  U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord  ),
+												   ( modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the mouse is dragged in this control while the right mouse button is pressed.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Right mouse button was dragged in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onRightMouseDragged(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( TSStatic, onTouchDown, bool, (  S32 id, Point2I touchPoint, Point3F pos, Point3F vec, Point2F touchUVCoord  ),
+												   ( id, touchPoint, pos, vec, touchUVCoord ),
+   "@brief Callback that occurs whenever the mouse is dragged in this control while the right mouse button is pressed.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Right mouse button was dragged in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onRightMouseDragged(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( TSStatic, onTouchMove, bool, (  S32 id, Point2I touchPoint, Point3F pos, Point3F vec, Point2F touchUVCoord  ),
+												   ( id, touchPoint, pos, vec, touchUVCoord ),
+   "@brief Callback that occurs whenever the mouse is dragged in this control while the right mouse button is pressed.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Right mouse button was dragged in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onRightMouseDragged(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( TSStatic, onTouchUp, bool, (  S32 id, Point2I touchPoint, Point3F pos, Point3F vec, Point2F touchUVCoord  ),
+												   ( id, touchPoint, pos, vec, touchUVCoord ),
+   "@brief Callback that occurs whenever the mouse is dragged in this control while the right mouse button is pressed.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Right mouse button was dragged in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onRightMouseDragged(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+// end jc
+
+TSStatic::TSStatic() :
+// start jc
+   mWebViewData(NULL),
+   mWebViewID(0),
+   mEnableInputEvents(false),
+   mInputEventsMethod(ShapeBase::MeshHit),
+   mCastShadowsOnly(false)
+// end jc
 {
    mNetFlags.set(Ghostable | ScopeAlways);
 
@@ -175,6 +481,11 @@ void TSStatic::initPersistFields()
          "with large complex shapes like buildings which contain many submeshes." );
       addField( "originSort",    TypeBool,   Offset( mUseOriginSort, TSStatic ), 
          "Enables translucent sorting of the TSStatic by its origin instead of the bounds." );
+   // start jc
+      addField( "castShadowsOnly",    TypeBool,   Offset( mCastShadowsOnly, TSStatic ), 
+         "." );
+      
+   // end jc
 
    endGroup("Rendering");
 
@@ -198,6 +509,20 @@ void TSStatic::initPersistFields()
          "Forces rendering to a particular detail level." );
 
    endGroup("Debug");
+
+// start jc
+   addGroup("web");
+
+      addField( "webViewData", TYPEID<WebViewData>(), Offset( mWebViewData, TSStatic ),
+         "Link to a WebViewData object used to render the 'web' material." );
+      addField( "enableInputEvents", TypeBool, Offset( mEnableInputEvents, TSStatic ),
+         "If true recieve 3D input events." );
+      addField( "inputEventsMethod", TYPEID< ShapeBase::InputEventsMethod >(), Offset( mInputEventsMethod, TSStatic ),
+         "If true recieve 3D input events." );
+
+   endGroup("web");
+// end jc
+
 
    Parent::initPersistFields();
 }
@@ -233,6 +558,12 @@ void TSStatic::inspectPostApply()
 bool TSStatic::onAdd()
 {
    PROFILE_SCOPE(TSStatic_onAdd);
+// start jc
+   if(mEnableInputEvents)
+      mTypeMask |= InputEventObjectType;
+   else
+      mTypeMask &= ~InputEventObjectType;
+// end jc
 
    if ( isServerObject() )
    {
@@ -278,6 +609,11 @@ bool TSStatic::onAdd()
    addToScene();
 
    _updateShouldTick();
+
+// start jc
+   if(mWebViewID)
+      webSkin();
+// end jc
 
    return true;
 }
@@ -492,6 +828,10 @@ void TSStatic::prepRenderImage( SceneRenderState* state )
 {
    if( !mShapeInstance )
       return;
+// start jc
+   if(mCastShadowsOnly && !state->isShadowPass())
+      return;
+// end jc
 
    Point3F cameraOffset;
    getRenderTransform().getColumn(3,&cameraOffset);
@@ -626,6 +966,18 @@ U32 TSStatic::packUpdate(NetConnection *con, U32 mask, BitStream *stream)
    if ( mLightPlugin )
       retMask |= mLightPlugin->packUpdate(this, AdvancedStaticOptionsMask, con, mask, stream);
 
+   // start jc
+   if(stream->writeFlag(mWebViewData))
+      stream->writeRangedU32(mWebViewData->getId(),DataBlockObjectIdFirst,DataBlockObjectIdLast);
+   
+   stream->writeFlag(mEnableInputEvents);
+   stream->writeRangedU32( mInputEventsMethod, 0, 4 );
+
+   stream->writeString(mSuperClassName);
+   stream->writeString(mClassName);
+   stream->writeFlag(mCastShadowsOnly);
+   // end jc
+
    return retMask;
 }
 
@@ -687,7 +1039,101 @@ void TSStatic::unpackUpdate(NetConnection *con, BitStream *stream)
 
    if ( isProperlyAdded() )
       _updateShouldTick();
+
+// start jc
+   if( stream->readFlag() )
+   {
+      mWebViewID = stream->readRangedU32( DataBlockObjectIdFirst, DataBlockObjectIdLast );
+   //   webSkin();
+   }
+   mEnableInputEvents = stream->readFlag();
+   mInputEventsMethod = static_cast<ShapeBase::InputEventsMethod>(stream->readRangedU32(0,4));
+
+   setSuperClassNamespace(stream->readSTString());
+   setClassNamespace(stream->readSTString());
+
+   mCastShadowsOnly = stream->readFlag();
+// end jc
+
 }
+
+// start jc
+void TSStatic::setEnableInputEvents( bool enable )
+{
+   if ( enable != mEnableInputEvents )
+   {
+      removeFromScene();
+      if(enable)
+         mTypeMask |= InputEventObjectType;
+      else
+         mTypeMask &= ~InputEventObjectType;
+      addToScene();
+   }
+}
+
+void TSStatic::webSkin()
+{
+   if ( isGhost() && !mWebViewData && mWebViewID != 0 )
+   {
+      Sim::findObject( mWebViewID, mWebViewData );
+
+      if(mWebViewData)
+      {
+      //   mWebViewData->refresh();
+         mShapeInstance->webSkin(mWebViewData);
+      }
+   }
+}
+
+void TSStatic::onMouseDown(const ShapeInputEvent &event)
+{
+   onMouseDown_callback(event.modifier, event.mousePoint, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+void TSStatic::onMouseUp(const ShapeInputEvent & event)
+{
+   onMouseUp_callback(event.modifier, event.mousePoint, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+void TSStatic::onMouseMove(const ShapeInputEvent & event)
+{
+   onMouseMove_callback(event.modifier, event.mousePoint, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+void TSStatic::onMouseDragged(const ShapeInputEvent & event)
+{
+   onMouseDragged_callback(event.modifier, event.mousePoint, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+void TSStatic::onMouseEnter(const ShapeInputEvent & event)
+{
+   onMouseEnter_callback(event.modifier, event.mousePoint, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+void TSStatic::onMouseLeave(const ShapeInputEvent & event)
+{
+   onMouseLeave_callback(event.modifier, event.mousePoint, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+void TSStatic::onRightMouseDown(const ShapeInputEvent & event)
+{
+   onRightMouseDown_callback(event.modifier, event.mousePoint, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+void TSStatic::onRightMouseUp(const ShapeInputEvent & event)
+{
+   onRightMouseUp_callback(event.modifier, event.mousePoint, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+void TSStatic::onRightMouseDragged(const ShapeInputEvent & event)
+{
+   onRightMouseDragged_callback(event.modifier, event.mousePoint, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+bool TSStatic::onTouchDown(const ShapeTouchEvent & event)
+{
+   return onTouchDown_callback(event.touchId, event.touchPosition, event.pos, event.vec, event.ri.texCoord);;
+}
+bool TSStatic::onTouchMove(const ShapeTouchEvent & event)
+{
+   return onTouchMove_callback(event.touchId, event.touchPosition, event.pos, event.vec, event.ri.texCoord);
+}
+bool TSStatic::onTouchUp(const ShapeTouchEvent & event)
+{
+   return onTouchUp_callback(event.touchId, event.touchPosition, event.pos, event.vec, event.ri.texCoord);
+}
+// end jc
 
 //----------------------------------------------------------------------------
 bool TSStatic::castRay(const Point3F &start, const Point3F &end, RayInfo* info)
@@ -780,6 +1226,9 @@ bool TSStatic::castRayRendered(const Point3F &start, const Point3F &end, RayInfo
 
    // Cast the ray against the currently visible detail
    RayInfo localInfo;
+// start jc
+   localInfo.generateTexCoord = info->generateTexCoord;
+// end jc
    bool res = mShapeInstance->castRayOpcode( mShapeInstance->getCurrentDetail(), start, end, &localInfo );
 
    if ( res )
@@ -1144,3 +1593,11 @@ DefineEngineMethod( TSStatic, getModelFile, const char *, (),,
 {
 	return object->getShapeFileName();
 }
+
+// start jc
+DefineEngineMethod(TSStatic, onAdd, bool,(),,
+   "")
+{
+   return object->onAddClient();
+}
+// end jc

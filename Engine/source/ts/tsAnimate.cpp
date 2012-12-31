@@ -67,11 +67,22 @@ void TSShapeInstance::animateNodes(S32 ss)
 
    // @todo: When a node is added, we need to make sure to resize the nodeTransforms array as well
    mNodeTransforms.setSize(mShape->nodes.size());
+// start jc
+#ifdef TORQUE_CUBE_NODESCALES
+   mNodeScales.setSize(mShape->nodes.size());
+#endif
+// end jc
 
    // temporary storage for node transforms
    smNodeCurrentRotations.setSize(mShape->nodes.size());
    smNodeCurrentTranslations.setSize(mShape->nodes.size());
    smNodeLocalTransforms.setSize(mShape->nodes.size());
+// start jc
+#ifdef TORQUE_CUBE_NODESCALES
+   smNodeCurrentScales.setSize(mShape->nodes.size());
+   smNodeLocalScales.setSize(mShape->nodes.size());
+#endif
+// end jc
    smRotationThreads.setSize(mShape->nodes.size());
    smTranslationThreads.setSize(mShape->nodes.size());
 
@@ -126,6 +137,19 @@ void TSShapeInstance::animateNodes(S32 ss)
       if (tranBeenSet.test(i))
       {
          smNodeCurrentTranslations[i] = mShape->defaultTranslations[i];
+      // start jc
+#ifdef TORQUE_CUBE_NODESCALES
+        //    smNodeCurrentScales[i] = mShape->nodeArbitraryScaleFactors[i];
+         Point3F scale(Point3F::One);
+         if(!mShape->nodeUniformScales.empty())
+            scale.set(mShape->nodeUniformScales[i]);
+         else if(!mShape->nodeAlignedScales.empty())
+            scale.set(mShape->nodeAlignedScales[i]);
+         else if(!mShape->nodeArbitraryScaleFactors.empty())
+            scale.set(mShape->nodeArbitraryScaleFactors[i]);
+         smNodeCurrentScales[i] = scale;
+#endif
+      // end jc
          smTranslationThreads[i] = NULL;
       }
    }
@@ -194,15 +218,61 @@ void TSShapeInstance::animateNodes(S32 ss)
    // compute transforms
    for (i=a; i<b; i++)
    {
+   // start jc
+   /*
       if (!mHandsOffNodes.test(i))
          TSTransform::setMatrix(smNodeCurrentRotations[i],smNodeCurrentTranslations[i],&smNodeLocalTransforms[i]);
       else
          smNodeLocalTransforms[i] = mNodeTransforms[i];     // in case mNodeTransform was changed externally
+   */
+      if (!mHandsOffNodes.test(i))
+      {
+         TSTransform::setMatrix(smNodeCurrentRotations[i],smNodeCurrentTranslations[i],&smNodeLocalTransforms[i]);
+      }
+      else
+      {
+         smNodeLocalTransforms[i] = mNodeTransforms[i];     // in case mNodeTransform was changed externally
+      }
+   // end jc
    }
 
    // add scale onto transforms
    if (scaleCurrentlyAnimated())
       handleNodeScale(a,b);
+
+// start jc
+#ifdef TORQUE_CUBE_NODESCALES
+   
+   if (scaleCurrentlyAnimated())
+      for (i=a; i<b; i++)
+      {
+         if (!mHandsOffNodes.test(i))
+         {
+         // todo: this isn't animated but it'll do for now
+         // needs to be moved under the scale animation and made work?
+         TSShape* shape = getShape();
+         if(shape)
+         {
+            if (animatesUniformScale() && i < smNodeCurrentUniformScales.size())
+            {
+               F32 scale = smNodeCurrentUniformScales[i];
+               smNodeLocalScales[i] = Point3F(scale,scale,scale);
+            }
+            else if (animatesAlignedScale() && i < smNodeCurrentAlignedScales.size())
+               smNodeLocalScales[i] = smNodeCurrentAlignedScales[i];
+            else if (animatesArbitraryScale() && i < smNodeCurrentArbitraryScales.size())
+               smNodeLocalScales[i] = smNodeCurrentArbitraryScales[i].mScale;
+            else smNodeLocalScales[i] = Point3F::One;
+         }
+         }
+         else
+         {
+            smNodeLocalScales[i] = mNodeScales[i];     // in case mNodeTransform was changed externally            
+         }
+      }
+#endif
+      
+// end jc
 
    // get callbacks...
    start = getMax(mCallbackNodes.start(),a);
@@ -233,6 +303,8 @@ void TSShapeInstance::animateNodes(S32 ss)
       handleTransitionNodes(a,b);
 
    // multiply transforms...
+// start jc
+#ifndef TORQUE_CUBE_NODESCALES
    for (i=a; i<b; i++)
    {
       S32 parentIdx = mShape->nodes[i].parentIndex;
@@ -241,6 +313,19 @@ void TSShapeInstance::animateNodes(S32 ss)
       else
          mNodeTransforms[i].mul(mNodeTransforms[parentIdx],smNodeLocalTransforms[i]);
    }
+#else
+   for (i=a; i<b; i++)
+   {
+      S32 parentIdx = mShape->nodes[i].parentIndex;
+      if (parentIdx < 0)
+         mNodeTransforms[i] = smNodeLocalTransforms[i];
+      else
+         mNodeTransforms[i].mul(mNodeTransforms[parentIdx],smNodeLocalTransforms[i]);
+      mNodeScales[i] = smNodeLocalScales[i];
+   }
+#endif
+
+// end jc
 }
 
 void TSShapeInstance::handleDefaultScale(S32 a, S32 b, TSIntegerSet & scaleBeenSet)
@@ -305,12 +390,22 @@ void TSShapeInstance::updateTransitionNodeTransforms(TSIntegerSet& transitionNod
             // @todo:No support for scale yet => need to do proper affine decomposition here
             smNodeCurrentTranslations[i] = smNodeLocalTransforms[i].getPosition();
             smNodeCurrentRotations[i].set(smNodeLocalTransforms[i]);
+         // start jc
+#ifdef TORQUE_CUBE_NODESCALES
+            smNodeCurrentScales[i] = smNodeLocalTransforms[i].getScale();
+#endif
+         // end jc
          }
          else
          {
             // Scale is identity => can do a cheap decomposition
             smNodeCurrentTranslations[i] = smNodeLocalTransforms[i].getPosition();
             smNodeCurrentRotations[i].set(smNodeLocalTransforms[i]);
+         // start jc
+#ifdef TORQUE_CUBE_NODESCALES
+            smNodeCurrentScales[i] = smNodeLocalTransforms[i].getScale();
+#endif
+         // end jc
          }
       }
    }

@@ -87,7 +87,10 @@ ForestWind::ForestWind(  ForestWindEmitter *emitter )
       mTargetYawAngle( 0 ),
       mParent( emitter ),
       mIsDirty( false ),
-      mRandom( Platform::getRealMilliseconds() + 1 )
+      mRandom( Platform::getRealMilliseconds() + 1 ),
+   // start jc
+      mStartTime(0)
+   // end jc
 {
 }
 
@@ -101,6 +104,9 @@ void ForestWind::processTick()
 
    const F32 deltaTime = 0.032f;
    const U32 simTime = Sim::getCurrentTime();
+// start jc
+   mRandom.setSeed(simTime-mStartTime);
+// end jc
    
    Point2F finalVec( 0, 0 );
    Point2F windDir( mParent->mWindDirection.x, mParent->mWindDirection.y );
@@ -576,3 +582,34 @@ DefineEngineMethod( ForestWindEmitter, attachToObject, void, ( U32 objectID ),,
 
 	object->attachToObject( obj );
 }
+
+// start jc
+void ForestWind::resetWind( S32 randomSeed )
+{
+   U32 simTime = Sim::getCurrentTime();
+//   mStrength = 0.0f;
+//   mDirection.set( 1.0f, 0, 0 );
+//   mLastGustTime = simTime + (mParent->mWindGustFrequency * 1000.0f);
+//   mLastYawTime = simTime + (mParent->mWindGustYawFrequency * 1000.0f);
+   mLastGustTime = simTime;
+   mLastYawTime = simTime;
+   mCurrentTarget.set( 0, 0 );
+   mCurrentInterp = 0;
+   mTargetYawAngle = 0;
+//   mParent( emitter );
+   mIsDirty = true;
+//   mRandom.setSeed( randomSeed );
+
+   mStartTime = Sim::getCurrentTime();
+}
+
+DefineEngineMethod( ForestWindEmitter, resetWind, void, ( S32 randomSeed ),,
+   "@brief Mounts the wind emitter to another scene object\n\n"
+
+   "@param ")
+{
+   if(object->getWind())
+      object->getWind()->resetWind(randomSeed);
+}
+
+// end jc

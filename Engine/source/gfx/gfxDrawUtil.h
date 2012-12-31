@@ -144,6 +144,15 @@ public:
    /// If colors is NULL the default colors are RED, GREEEN, BLUE ( x, y, z ).
    void drawTransform( const GFXStateBlockDesc &desc, const MatrixF &mat, const Point3F *scale = NULL, const ColorI colors[3] = NULL );  
 
+// start jc
+   void lockStateBlock(void)	{ mLockStateBlock = true;	}
+   void unlockStateBlock(void)	{ mLockStateBlock = false;	}
+   bool isLockStateBlock()		{ return mLockStateBlock;	}
+   GFXDevice::GenericShaderType getGenericShader()				{ return mGenericShader; }
+   void setGenericShader(GFXDevice::GenericShaderType type)	{ mGenericShader = type; }
+// end jc
+
+
 protected:
 
    void _setupStateBlocks();
@@ -176,6 +185,11 @@ protected:
    GFXStateBlockRef mRectFillSB;
    
    FontRenderBatcher* mFontRenderBatcher;
+
+// start jc
+   bool mLockStateBlock;
+   GFXDevice::GenericShaderType mGenericShader;
+// end jc
 };
 
 #endif // _GFX_GFXDRAWER_H_

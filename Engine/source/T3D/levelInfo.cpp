@@ -76,6 +76,7 @@ static SFXAmbience sDefaultAmbience;
 
 LevelInfo::LevelInfo()
    :  mNearClip( 0.1f ),
+      mFrustumOffset( Point4F::Zero ), // start jc
       mVisibleDistance( 1000.0f ),
       mDecalBias( 0.0015f ),
       mCanvasClearColor( 255, 0, 255, 255 ),
@@ -116,6 +117,11 @@ void LevelInfo::initPersistFields()
       addField( "visibleDistance", TypeF32, Offset( mVisibleDistance, LevelInfo ), "Furthest distance fromt he camera's position to render the world." );
       addField( "decalBias", TypeF32, Offset( mDecalBias, LevelInfo ),
          "NearPlane bias used when rendering Decal and DecalRoad. This should be tuned to the visibleDistance in your level." );
+
+// start jc
+      addField( "frustumOffset", TypePoint4F, Offset( mFrustumOffset, LevelInfo ),
+         "Point4F(left, right, top, bottom) - Offset to allow non axis aligned frustum.  For full frustum use (0,1,0,1)" );
+// end jc
 
    endGroup( "Visibility" );
 
@@ -300,6 +306,9 @@ void LevelInfo::_updateSceneGraph()
    
    scene->setNearClip( mNearClip );
    scene->setVisibleDistance( mVisibleDistance );
+// start jc
+   scene->setFrustumOffset(mFrustumOffset);
+// end jc
 
    gDecalBias = mDecalBias;
 
@@ -337,3 +346,30 @@ void LevelInfo::_onLMActivate(const char *lm, bool enable)
    }
 #endif
 }
+
+// start jc
+// MACSK >>
+void LevelInfo::setNearClip( F32 nearClip )
+{
+   // We must update both scene graphs.
+   SceneManager *sm;
+   if ( isClientObject() )
+      sm = gClientSceneGraph;
+   else
+      sm = gServerSceneGraph;
+
+
+   // Clamp above zero before setting on the sceneGraph.
+   // If we don't we get serious crashes.
+   if ( nearClip <= 0.0f )
+      nearClip = 0.001f;
+   mNearClip = nearClip;
+   sm->setNearClip( mNearClip );
+}
+
+ConsoleMethod( LevelInfo, setNearClip, void, 3, 3, "( F32 nearClip )")
+{
+	object->setNearClip( dAtof( argv[2] ));
+}
+// MACSK <<
+// end jc

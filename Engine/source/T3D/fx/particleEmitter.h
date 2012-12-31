@@ -82,6 +82,9 @@ class ParticleEmitterData : public GameBaseData
 
    F32   softnessDistance;                   ///< For soft particles, the distance (in meters) where particles will be faded
                                              ///< based on the difference in depth between the particle and the scene geometry.
+// start jc
+   Box3F overrideBounds;
+// end jc
 
    /// A scalar value used to influence the effect 
    /// of the ambient color on the particle.
@@ -157,6 +160,9 @@ class ParticleEmitter : public GameBase
    /// By default, a particle renderer will wait for it's owner to delete it.  When this
    /// is turned on, it will delete itself as soon as it's particle count drops to zero.
    void deleteWhenEmpty();
+// start jc
+   bool onAddClient()      { return this->onAdd(); }
+// end jc
 
    /// @name Particle Emission
    /// Main interface for creating particles.  The emitter does _not_ track changes

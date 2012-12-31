@@ -35,6 +35,9 @@
 #include "gfx/util/screenspace.h"
 #include "gfx/gfxDrawUtil.h"
 #include "collision/clippedPolyList.h"
+// start jc
+#include "shaderGen/shaderGenVars.h"
+// end jc
 
 static const Point4F cubePoints[9] = 
 {
@@ -60,8 +63,12 @@ ConsoleDocClass( RenderParticleMgr,
 const RenderInstType RenderParticleMgr::RIT_Particles("ParticleSystem");
 
 // TODO: Replace these once they are supported via options
-const bool RenderToParticleTarget = true;
-const bool RenderToSingleTarget = true;
+// start jc
+//const bool RenderToParticleTarget = true;
+//const bool RenderToSingleTarget = true;
+const bool RenderToParticleTarget = false;
+const bool RenderToSingleTarget = false;
+// end jc
 
 RenderParticleMgr::RenderParticleMgr()
 :  Parent(  RenderParticleMgr::RIT_Particles, 
@@ -432,6 +439,29 @@ void RenderParticleMgr::renderInstance(ParticleRenderInst *ri, SceneRenderState 
             oneOverSoftness = 1.0f / ( ri->softnessDistance / state->getFarPlane() );
          mParticleShaderConsts.mShaderConsts->set( mParticleShaderConsts.mOneOverSoftnessSC, oneOverSoftness );
       }
+   // start jc
+      // Set the fog data.
+      const FogData &data = state->getSceneManager()->getFogData();
+      if ( mParticleShaderConsts.mFogDataSC->isValid() )
+      {
+
+         Point3F params;
+         params.x = data.density;
+         params.y = data.densityOffset;
+
+         if ( !mIsZero( data.atmosphereHeight ) )
+            params.z = 1.0f / data.atmosphereHeight;
+         else
+            params.z = 0.0f;
+
+         mParticleShaderConsts.mShaderConsts->set( mParticleShaderConsts.mFogDataSC, params );
+      }
+      if ( state )
+      {
+         mParticleShaderConsts.mShaderConsts->setSafe( mParticleShaderConsts.mEyePosSC, state->getDiffuseCameraPosition() );
+         mParticleShaderConsts.mShaderConsts->setSafe( mParticleShaderConsts.mFogColorSC, data.color );
+      }
+   // end jc
 
       GFX->setShader( mParticleShader );
       GFX->setShaderConstBuffer( mParticleShaderConsts.mShaderConsts );
@@ -548,6 +578,11 @@ bool RenderParticleMgr::_initShader()
       mParticleShaderConsts.mAlphaScaleSC = mParticleShader->getShaderConstHandle( "$alphaScale" );
       mParticleShaderConsts.mFSModelViewProjSC = mParticleShader->getShaderConstHandle( "$fsModelViewProj" );
       mParticleShaderConsts.mPrePassTargetParamsSC = mParticleShader->getShaderConstHandle( "$prePassTargetParams" );
+   // start jc
+      mParticleShaderConsts.mEyePosSC = mParticleShader->getShaderConstHandle( "$eyePosWorld" );
+      mParticleShaderConsts.mFogDataSC = mParticleShader->getShaderConstHandle( "$fogData" );
+      mParticleShaderConsts.mFogColorSC = mParticleShader->getShaderConstHandle( "$fogColor" );
+   // end jc
    }
 
    shaderData = NULL;
@@ -591,7 +626,12 @@ void RenderParticleMgr::_onLMActivate( const char*, bool activate )
    // If we found the prepass bin, set this bin to render very shortly afterwards
    // and re-add this render-manager. If there is no pre-pass bin, or it doesn't
    // have a depth-texture, we can't render offscreen.
-   mOffscreenRenderEnabled = prePassBin && (prePassBin->getTargetChainLength() > 0);
+// start jc
+//   mOffscreenRenderEnabled = prePassBin && (prePassBin->getTargetChainLength() > 0);
+   mOffscreenRenderEnabled = false;
+// end jc
+
+   // makes the particles render over transparent objects
    if(mOffscreenRenderEnabled)
    {
       rpm->removeManager(this);

@@ -35,7 +35,26 @@ class GuiMouseEventCtrl : public GuiControl
 {
    private:
       typedef  GuiControl     Parent;
-      void sendMouseEvent(const char * name, const GuiEvent &);
+// start jc
+//      void sendMouseEvent(const char * name, const GuiEvent &);
+      enum EventId {
+         OnMouseDown,
+         OnMouseUp,
+         OnMouseMove,
+         OnMouseDragged,
+         OnMouseEnter,
+         OnMouseLeave,
+         OnRightMouseDown,
+         OnRightMouseUp,
+         OnRightMouseDragged,
+         OnTouchDown,
+         OnTouchMove,
+         OnTouchUp
+      };
+      void sendMouseEvent(const EventId id, const char * name, const GuiEvent &);
+      bool sendTouchEvent(const EventId id, const char * name, const GuiEvent &);
+// end jc
+
 
       // field info
       bool        mLockMouse;
@@ -53,6 +72,13 @@ class GuiMouseEventCtrl : public GuiControl
 	  DECLARE_CALLBACK( void, onRightMouseDown, ( U8 modifier, Point2I mousePoint,U8 mouseClickCount ));
 	  DECLARE_CALLBACK( void, onRightMouseUp, ( U8 modifier, Point2I mousePoint,U8 mouseClickCount ));
 	  DECLARE_CALLBACK( void, onRightMouseDragged, ( U8 modifier, Point2I mousePoint,U8 mouseClickCount ));
+// start jc
+	  DECLARE_CALLBACK( void, onTouchDown, ( S32 id, Point2I touchPoint ));
+	  DECLARE_CALLBACK( void, onTouchMove, ( S32 id, Point2I touchPoint ));
+	  DECLARE_CALLBACK( void, onTouchUp, ( S32 id, Point2I touchPoint ));
+
+	  DECLARE_CALLBACK( void, childResized, ( S32 child ));
+// end jc
 
       // GuiControl
       void onMouseDown(const GuiEvent & event);
@@ -64,7 +90,14 @@ class GuiMouseEventCtrl : public GuiControl
       void onRightMouseDown(const GuiEvent & event);
       void onRightMouseUp(const GuiEvent & event);
       void onRightMouseDragged(const GuiEvent & event);
+// start jc
+      bool onTouchDown(const GuiEvent & event);
+      bool onTouchMove(const GuiEvent & event);
+      bool onTouchUp(const GuiEvent & event);
 
+      bool resize( const Point2I &newPosition, const Point2I &newExtent );
+      void childResized( GuiControl* child );
+// end jc
       static void initPersistFields();
 
       DECLARE_CONOBJECT( GuiMouseEventCtrl );

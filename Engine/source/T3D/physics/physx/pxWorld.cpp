@@ -714,6 +714,65 @@ bool PxWorld::castRay( const Point3F &startPnt, const Point3F &endPnt, RayInfo *
 
    return true;
 }
+// start pg
+class UserEntityReport : public NxUserEntityReport<NxSweepQueryHit>
+{
+public:
+   NxSweepQueryHit bestHit;
+   void  reset()
+   {
+      bestHit.t = 1;
+   }
+   virtual bool onEvent(NxU32 nbEntities, NxSweepQueryHit* entities)
+   {
+      for(int j=0; j<nbEntities; j++){
+         NxSweepQueryHit   &e = entities[j];
+         if(e.t<bestHit.t){
+            bestHit = e;
+         }
+      }
+      return true;
+   }
+};
+
+UserEntityReport myReport;
+
+
+bool PxWorld::sweepSphere( SweepResult &res, const Point3F &start, const Point3F &end, const F32 &radius)
+{
+//   asdasd
+   NxCapsule   capsule;
+   capsule.p0.x = start.x;
+   capsule.p0.y = start.y;
+   capsule.p0.z = start.z;
+   capsule.p1.x = start.x;
+   capsule.p1.y = start.y;
+   capsule.p1.z = start.z;
+   capsule.radius = 1.0f;
+
+   NxU32 flags = NX_STATIC_SHAPES;
+   NxVec3   range;
+   range.x = end.x - start.x;
+   range.y = end.y - start.y;
+   range.z = end.z - start.z;
+   
+   myReport.reset();
+   mScene->linearCapsuleSweep(capsule, range, flags, 0, 0, 0, &myReport); 
+   if(myReport.bestHit.t<1.0f){
+      res.normal.x = myReport.bestHit.normal.x;
+      res.normal.y = myReport.bestHit.normal.y;
+      res.normal.z = myReport.bestHit.normal.z;
+
+      res.point.x = myReport.bestHit.point.x;
+      res.point.y = myReport.bestHit.point.y;
+      res.point.z = myReport.bestHit.point.z;
+      res.pathFraction = myReport.bestHit.t;
+      return true;
+   }else{
+      return false;
+   }
+}
+// end pg
 
 PhysicsBody* PxWorld::castRay( const Point3F &start, const Point3F &end, U32 bodyTypes )
 {
@@ -870,3 +929,11 @@ void PxWorld::onDebugDraw( const SceneRenderState *state )
       PrimBuild::end();
    }
 }
+
+// start jc
+   /// Returns the active gravity force.
+void PxWorld::setGravity(const Point3F& gravity)
+{
+   mScene->setGravity(pxCast<NxVec3>(gravity));
+}
+// end jc

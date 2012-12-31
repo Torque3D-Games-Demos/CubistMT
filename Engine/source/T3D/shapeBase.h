@@ -62,6 +62,15 @@
 #ifndef _DYNAMIC_CONSOLETYPES_H_
    #include "console/dynamicTypes.h"
 #endif
+// start jc
+#ifndef _SIMTUIO_H_
+#include "console/simTUIO.h"
+#endif
+
+#define TORQUE_RESYNC_ANIM
+//#define TORQUE_RESYNC_ANIM_TIME 1000.0f * 60.0f * 5.0f
+#define TORQUE_RESYNC_ANIM_TIME 1000.0f * 60.0f
+// end jc
 
 
 class GFXCubemap;
@@ -79,6 +88,9 @@ class ShapeBase;
 class SFXSource;
 class SFXTrack;
 class SFXProfile;
+// start jc
+class WebViewData;
+// end jc
 
 typedef void* Light;
 
@@ -87,6 +99,21 @@ typedef void* Light;
 
 extern void collisionFilter(SceneObject* object,S32 key);
 extern void defaultFilter(SceneObject* object,S32 key);
+
+// start jc
+//--------------------------------------------------------------------------
+
+class ShapeBaseWebViewEvent : public SimEvent
+{
+   typedef SimEvent Parent;
+//   NetConnection *mCon;
+public:
+
+   ShapeBaseWebViewEvent() {}
+   //virtual void process( SimObject *object );
+   virtual void process( SimObject *object );
+};
+// end jc
 
 
 //--------------------------------------------------------------------------
@@ -613,6 +640,13 @@ public:
    bool useEyePoint;                ///< Do we use this object's eye point to view from?
    bool isInvincible;               ///< If set, object cannot take damage (won't show up with damage bar either)
    bool renderWhenDestroyed;        ///< If set, will not render this object when destroyed.
+// start jc
+   bool renderInReflections;
+   Box3F overrideBounds;
+// end jc
+// start jc
+   bool mAlwaysUnderwater;
+// end jc
 
    bool inheritEnergyFromMount;
 
@@ -644,6 +678,31 @@ public:
    DECLARE_CALLBACK( void, onTrigger, ( ShapeBase* obj, S32 index, bool state ) );
    DECLARE_CALLBACK( void, onEndSequence, ( ShapeBase* obj, S32 slot ) );
    DECLARE_CALLBACK( void, onForceUncloak, ( ShapeBase* obj, const char* reason ) );
+
+// start jc
+   DECLARE_CALLBACK( void, onAddClient, ( ShapeBase* obj ) );
+   DECLARE_CALLBACK( void, onRemoveClient, ( ShapeBase* obj ) );
+   DECLARE_CALLBACK( void, onMouseDown, ( ShapeBase* obj, U8 modifier, Point3F mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+   DECLARE_CALLBACK( void, onMouseUp, ( ShapeBase* obj, U8 modifier, Point3F mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+   DECLARE_CALLBACK( void, onMouseMove, ( ShapeBase* obj, U8 modifier, Point3F mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+   DECLARE_CALLBACK( void, onMouseDragged, ( ShapeBase* obj, U8 modifier, Point3F mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+   DECLARE_CALLBACK( void, onMouseEnter, ( ShapeBase* obj, U8 modifier, Point3F mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+   DECLARE_CALLBACK( void, onMouseLeave, ( ShapeBase* obj, U8 modifier, Point3F mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+   DECLARE_CALLBACK( void, onRightMouseDown, ( ShapeBase* obj, U8 modifier, Point3F mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+   DECLARE_CALLBACK( void, onRightMouseUp, ( ShapeBase* obj, U8 modifier, Point3F mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+   DECLARE_CALLBACK( void, onRightMouseDragged, ( ShapeBase* obj, U8 modifier, Point3F mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+
+   DECLARE_CALLBACK( bool, onTouchDown, ( ShapeBase* obj, S32 id, Point3F touchPoint, Point3F pos, Point3F vec, Point2F touchUVCoord ));
+   DECLARE_CALLBACK( bool, onTouchMove, ( ShapeBase* obj, S32 id, Point3F touchPoint, Point3F pos, Point3F vec, Point2F touchUVCoord ));
+   DECLARE_CALLBACK( bool, onTouchUp, ( ShapeBase* obj, S32 id, Point3F touchPoint, Point3F pos, Point3F vec, Point2F touchUVCoord ));
+
+   DECLARE_CALLBACK(void, onMaterialsLoaded, (ShapeBase* obj) );
+
+//   DECLARE_CALLBACK(void, onAdd, (ShapeBase* obj, SimObjectId ID) );
+//   DECLARE_CALLBACK(void, onRemove, (ShapeBase* obj, SimObjectId ID));
+
+
+// end jc
    /// @}
 };
 
@@ -665,6 +724,9 @@ class ShapeBase : public GameBase, public ISceneLight
    friend struct ShapeBaseImageData;
    friend void waterFind(SceneObject*, void*);
    friend void physicalZoneFind(SceneObject*, void*);
+// start jc
+   friend class ShapeBaseWebViewEvent;
+// end jc
 
 public:
    typedef GameBase Parent;
@@ -684,7 +746,11 @@ public:
       MaxImageEmitters = 3,
       NumImageBits = 3,
       ShieldNormalBits = 8,
-      CollisionTimeoutValue = 250      ///< Timeout in ms.
+//start pg
+//      CollisionTimeoutValue = 250      ///< Timeout in ms.
+      CollisionTimeoutValue = 64      ///< Timeout in ms.
+//      CollisionTimeoutValue = 25000      ///< Timeout in ms.
+//end pg
    };
 
    /// This enum indexes into the sDamageStateName array
@@ -695,6 +761,14 @@ public:
       NumDamageStates,
       NumDamageStateBits = 2,   ///< Should be log2 of the number of states.
    };
+// start jc
+   enum InputEventsMethod { 
+      MeshHit,
+      ConvexHit,
+      HybridHit,
+      BoxHit
+   };
+// end jc
 
 protected:
    ShapeBaseData*    mDataBlock;                ///< Datablock
@@ -731,6 +805,12 @@ protected:
 	  F32 timescale;    ///< Timescale
       U32 sound;        ///< Handle to sound.
       bool atEnd;       ///< Are we at the end of this thread?
+   // start jc
+#ifdef TORQUE_RESYNC_ANIM
+      F32 reSyncFactor;       ///< Are we at the end of this thread?
+      F32 reSync;       ///< Are we at the end of this thread?
+#endif
+   // end jc
       F32 position;
    };
    Thread mScriptThread[MaxScriptThreads];
@@ -873,6 +953,20 @@ protected:
    Convex *          mConvexList;
    NetStringHandle   mSkinNameHandle;
    String            mAppliedSkinName;
+// start jc
+   WebViewData* mWebViewData;
+   SimObjectId mWebViewID;
+   bool mHasWebSkin;
+
+   bool mEnableInputEvents;
+   InputEventsMethod mInputEventsMethod;
+   U32 mTriggerStates;
+
+   /// If true each submesh within the TSShape is culled 
+   /// against the object space frustum.
+   bool mMeshCulling;
+
+// end jc
 
    NetStringHandle mShapeNameHandle;   ///< Name sent to client
    /// @}
@@ -1001,6 +1095,16 @@ protected:
 
    /// Do a reskin if necessary.
    virtual void reSkin();
+
+// start jc
+   void reSkinNewPath();
+   void reSkin(const char* oldSkin);
+   void webSkin();
+
+//   void onScaleChanged();
+
+   void setEnableInputEvents( bool enable );
+// end jc
 
    /// This recalculates the total mass of the object, and all mounted objects
    void updateMass();
@@ -1155,7 +1259,9 @@ public:
       InvincibleMask  = Parent::NextFreeMask << 5,
       SkinMask        = Parent::NextFreeMask << 6,
       MeshHiddenMask  = Parent::NextFreeMask << 7,
-      SoundMaskN      = Parent::NextFreeMask << 8,       ///< Extends + MaxSoundThreads bits
+      GravityMask	  = Parent::NextFreeMask << 8, // start jc
+      UVAnimMask	  = Parent::NextFreeMask << 9, // start pg
+      SoundMaskN      = Parent::NextFreeMask << 10,       ///< Extends + MaxSoundThreads bits
       ThreadMaskN     = SoundMaskN  << MaxSoundThreads,  ///< Extends + MaxScriptThreads bits
       ImageMaskN      = ThreadMaskN << MaxScriptThreads, ///< Extends + MaxMountedImage bits
       NextFreeMask    = ImageMaskN  << MaxMountedImages
@@ -1175,6 +1281,9 @@ public:
    static F32  sCloakSpeed;               // Time to cloak, in seconds
       
    CubeReflector mCubeReflector;
+// start jc
+   PlaneReflector mPlaneReflector;
+// end jc
 
    /// @name Initialization
    /// @{
@@ -1184,6 +1293,16 @@ public:
    void onSceneRemove();
    static void consoleInit();
    bool onNewDataBlock( GameBaseData *dptr, bool reload );
+// start jc
+//   static void initPersistFields();
+   void updateCollisionBox();
+   void setObjectBox(Box3F objBox);
+   Point2I getTextureResolution(U32 index);
+
+   bool  rayCrossesTransparency(RayInfo* ri);
+   InputEventsMethod getInputEventsMethod() { return mInputEventsMethod; }
+
+// end jc
 
    /// @}
 
@@ -1195,6 +1314,40 @@ public:
    const char* getSkinName();
    /// @}
 
+   //start pg
+   void cloneMaterial(String name);
+
+   void  materialAnimStart(const char *baseMaterialName, const char *animMaterialPrefix,int frameCount, F32 animTime);
+   void  materialAnimSetTime(F32 _time);
+   void  materialAnimReset();
+   void  materialAnimTick();
+
+   struct MaterialAnim{
+      NetStringHandle   animName;
+      NetStringHandle   animPrefix;
+      String            oldSkinName;
+      F32               totalTime;
+      F32               time;
+      U32               frame;
+      U32               frameCount;
+      bool              enabled;
+   };
+   MaterialAnim   mMaterialAnim;
+
+
+   //end pg
+
+// start jc
+   /// @name Node utility functions
+   /// @{
+   S32 findNode(const String &nodeName);
+   MatrixF getNodeTransform(S32 nodeIndex);
+#ifdef TORQUE_CUBE_NODESCALES
+   Point3F getNodeScale(S32 nodeIndex);
+#endif
+
+   /// @}
+// end jc
    /// @name Mesh Visibility
    /// @{
    
@@ -1350,6 +1503,10 @@ public:
    /// @param   pos    Position
    bool setThreadPosition( U32 slot, F32 pos );
 
+// start jc
+   F32 getThreadPosition( U32 slot );
+// end jc
+
    /// Toggle the thread as reversed or normal (For example, sidestep-right reversed is sidestep-left)
    /// @param   slot   Mount slot ID
    /// @param   forward   True if the animation is to be played normally
@@ -1398,6 +1555,42 @@ public:
    virtual void getMountTransform( S32 index, const MatrixF &xfm, MatrixF *outMat );
    virtual void getRenderMountTransform( F32 delta, S32 index, const MatrixF &xfm, MatrixF *outMat );
    /// @}
+
+// start jc
+
+   void setUrl(const char *url);
+   void setWebViewData(WebViewData* webview)
+   {
+      mWebViewData = webview;
+      setMaskBits(SkinMask);
+   }
+   WebViewData* getWebViewData()
+   {
+      return mWebViewData;
+   }
+   bool hasWebViewData()
+   {
+      return bool(mWebViewData);
+   }
+
+   S32 findNode(const String &name) const;
+   void getNodeWorldTransform(S32 nodeIndex, MatrixF* mat) const;
+
+   virtual void onMouseDown(const ShapeInputEvent & event);
+   virtual void onMouseUp(const ShapeInputEvent & event);
+   virtual void onMouseMove(const ShapeInputEvent & event);
+   virtual void onMouseDragged(const ShapeInputEvent & event);
+   virtual void onMouseEnter(const ShapeInputEvent & event);
+   virtual void onMouseLeave(const ShapeInputEvent & event);
+   virtual void onRightMouseDown(const ShapeInputEvent & event);
+   virtual void onRightMouseUp(const ShapeInputEvent & event);
+   virtual void onRightMouseDragged(const ShapeInputEvent & event);
+
+   virtual bool onTouchDown(const ShapeTouchEvent & event);
+   virtual bool onTouchMove(const ShapeTouchEvent & event);
+   virtual bool onTouchUp(const ShapeTouchEvent & event);
+
+// end jc
 
    /// Returns where the AI should be to repair this object
    ///
@@ -1780,6 +1973,10 @@ public:
 
 
    void processTick(const Move *move);
+// start jc
+   void interpolateTick(F32 delta);
+// end jc
+
    void advanceTime(F32 dt);
 
    /// @name Rendering
@@ -1878,6 +2075,12 @@ protected:
    DECLARE_CALLBACK( F32, validateCameraFov, (F32 fov) );
 
 };
+
+
+// start jc
+typedef ShapeBase::InputEventsMethod ShapeBaseInputEventsMethod;
+DefineEnumType( ShapeBaseInputEventsMethod );
+// end jc
 
 
 //------------------------------------------------------------------------------

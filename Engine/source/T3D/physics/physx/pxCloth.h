@@ -56,7 +56,11 @@ class PxCloth : public GameBase
       TransformMask  = Parent::NextFreeMask << 0,
       ClothMask      = Parent::NextFreeMask << 1,
       MaterialMask   = Parent::NextFreeMask << 3,
-      NextFreeMask   = Parent::NextFreeMask << 4
+   // start jc
+   //   NextFreeMask   = Parent::NextFreeMask << 4
+      ScaleAttachmentPointsMask   = Parent::NextFreeMask << 4,
+      NextFreeMask   = Parent::NextFreeMask << 5
+   // end jc
    };  
 
 public:
@@ -81,7 +85,9 @@ public:
    virtual void setTransform( const MatrixF &mat );
    virtual void setScale( const VectorF &scale );
    virtual void prepRenderImage( SceneRenderState *state );
-
+// start jc
+   virtual void setAttachmentPointScale( const Point3F &scale );
+// end jc
    // GameBase
    virtual bool onNewDataBlock( GameBaseData *dptr, bool reload );
    virtual void processTick( const Move *move );
@@ -116,6 +122,9 @@ protected:
    F32 mAttachmentResponseCoefficient;
 
    U32 mAttachmentMask;
+// start jc
+   Point3F mAttachmentPointScale;
+// end jc
 
    static EnumTable mAttachmentFlagTable;
 

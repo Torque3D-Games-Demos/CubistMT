@@ -247,6 +247,37 @@ DefineEngineMethod( NetObject, setScopeAlways, void, (),,
 {
 	object->setScopeAlways();
 }
+// start jc
+DefineEngineMethod( NetObject, updateScope, void, (),,
+   "@brief Update the scope for this object on all connections.\n\n"
+
+   "The object is tested for scope and is immediately ghosted to "
+   "all active connections.  This function has no effect if the object "
+   "is not marked as Ghostable.\n\n")
+{
+	object->updateScope();
+}
+
+DefineEngineMethod( NetObject, setNoAutoScope, void, (),,
+   "@brief Update the scope for this object on all connections.\n\n"
+
+   "The object is tested for scope and is immediately ghosted to "
+   "all active connections.  This function has no effect if the object "
+   "is not marked as Ghostable.\n\n")
+{
+	object->setNoAutoScope();
+}
+DefineEngineMethod( NetObject, clearNoAutoScope, void, (),,
+   "@brief Update the scope for this object on all connections.\n\n"
+
+   "The object is tested for scope and is immediately ghosted to "
+   "all active connections.  This function has no effect if the object "
+   "is not marked as Ghostable.\n\n")
+{
+	object->clearNoAutoScope();
+}
+
+// end jc
 
 //ConsoleMethod(NetObject,setScopeAlways,void,2,2,"Always scope this object on all connections.")
 //{
@@ -290,6 +321,33 @@ void NetObject::clearScopeAlways()
          mFirstObjectRef->connection->detachObject(mFirstObjectRef);
    }
 }
+
+// start jc
+void NetObject::updateScope()
+{
+	// add it to all Connections that already exist.
+
+	SimGroup *clientGroup = Sim::getClientGroup();
+	SimGroup::iterator i;
+	for(i = clientGroup->begin(); i != clientGroup->end(); i++)
+	{
+	 NetConnection *con = (NetConnection *) (*i);
+	 if(con->isGhosting())
+		con->objectInScope(this);
+	}
+}
+
+
+void NetObject::setNoAutoScope()     {
+   mNetFlags.set(NoAutoScope);   
+   // Un ghost this object from all the connections
+   while(mFirstObjectRef)
+      mFirstObjectRef->connection->detachObject(mFirstObjectRef);
+}
+void NetObject::clearNoAutoScope()   { 
+   mNetFlags.clear(NoAutoScope); 
+}
+// end jc
 
 bool NetObject::onAdd()
 {
@@ -343,6 +401,20 @@ void NetObject::onCameraScopeQuery(NetConnection *cr, CameraScopeQuery* /*camInf
          {
             // it's in scope...
             cr->objectInScope(nobj);
+
+         // start jc
+            /*
+            // insure WebViewData objects are scoped to the clients of there host objects
+            ShapeBase* shape = static_cast<ShapeBase*>(nobj);
+            if(shape && shape->hasWebViewData())
+            {
+               NetObject* webViewData = reinterpret_cast<NetObject*>(shape->getWebViewData());
+            //   NetObject* webViewData = shape->getWebViewData();
+               if(webViewData)
+                  cr->objectInScope(webViewData);
+            }
+            */
+         // end jc
          }
       }
    }

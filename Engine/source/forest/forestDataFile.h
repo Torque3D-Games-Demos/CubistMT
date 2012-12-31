@@ -101,6 +101,11 @@ class ForestData
                                  const Point3F &position,
                                  F32 rotation,
                                  F32 scale );
+   // start jc
+      const ForestItem& addItem( ForestItemData *data,
+                                 const MatrixF &mat,
+                                 F32 scale );
+   // end jc
 
       const ForestItem& addItem( ForestItemKey key,
                                  ForestItemData *data,

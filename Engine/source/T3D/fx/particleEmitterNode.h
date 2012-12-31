@@ -77,8 +77,13 @@ class ParticleEmitterNode : public GameBase
   private:
    ParticleEmitterNodeData* mDataBlock;
 
-  protected:
+// start jc
+//  protected:
+//   bool onAdd();
+  public:
    bool onAdd();
+  protected:
+// end jc
    void onRemove();
    bool onNewDataBlock( GameBaseData *dptr, bool reload );
    void inspectPostApply();
@@ -112,7 +117,27 @@ class ParticleEmitterNode : public GameBase
    inline void setActive( bool active ) { mActive = active; setMaskBits( StateMask ); };
 
    void setEmitterDataBlock(ParticleEmitterData* data);
+// start jc
+   void setObjectBox(Box3F objBox);
+// end jc
 };
+
+// start jc
+class ParticleEmitterNodeClient : public ParticleEmitterNode
+{
+   typedef ParticleEmitterNode Parent;
+
+  protected:
+   
+
+  public:
+   ParticleEmitterNodeClient();
+   ~ParticleEmitterNodeClient();
+
+   DECLARE_CONOBJECT(ParticleEmitterNodeClient);
+
+};
+// end jc
 
 #endif // _H_PARTICLEEMISSIONDUMMY
 

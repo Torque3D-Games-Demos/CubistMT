@@ -28,6 +28,9 @@
 #include "platform/async/asyncUpdate.h"
 #include "console/consoleTypes.h"
 #include "core/volume.h"
+// start jc
+#include "console/engineAPI.h"
+// end jc
 
 
 bool                 SFXFMODDevice::smPrefDisableSoftware = false;
@@ -278,6 +281,26 @@ bool SFXFMODDevice::_init()
       if( smFunc->FMOD_System_GetHardwareChannels( smSystem, &num2D, &num3D, &numTotal ) == FMOD_OK )
          Con::printf( "FMOD Hardware channels: 2d=%i, 3d=%i, total=%i", num2D, num3D, numTotal );
    }
+
+// start jc
+   // setup speaker positions from prefs
+   Point3F pos = Con::getPoint3FVariable( "$pref::SFX::FMOD::speakerPositionFrontLeft", Point3F::Zero );
+   smFunc->FMOD_System_Set3DSpeakerPosition(smSystem,FMOD_SPEAKER_FRONT_LEFT,pos.x,pos.y,bool(pos.z>0.0f));
+   pos = Con::getPoint3FVariable( "$pref::SFX::FMOD::speakerPositionFrontRight", Point3F::Zero );
+   smFunc->FMOD_System_Set3DSpeakerPosition(smSystem,FMOD_SPEAKER_FRONT_RIGHT,pos.x,pos.y,bool(pos.z>0.0f));
+   pos = Con::getPoint3FVariable( "$pref::SFX::FMOD::speakerPositionFrontCenter", Point3F::Zero );
+   smFunc->FMOD_System_Set3DSpeakerPosition(smSystem,FMOD_SPEAKER_FRONT_CENTER,pos.x,pos.y,bool(pos.z>0.0f));
+   pos = Con::getPoint3FVariable( "$pref::SFX::FMOD::speakerPositionLowFrequency", Point3F::Zero );
+   smFunc->FMOD_System_Set3DSpeakerPosition(smSystem,FMOD_SPEAKER_LOW_FREQUENCY,pos.x,pos.y,bool(pos.z>0.0f));
+   pos = Con::getPoint3FVariable( "$pref::SFX::FMOD::speakerPositionBackLeft", Point3F::Zero );
+   smFunc->FMOD_System_Set3DSpeakerPosition(smSystem,FMOD_SPEAKER_BACK_LEFT,pos.x,pos.y,bool(pos.z>0.0f));
+   pos = Con::getPoint3FVariable( "$pref::SFX::FMOD::speakerPositionBackRight", Point3F::Zero );
+   smFunc->FMOD_System_Set3DSpeakerPosition(smSystem,FMOD_SPEAKER_BACK_RIGHT,pos.x,pos.y,bool(pos.z>0.0f));
+   pos = Con::getPoint3FVariable( "$pref::SFX::FMOD::speakerPositionSideLeft", Point3F::Zero );
+   smFunc->FMOD_System_Set3DSpeakerPosition(smSystem,FMOD_SPEAKER_SIDE_LEFT,pos.x,pos.y,bool(pos.z>0.0f));
+   pos = Con::getPoint3FVariable( "$pref::SFX::FMOD::speakerPositionSideRight", Point3F::Zero );
+   smFunc->FMOD_System_Set3DSpeakerPosition(smSystem,FMOD_SPEAKER_SIDE_RIGHT,pos.x,pos.y,bool(pos.z>0.0f));
+// end jc
 
    // Set up filesystem.
    
@@ -579,3 +602,33 @@ ConsoleFunction( fmodDumpMemoryStats, void, 1, 1, "()"
          SFXFMODDevice::smFunc->FMOD_Memory_GetStats(&current, &max);
    Con::printf("Fmod current: %d, max: %d", current, max);
 }
+
+
+// start jc
+DefineEngineFunction( fmodUpdate3DSpeakerPositions, void, (),,
+				"@return Updates 3D speaker positions from pref variables\n\n"
+				"@ingroup SFXFMOD")
+{
+   if(SFXFMODDevice::smFunc && SFXFMODDevice::smFunc->FMOD_System_Set3DSpeakerPosition.fn)
+   {
+
+      // setup speaker positions from prefs
+      Point3F pos = Con::getPoint3FVariable( "$pref::SFX::FMOD::speakerPositionFrontLeft", Point3F::Zero );
+      SFXFMODDevice::smFunc->FMOD_System_Set3DSpeakerPosition(SFXFMODDevice::smSystem,FMOD_SPEAKER_FRONT_LEFT,pos.x,pos.y,bool(pos.z>0.0f));
+      pos = Con::getPoint3FVariable( "$pref::SFX::FMOD::speakerPositionFrontRight", Point3F::Zero );
+      SFXFMODDevice::smFunc->FMOD_System_Set3DSpeakerPosition(SFXFMODDevice::smSystem,FMOD_SPEAKER_FRONT_RIGHT,pos.x,pos.y,bool(pos.z>0.0f));
+      pos = Con::getPoint3FVariable( "$pref::SFX::FMOD::speakerPositionFrontCenter", Point3F::Zero );
+      SFXFMODDevice::smFunc->FMOD_System_Set3DSpeakerPosition(SFXFMODDevice::smSystem,FMOD_SPEAKER_FRONT_CENTER,pos.x,pos.y,bool(pos.z>0.0f));
+      pos = Con::getPoint3FVariable( "$pref::SFX::FMOD::speakerPositionLowFrequency", Point3F::Zero );
+      SFXFMODDevice::smFunc->FMOD_System_Set3DSpeakerPosition(SFXFMODDevice::smSystem,FMOD_SPEAKER_LOW_FREQUENCY,pos.x,pos.y,bool(pos.z>0.0f));
+      pos = Con::getPoint3FVariable( "$pref::SFX::FMOD::speakerPositionBackLeft", Point3F::Zero );
+      SFXFMODDevice::smFunc->FMOD_System_Set3DSpeakerPosition(SFXFMODDevice::smSystem,FMOD_SPEAKER_BACK_LEFT,pos.x,pos.y,bool(pos.z>0.0f));
+      pos = Con::getPoint3FVariable( "$pref::SFX::FMOD::speakerPositionBackRight", Point3F::Zero );
+      SFXFMODDevice::smFunc->FMOD_System_Set3DSpeakerPosition(SFXFMODDevice::smSystem,FMOD_SPEAKER_BACK_RIGHT,pos.x,pos.y,bool(pos.z>0.0f));
+      pos = Con::getPoint3FVariable( "$pref::SFX::FMOD::speakerPositionSideLeft", Point3F::Zero );
+      SFXFMODDevice::smFunc->FMOD_System_Set3DSpeakerPosition(SFXFMODDevice::smSystem,FMOD_SPEAKER_SIDE_LEFT,pos.x,pos.y,bool(pos.z>0.0f));
+      pos = Con::getPoint3FVariable( "$pref::SFX::FMOD::speakerPositionSideRight", Point3F::Zero );
+      SFXFMODDevice::smFunc->FMOD_System_Set3DSpeakerPosition(SFXFMODDevice::smSystem,FMOD_SPEAKER_SIDE_RIGHT,pos.x,pos.y,bool(pos.z>0.0f));
+   }
+}
+// end jc

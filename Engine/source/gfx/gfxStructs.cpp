@@ -31,6 +31,9 @@ GFXVideoMode::GFXVideoMode()
    wideScreen = false;
    resolution.set(800,600);
    antialiasLevel = 0;
+// start jc
+   position.set(0,0);
+// end jc
 }
 
 void GFXVideoMode::parseFromString( const char *str )
@@ -52,6 +55,11 @@ void GFXVideoMode::parseFromString( const char *str )
    PARSE_ELEM(S32, bitDepth,     dAtoi, NULL,    " \0")
    PARSE_ELEM(S32, refreshRate,  dAtoi, NULL,    " \0")
    PARSE_ELEM(S32, antialiasLevel, dAtoi, NULL,    " \0")
+// start jc
+   PARSE_ELEM(S32, position.x, dAtoi, NULL, " x\0")
+   PARSE_ELEM(S32, position.y, dAtoi, NULL,    " x\0")
+   PARSE_ELEM(S32, borderless, dAtob, NULL,    " \0")
+// end jc
 
 #undef PARSE_ELEM
 
@@ -60,7 +68,10 @@ void GFXVideoMode::parseFromString( const char *str )
 
 const String GFXVideoMode::toString() const
 {
-   return String::ToString("%d %d %s %d %d %d", resolution.x, resolution.y, (fullScreen ? "true" : "false"), bitDepth,  refreshRate, antialiasLevel);
+// start jc
+//   return String::ToString("%d %d %s %d %d %d", resolution.x, resolution.y, (fullScreen ? "true" : "false"), bitDepth,  refreshRate, antialiasLevel);
+   return String::ToString("%d %d %s %d %d %d %d %d %s", resolution.x, resolution.y, (fullScreen ? "true" : "false"), bitDepth,  refreshRate, antialiasLevel, position.x, position.y, (borderless ? "true" : "false"));
+// end jc
 }
 
 void GFXShaderMacro::stringize( const Vector<GFXShaderMacro> &macros, String *outString )

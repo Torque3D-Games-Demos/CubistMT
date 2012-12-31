@@ -553,13 +553,23 @@ const char* SimXMLDocument::attribute(const char* rAttribute)
    {
       return StringTable->insert("");
    }
-
+// start jc
+/*
    if(!pNode->Attribute(rAttribute))
    {
       return StringTable->insert("");
    }
 
    return pNode->Attribute(rAttribute);
+*/
+   const char* value = pNode->Attribute(rAttribute);
+   if(!value)
+   {
+      return StringTable->insert("");
+   }
+
+   return value;
+// end jc
 }
 
 DefineEngineMethod( SimXMLDocument, attribute, const char*, ( const char* attributeName ),,

@@ -185,6 +185,9 @@ public:
    virtual const Point2I getPosition();
    virtual void centerWindow();
    virtual bool setSize(const Point2I &newSize);
+// start jc
+   virtual bool setSize(const Point2I &newSize, const Point2I &newPos);
+// end jc
    
    // Coordinate space conversion.
    virtual Point2I clientToScreen( const Point2I& pos );

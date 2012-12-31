@@ -29,6 +29,11 @@
 #include "platform/profiler.h"
 #include "console/engineAPI.h"
 #include "math/util/frustum.h"
+// start jc
+#include "collision/Convex.h"
+#include "T3D/shapeBase.h"
+#include "T3D/tsStatic.h"
+// end jc
 
 
 // [rene, 02-Mar-11]
@@ -41,10 +46,18 @@
 SceneContainer gServerContainer;
 SceneContainer gClientContainer;
 
+// start jc
+/*
 const U32 SceneContainer::csmNumBins = 16;
 const F32 SceneContainer::csmBinSize = 64;
 const F32 SceneContainer::csmTotalBinSize = SceneContainer::csmBinSize * SceneContainer::csmNumBins;
 const U32 SceneContainer::csmRefPoolBlockSize = 4096;
+*/
+const U32 SceneContainer::csmNumBins = 64;
+const F32 SceneContainer::csmBinSize = 16;
+const F32 SceneContainer::csmTotalBinSize = SceneContainer::csmBinSize * SceneContainer::csmNumBins;
+const U32 SceneContainer::csmRefPoolBlockSize = 8192;
+// end jc
 
 // Statics used by buildPolyList methods
 static AbstractPolyList* sPolyList;
@@ -117,6 +130,9 @@ SceneContainer::SceneContainer()
    VECTOR_SET_ASSOCIATION( mSearchList );
    VECTOR_SET_ASSOCIATION( mWaterAndZones );
    VECTOR_SET_ASSOCIATION( mTerrains );
+// start jc
+   VECTOR_SET_ASSOCIATION( mEventObjects );
+// end jc
 
    mFreeRefPool = NULL;
    addRefPoolBlock();
@@ -169,6 +185,11 @@ bool SceneContainer::addObject(SceneObject* obj)
       mWaterAndZones.push_back(obj);
    if( obj->getTypeMask() & TerrainObjectType )
       mTerrains.push_back( obj );
+// start jc
+   // Also insert water and physical zone types into the special vector.
+   if ( obj->getTypeMask() & ( InputEventObjectType ) )
+      mEventObjects.push_back(obj);
+// end jc
 
    return true;
 }
@@ -184,7 +205,7 @@ bool SceneContainer::removeObject(SceneObject* obj)
    if ( obj->getTypeMask() & ( WaterObjectType | PhysicalZoneObjectType ) )
    {
       Vector<SceneObject*>::iterator iter = find( mWaterAndZones.begin(), mWaterAndZones.end(), obj );
-      if( iter != mTerrains.end() )
+      if ( iter != mWaterAndZones.end() )
          mWaterAndZones.erase_fast(iter);
    }
 
@@ -195,6 +216,15 @@ bool SceneContainer::removeObject(SceneObject* obj)
       if( iter != mTerrains.end() )
          mTerrains.erase_fast(iter);
    }
+// start jc
+   // Remove water and physical zone types from the special vector.
+   if ( obj->getTypeMask() & ( InputEventObjectType ) )
+   {
+      Vector<SceneObject*>::iterator iter = find( mEventObjects.begin(), mEventObjects.end(), obj );
+      if ( iter != mEventObjects.end() )
+         mEventObjects.erase_fast(iter);
+   }
+// end jc
 
    obj->mContainer = 0;
    obj->unlink();
@@ -429,6 +459,14 @@ void SceneContainer::findObjects(const Box3F& box, U32 mask, FindCallback callba
       _findSpecialObjects( mTerrains, box, mask, callback, key );
       return;
    }
+// start jc
+   // If we're searching for just InputEventObjects then use the optimized path.
+   else if ( mask == InputEventObjectType )
+   {
+      _findInputEventObjects( box, mask, callback, key );
+      return;
+   }
+// end jc
 
    AssertFatal( !mSearchInProgress, "SceneContainer::findObjects - Container queries are not re-entrant" );
    mSearchInProgress = true;
@@ -507,6 +545,13 @@ void SceneContainer::findObjects( const Frustum &frustum, U32 mask, FindCallback
       _findSpecialObjects( mTerrains, searchBox, mask, callback, key );
       return;
    }
+// start jc
+   else if ( mask == InputEventObjectType )
+   {
+      _findInputEventObjects( searchBox, mask, callback, key );
+      return;
+   }
+// end jc
 
    AssertFatal( !mSearchInProgress, "SceneContainer::findObjects - Container queries are not re-entrant" );
    mSearchInProgress = true;
@@ -604,7 +649,13 @@ void SceneContainer::polyhedronFindObjects(const Polyhedron& polyhedron, U32 mas
       _findSpecialObjects( mTerrains, mask, callback, key );
       return;
    }
-
+// start jc
+   else if ( mask == InputEventObjectType )
+   {
+      _findInputEventObjects( box, mask, callback, key );
+      return;
+   }
+// end jc
    AssertFatal( !mSearchInProgress, "SceneContainer::polyhedronFindObjects - Container queries are not re-entrant" );
    mSearchInProgress = true;
 
@@ -813,6 +864,37 @@ void SceneContainer::_findSpecialObjects( const Vector< SceneObject* >& vector, 
    }  
 }
 
+// start jc
+void SceneContainer::_findInputEventObjects( U32 mask, FindCallback callback, void *key )
+{
+   PROFILE_SCOPE( Container_FindInputEventObjects );
+
+   Vector<SceneObject*>::iterator iter = mEventObjects.begin();
+   for ( ; iter != mEventObjects.end(); iter++ )
+   {
+      if ( (*iter)->getTypeMask() & mask )
+         callback( *iter, key );
+   }   
+}
+
+void SceneContainer::_findInputEventObjects( const Box3F &box, U32 mask, FindCallback callback, void *key )
+{
+   PROFILE_SCOPE( Container_FindInputEventObjects_Box );
+
+   Vector<SceneObject*>::iterator iter = mEventObjects.begin();
+
+   for ( ; iter != mEventObjects.end(); iter++ )
+   {
+      SceneObject *pObj = *iter;
+      
+      if ( pObj->getTypeMask() & mask &&
+           ( pObj->isGlobalBounds() || pObj->getWorldBox().isOverlapped(box) ) )
+      {
+         callback( pObj, key );
+      }
+   }  
+}
+// end jc
 //-----------------------------------------------------------------------------
 
 bool SceneContainer::castRay( const Point3F& start, const Point3F& end, U32 mask, RayInfo* info, CastRayCallback callback )
@@ -836,6 +918,19 @@ bool SceneContainer::castRayRendered( const Point3F& start, const Point3F& end, 
    PROFILE_END();
    return result;
 }
+
+// start jc
+bool SceneContainer::castRayHybrid( const Point3F& start, const Point3F& end, U32 mask, RayInfo* info, CastRayCallback callback )
+{
+   AssertFatal( info->userData == NULL, "SceneContainer::castRayRendered - RayInfo->userData cannot be used here!" );
+
+   PROFILE_START( SceneContainer_CastRayHybrid );
+   bool result = _castRay( HybridGeometry, start, end, mask, info, callback );
+   PROFILE_END();
+   return result;
+}
+// end jc
+
 
 //-----------------------------------------------------------------------------
 
@@ -885,6 +980,82 @@ bool SceneContainer::_castRay( U32 type, const Point3F& start, const Point3F& en
                result = ptr->castRay(xformedStart, xformedEnd, &ri);
             else if (type == RenderedGeometry)
                result = ptr->castRayRendered(xformedStart, xformedEnd, &ri);
+         // start jc
+            else if (type == HybridGeometry)
+            {
+               ShapeBase* shape = static_cast<ShapeBase*>(ptr);
+               if(shape)
+               {
+                  switch(shape->getInputEventsMethod())
+                  {
+                  case ShapeBase::HybridHit:
+                     {
+                     RayInfo riTemp;
+                     if(ptr->castRay(xformedStart, xformedEnd, &riTemp))
+                        result = ptr->castRayRendered(xformedStart, xformedEnd, &ri);
+                     break;
+                     }
+
+                  case ShapeBase::ConvexHit:
+                     result = ptr->castRay(xformedStart, xformedEnd, &ri);
+                     break;
+
+                  case ShapeBase::BoxHit:
+                     {
+                     Point3F temp;
+                     shape->getWorldBox().collideLine(start, end , &ri.t, &temp);
+                   //  ri.t = currentT;
+                     ri.object = ptr;
+                   //  info->point.interpolate(start, end, ri.t);
+                   //  info->distance = (start - info->point).len();
+                     result = true;
+                     break;
+                     }
+
+                  default:
+                     result = ptr->castRayRendered(xformedStart, xformedEnd, &ri);
+                  }
+               }
+               else
+               {
+                  TSStatic* shape = static_cast<TSStatic*>(ptr);
+                  if(shape)
+                  {
+                     switch(shape->getInputEventsMethod())
+                     {
+                     case ShapeBase::HybridHit:
+                        {
+                        RayInfo riTemp;
+                        if(ptr->castRay(xformedStart, xformedEnd, &riTemp))
+                           result = ptr->castRayRendered(xformedStart, xformedEnd, &ri);
+                        break;
+                        }
+
+                     case ShapeBase::ConvexHit:
+                        result = ptr->castRay(xformedStart, xformedEnd, &ri);
+                        break;
+
+                     case ShapeBase::BoxHit:
+                        {
+                        Point3F temp;
+                        shape->getWorldBox().collideLine(start, end , &ri.t, &temp);
+                     //   ri.t = currentT;
+                        ri.object = ptr;
+                     //   info->point.interpolate(start, end, ri.t);
+                     //   info->distance = (start - info->point).len();
+                        result = true;
+                        break;
+                        }
+
+                     default:
+                        result = ptr->castRayRendered(xformedStart, xformedEnd, &ri);
+                     }
+                  }
+                  else
+                     result = ptr->castRayRendered(xformedStart, xformedEnd, &ri);
+               }
+            }
+         // end jc
             if (result)
             {
                if( ri.t < currentT && ( !callback || callback( &ri ) ) )
@@ -984,6 +1155,34 @@ bool SceneContainer::_castRay( U32 type, const Point3F& start, const Point3F& en
                         result = ptr->castRay(xformedStart, xformedEnd, &ri);
                      else if (type == RenderedGeometry)
                         result = ptr->castRayRendered(xformedStart, xformedEnd, &ri);
+                  // start jc
+                     else if (type == HybridGeometry)
+                     {
+                        ShapeBase* shape = static_cast<ShapeBase*>(ptr);
+                        if(shape)
+                        {
+                           switch(shape->getInputEventsMethod())
+                           {
+                           case ShapeBase::HybridHit:
+                              {
+                              RayInfo riTemp;
+                              if(ptr->castRay(xformedStart, xformedEnd, &riTemp))
+                                 result = ptr->castRayRendered(xformedStart, xformedEnd, &ri);
+                              break;
+                              }
+
+                           case ShapeBase::ConvexHit:
+                              result = ptr->castRay(xformedStart, xformedEnd, &ri);
+                              break;
+
+                           default:
+                              result = ptr->castRayRendered(xformedStart, xformedEnd, &ri);
+                           }
+                        }
+                        else
+                           result = ptr->castRayRendered(xformedStart, xformedEnd, &ri);
+                     }
+                  // end jc
                      if (result)
                      {
                         if( ri.t < currentT && ( !callback || callback( &ri ) ) )
@@ -1076,6 +1275,34 @@ bool SceneContainer::_castRay( U32 type, const Point3F& start, const Point3F& en
                               result = ptr->castRay(xformedStart, xformedEnd, &ri);
                            else if (type == RenderedGeometry)
                               result = ptr->castRayRendered(xformedStart, xformedEnd, &ri);
+                        // start jc
+                           else if (type == HybridGeometry)
+                           {
+                              ShapeBase* shape = static_cast<ShapeBase*>(ptr);
+                              if(shape)
+                              {
+                                 switch(shape->getInputEventsMethod())
+                                 {
+                                 case ShapeBase::HybridHit:
+                                    {
+                                    RayInfo riTemp;
+                                    if(ptr->castRay(xformedStart, xformedEnd, &riTemp))
+                                       result = ptr->castRayRendered(xformedStart, xformedEnd, &ri);
+                                    break;
+                                    }
+
+                                 case ShapeBase::ConvexHit:
+                                    result = ptr->castRay(xformedStart, xformedEnd, &ri);
+                                    break;
+
+                                 default:
+                                    result = ptr->castRayRendered(xformedStart, xformedEnd, &ri);
+                                 }
+                              }
+                              else
+                                 result = ptr->castRayRendered(xformedStart, xformedEnd, &ri);
+                           }
+                        // end jc
                            if (result)
                            {
                               if( ri.t < currentT && ( !callback || callback( &ri ) ) )
@@ -1124,6 +1351,79 @@ bool SceneContainer::_castRay( U32 type, const Point3F& start, const Point3F& en
       return false;
    }
 }
+
+// start ds
+bool SceneContainer::castRect(const Point3F &start, const Point3F &finish, const F32 width, const F32 height, U32 mask, Collision *closest, F32 *time)
+{
+   if (start.equal(finish))
+      return false;
+
+   static Polyhedron sRectPolyhedron;
+   static ExtrudedPolyList sExtrudedPolyList;
+   CollisionList collisionList;
+   
+   Point3F vector(finish - start);
+   sRectPolyhedron.buildFromRect(start, vector, width, height);
+
+   // Setup the bounding box for the extrudedPolyList
+   Box3F *plistBox = &(sRectPolyhedron.getBounds());
+   Point3F oldMin = plistBox->minExtents;
+   Point3F oldMax = plistBox->maxExtents;
+   plistBox->minExtents.setMin(oldMin + vector - Point3F(0.1f, 0.1f, 0.1f));
+   plistBox->maxExtents.setMax(oldMax + vector + Point3F(0.1f, 0.1f, 0.1f));
+
+
+   // Build extruded polyList...
+   sExtrudedPolyList.extrude(sRectPolyhedron,vector);
+   sExtrudedPolyList.setVelocity(vector);
+   sExtrudedPolyList.setCollisionList(&collisionList);
+
+   Convex dummyConvex;
+   SimpleQueryList queryList;
+   this->findObjects(*plistBox, mask, SimpleQueryList::insertionCallback, &queryList);
+   for (U32 i = 0; i < queryList.mList.size(); i++)
+      queryList.mList[i]->buildConvex(*plistBox, &dummyConvex);
+   // Build list from convex states here...
+   CollisionWorkingList& rList = dummyConvex.getWorkingList();
+   CollisionWorkingList* pList = rList.wLink.mNext;
+   while (pList != &rList) {
+      Convex* pConvex = pList->mConvex;
+      if (pConvex->getObject()->getTypeMask() & mask) {
+         Box3F convexBox = pConvex->getBoundingBox();
+         if (plistBox->isOverlapped(convexBox))
+         {
+            pConvex->getPolyList(&sExtrudedPolyList);
+         }
+      }
+      pList = pList->wLink.mNext;
+   }
+
+   if (collisionList.getCount() != 0 && collisionList.getTime() < 1.0) {
+      // Pick the surface most parallel to the face that was hit.
+      Collision* collision = &collisionList[0];
+      Collision* cp = collision + 1;
+      Collision *ep = collision + collisionList.getCount();
+      for (; cp != ep; cp++)
+      {
+         if (cp->faceDot > collision->faceDot)
+            collision = cp;
+      }
+      (*closest) = *collision;
+		if (time) 
+		{
+			/*
+			Point3F vec = vector;
+			F32 lenSquared = vector.lenSquared();
+			F32 pointPlaneDist = mDot(vec,closest->point -start);
+			*time = pointPlaneDist / lenSquared;
+			*/
+			*time = collisionList.getTime();
+		}
+      return true;
+   }
+   return false;
+}
+// end ds
 
 //-----------------------------------------------------------------------------
 
@@ -1427,7 +1727,7 @@ void SceneContainer::getBinRange( const F32 min, const F32 max, U32& minBin, U32
       minBin = U32(minCoord / SceneContainer::csmBinSize);
       maxBin = U32(maxCoord / SceneContainer::csmBinSize);
       AssertFatal(minBin < SceneContainer::csmNumBins, avar("Error, bad clipping(min)! (%g, %d)", maxCoord, minBin));
-      AssertFatal(minBin < SceneContainer::csmNumBins, avar("Error, bad clipping(max)! (%g, %d)", maxCoord, maxBin));
+      AssertFatal(maxBin < SceneContainer::csmNumBins, avar("Error, bad clipping(max)! (%g, %d)", maxCoord, maxBin));
 
       // MSVC6 seems to be generating some bad floating point code around
       // here when full optimizations are on.  The min != max test should

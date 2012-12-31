@@ -119,19 +119,39 @@ struct StringStack
    }
 
    /// Return a temporary buffer we can use to return data.
+// start jc
+/*
    char* getReturnBuffer(U32 size)
    {
       validateArgBufferSize(size);
       return mArgBuffer;
    }
+*/
+   char *getReturnBuffer(U32 size)
+   {
+      if(size > ReturnBufferSpace)
+      {
+ 		 return getArgBuffer(size);
+      }
+      else
+      {
+         validateBufferSize(mStart + size);
+         return mBuffer + mStart;
+      }
+   }
+// end jc
 
    /// Return a buffer we can use for arguments.
    ///
    /// This updates the function offset.
    char *getArgBuffer(U32 size)
    {
-      validateBufferSize(mStart + mFunctionOffset + size);
-      char *ret = mBuffer + mStart + mFunctionOffset;
+// start jc
+   //   validateBufferSize(mStart + mFunctionOffset + size);
+   //   char *ret = mBuffer + mStart + mFunctionOffset;
+      validateArgBufferSize(mStart + mFunctionOffset + size);
+      char *ret = mArgBuffer + mStart + mFunctionOffset;
+// end jc
       mFunctionOffset += size;
       return ret;
    }

@@ -210,7 +210,11 @@ void Frustum::setNearFarDist( F32 nearDist, F32 farDist )
 
    // Recalculate the frustum.
    MatrixF xfm( mTransform ); 
-   set( mIsOrtho, getFov(), getAspectRatio(), nearDist, farDist, xfm );
+// start jc
+   //IB: this breaks off axis projections for decals, scattersky and decal roads. Use the other set function. 
+//   set( mIsOrtho, getFov(), getAspectRatio(), nearDist, farDist, xfm );
+   set(mIsOrtho, mNearLeft,mNearRight, mNearTop, mNearBottom, nearDist, farDist, xfm);
+// end jc
 }
 
 //-----------------------------------------------------------------------------
@@ -452,6 +456,31 @@ void Frustum::tileFrustum(U32 numTiles, const Point2I& curTile, Point2F overlap)
    
    tile(&mNearLeft, &mNearRight, &mNearTop, &mNearBottom, mNumTiles, mCurrTile, mTileOverlap);
 }
+
+//-----------------------------------------------------------------------------
+
+// start jc
+void Frustum::offsetFrustum(Point4F offset)
+{
+   Point2F tileSize( ( mNearRight - mNearLeft ), 
+                     ( mNearTop - mNearBottom ));
+   
+   F32 leftOffset   = tileSize.x*offset.x;
+   F32 bottomOffset = tileSize.y*(1.0f-offset.w);
+   F32 rightOffset  = tileSize.x*offset.z;
+   F32 topOffset    = tileSize.y*(1.0f-offset.y);
+
+   mNearLeft += leftOffset;
+   mNearRight = mNearLeft + rightOffset;
+   mNearBottom += bottomOffset;
+   mNearTop = mNearBottom + topOffset;
+
+   // todo: update planes also
+//   mDirty = true;
+//   _update(); // maybe
+
+}
+// end jc
 
 //-----------------------------------------------------------------------------
 

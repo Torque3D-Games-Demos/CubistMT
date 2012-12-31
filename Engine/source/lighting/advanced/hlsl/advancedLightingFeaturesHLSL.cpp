@@ -246,6 +246,9 @@ void DeferredBumpFeatHLSL::processVert(   Vector<ShaderComponent*> &componentLis
    }
    else if (   fd.materialFeatures[MFT_NormalsOut] || 
                fd.features[MFT_ForwardShading] || 
+            //start jc
+               fd.features[MFT_IsObjectSpaceNormals] || 
+            // end jc
                !fd.features[MFT_RTLighting] )
    {
       Parent::processVert( componentList, fd );

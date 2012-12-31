@@ -476,7 +476,25 @@ public:
       return "Fog";
    }
 };
+// star jc
+class FogBlendAddFeatHLSL : public FogFeatHLSL
+{
+protected:
 
+   ShaderIncludeDependency mFogDep;
+
+public:
+   FogBlendAddFeatHLSL();
+
+   virtual void processPix( Vector<ShaderComponent*> &componentList, 
+                            const MaterialFeatureData &fd );
+
+   virtual String getName()
+   {
+      return "FogBlendAdd";
+   }
+};
+// end jc
 
 /// Tex Anim
 class TexAnimHLSL : public ShaderFeatureHLSL
@@ -534,6 +552,23 @@ public:
    }
 };
 
+// start jc
+
+///
+class AlphaScatterHLSL : public ShaderFeatureHLSL
+{
+public:
+   virtual void processPix(   Vector<ShaderComponent*> &componentList, 
+                              const MaterialFeatureData &fd );
+
+   virtual Material::BlendOp getBlendOp() { return Material::None; }
+
+   virtual String getName()
+   {
+      return "Alpha Scatter";
+   }
+};
+// end jc
 
 /// Special feature used to mask out the RGB color for
 /// non-glow passes of glow materials.

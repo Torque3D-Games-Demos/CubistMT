@@ -27,6 +27,10 @@
 #include "materials/matInstance.h"
 #include "materials/materialManager.h"
 
+// start jc
+#include "gfx/video/webTexture.h"
+#include "materials/matTextureTarget.h"
+// end jc
 
 TSMaterialList::TSMaterialList(U32 materialCount,
                                const char **materialNames,
@@ -312,6 +316,78 @@ bool TSMaterialList::renameMaterial(U32 i, const String& newName)
 
    return true;
 }
+
+// start jc
+
+/// Profile for the video texture.
+GFX_ImplementTextureProfile(  GFXWebViewDataProfile,
+                              GFXTextureProfile::DiffuseMap,
+                              GFXTextureProfile::NoMipmap | GFXTextureProfile::Dynamic | GFXTextureProfile::PreserveSize/* | GFXTextureProfile::KeepBitmap | GFXTextureProfile::NoPadding*/,
+                              GFXTextureProfile::None );
+
+static   int   numberClonedMaterials=0;
+void  TSMaterialList::cloneMaterial(U32 i)
+{
+   MatInstance *oldMatInst = static_cast<MatInstance *>(mMatInstList[ i ]);
+   AssertWarn(oldMatInst!=0,"TSMaterialList::cloneMaterial - material missing");
+   if(!oldMatInst)return;
+
+   Material *mat = MATMGR->allocateAndRegister(oldMatInst->getMaterial()->mMapTo, oldMatInst->getMaterial()->mMapTo + String::ToString(numberClonedMaterials++) );
+   if( mMatInstList[ i ] )
+      SAFE_DELETE( mMatInstList[ i ] );
+
+   BaseMatInstance   *matInst = mat->createMatInstance();
+
+   if(matInst)
+   {
+      mMatInstList[ i ] = matInst;
+   }
+}
+void  TSMaterialList::cloneMaterial(String name)
+{
+   for(U32 i=0; i<size(); i++){
+      MatInstance   *mat = (MatInstance *)getMaterialInst(i);
+      if( mat && name.compare(mat->getMaterial()->getName())==0 ){
+         cloneMaterial(i);                  
+      }
+   }
+}
+bool TSMaterialList::setWebViewMaterial(U32 i, WebViewData *webViewData)
+{
+   BaseMatInstance *matInst = mMatInstList[ i ];
+   if(matInst && webViewData)
+   {
+      String matName(String("WebMaterial")+webViewData->getIdString());
+      Material* mat = MATMGR->getMaterialDefinitionByName(matName);
+      if(!mat)
+         mat = MATMGR->allocateAndRegister(matName, String("web")+webViewData->getIdString());
+      if(!mat)
+      {
+         Con::warnf("TSMaterialList::setWebViewMaterial - failed to allocate and register material");
+         return false;
+      }
+      mat->mWebViewData[0] = webViewData;
+      mat->mTranslucent = true;
+      mat->mTranslucentBlendOp = Material::Sub;
+      mat->mTranslucentZWrite = false;
+ 
+
+      if( mMatInstList[ i ] )
+         SAFE_DELETE( mMatInstList[ i ] );
+
+      matInst = mat->createMatInstance();
+
+      if(matInst)
+      {
+         mMatInstList[ i ] = matInst;
+         return true;
+      }
+      return true;
+   }
+   return false;
+}
+// end jc
+
 
 void TSMaterialList::mapMaterial( U32 i )
 {

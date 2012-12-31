@@ -27,6 +27,17 @@
 #include "gui/core/guiControl.h"
 #endif
 
+// start jc
+#ifndef _MATERIALDEFINITION_H_
+#include "materials/materialDefinition.h"
+#endif
+#ifndef _GFXSTATEBLOCK_H_
+#include "gfx/gfxStateBlock.h"
+#endif
+
+//class Material;
+// end jc
+
 /// Renders a bitmap.
 class GuiBitmapCtrl : public GuiControl
 {
@@ -47,6 +58,12 @@ class GuiBitmapCtrl : public GuiControl
       
       /// If true, bitmap tiles inside control.  Otherwise stretches.
       bool mWrap;
+   // start jc
+      bool mLockAspect;
+	  bool mTranslucent;
+	  Material::BlendOp mTranslucentBlendOp;
+	  GFXStateBlockRef mTranslucentSB;
+   // end jc
 
       static bool setBitmapName( void *object, const char *index, const char *data );
       static const char *getBitmapName( void *obj, const char *data );
@@ -68,7 +85,11 @@ class GuiBitmapCtrl : public GuiControl
 
       void onRender(Point2I offset, const RectI &updateRect);
       void setValue(S32 x, S32 y);
-
+   // start jc
+      bool setExtent( const Point2I& newExtent);
+      inline  void setExtent( const S32 width, const S32 height) { setExtent(Point2I(width, height)); }
+      Point2I getNativeExtent() const;
+   // end jc
       DECLARE_CONOBJECT( GuiBitmapCtrl );
       DECLARE_CATEGORY( "Gui Images" );
       DECLARE_DESCRIPTION( "A control that displays a single, static image from a file.\n"

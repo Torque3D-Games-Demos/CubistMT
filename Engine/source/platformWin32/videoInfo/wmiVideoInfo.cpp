@@ -347,8 +347,14 @@ bool WMIVideoInfo::_queryProperty( const PVIQueryType queryType, const U32 adapt
 {
    if( _queryPropertyDXGI( queryType, adapterId, outValue ) )
       return true;
+//start pg
+#ifdef   PERFHUD_HACK
+#else
    else if( _queryPropertyDxDiag( queryType, adapterId, outValue ) )
       return true;
+#endif
+//end pg
+
    else
       return _queryPropertyWMI( queryType, adapterId, outValue );
 }

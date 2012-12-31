@@ -110,9 +110,16 @@ void GBufferConditionerHLSL::processVert( Vector<ShaderComponent*> &componentLis
       NamedFeatureHLSL dummy( String::EmptyString );
       dummy.mInstancingFormat = mInstancingFormat;
       Var *worldViewOnly = dummy.getWorldView( componentList, fd.features[MFT_UseInstancing], meta );
-
-      meta->addStatement(  new GenOp("   @ = mul(@, float4( normalize(@), 0.0 ) ).xyz;\r\n", 
-                              outNormal, worldViewOnly, inNormal ) );
+// start jc
+//      meta->addStatement(  new GenOp("   @ = mul(@, float4( normalize(@), 0.0 ) ).xyz;\r\n", 
+//                              outNormal, worldViewOnly, inNormal ) );
+      if( fd.features.hasFeature(MFT_IsObjectSpaceNormals) )
+         meta->addStatement(  new GenOp("   @ = @;\r\n", 
+                                 outNormal, worldViewOnly ) );
+      else
+         meta->addStatement(  new GenOp("   @ = mul(@, float4( normalize(@), 0.0 ) ).xyz;\r\n", 
+                               outNormal, worldViewOnly, inNormal ) );
+// end jc
    }
    else
    {

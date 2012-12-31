@@ -30,6 +30,9 @@
 #include "core/util/path.h"
 #endif
 
+// start jc
+class WebViewData;
+// end jc
 
 /// Specialized material list for 3space objects.
 class TSMaterialList : public MaterialList
@@ -75,6 +78,9 @@ class TSMaterialList : public MaterialList
    void setFlags(U32 index, U32 value);
 
    bool renameMaterial(U32 index, const String& newName); // use to support reskinning
+// start jc
+   bool setWebViewMaterial(U32 i, WebViewData *webViewData);
+// end jc
 
    /// pre-load only
    void push_back(const String &name, U32 flags,
@@ -89,6 +95,8 @@ class TSMaterialList : public MaterialList
    bool write(Stream &);
    bool read(Stream &);
    /// @}
+   void  cloneMaterial(U32 i);
+   void  cloneMaterial(String name);
 
 protected:
    virtual void mapMaterial( U32 index );

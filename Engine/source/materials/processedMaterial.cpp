@@ -31,7 +31,9 @@
 #include "scene/sceneRenderState.h"
 #include "gfx/gfxPrimitiveBuffer.h"
 #include "gfx/sim/cubemapData.h"
-
+// start jc
+#include "gfx/video/webTexture.h"
+// end jc
 
 RenderPassData::RenderPassData()
 {
@@ -185,6 +187,9 @@ void ProcessedMaterial::_initStateBlockTemplates(GFXStateBlockDesc& stateTranslu
    stateTranslucent.zWriteEnable = mMaterial->mTranslucentZWrite;   
    stateTranslucent.alphaDefined = true;
    stateTranslucent.alphaTestEnable = mMaterial->mAlphaTest;
+// start jc
+   stateTranslucent.alphaScatterEnable = mMaterial->mAlphaScatter;
+// end jc
    stateTranslucent.alphaTestRef = mMaterial->mAlphaRef;
    stateTranslucent.alphaTestFunc = GFXCmpGreaterEqual;
    stateTranslucent.samplersDefined = true;
@@ -230,6 +235,12 @@ void ProcessedMaterial::_initPassStateBlock( RenderPassData *rpd, GFXStateBlockD
       result.alphaTestRef = mMaterial->mAlphaRef;
       result.alphaTestFunc = GFXCmpGreaterEqual;
    }
+// start jc
+   if(mMaterial->mAlphaScatter)
+   {
+      result.alphaScatterEnable = mMaterial->mAlphaScatter;
+   }
+// end jc
 
    result.samplersDefined = true;
    NamedTexTarget *texTarget;
@@ -385,7 +396,56 @@ void ProcessedMaterial::_setStageData()
    for( i=0; i<Material::MAX_STAGES; i++ )
    {
       // DiffuseMap
-      if( mMaterial->mDiffuseMapFilename[i].isNotEmpty() )
+   // start jc
+#if TORQUE_AWESOMIUM_VERSION >= 17
+   //   if( mMaterial->mDiffuseMapFilename[i].isNotEmpty() )
+      if(mMaterial->mWebViewData[i])
+      {
+         WebViewTexture* webTex = mMaterial->mWebViewData[i]->getWebViewTexture();
+         if(webTex)
+         {
+           // webTex->getTexture().free();
+         //   webTex->refresh();
+            if(webTex->getTexture().isValid())
+               mStages[i].setTex( MFT_DiffuseMap, webTex->getTexture() );
+            else
+               mStages[i].setTex( MFT_DiffuseMap, GFXTexHandle::ZERO );
+
+         }
+         if (!mStages[i].getTex( MFT_DiffuseMap ))
+         {
+            mMaterial->logError("Failed to load diffuse map %s for stage %i", mMaterial->mWebViewData[i]->getName(), i);
+            
+            // Load a debug texture to make it clear to the user 
+            // that the texture for this stage was missing.
+         //   mStages[i].setTex( MFT_DiffuseMap, _createTexture( "core/art/missingTexture", &GFXDefaultStaticDiffuseProfile ) );
+            mStages[i].setTex( MFT_DiffuseMap, GFXTexHandle::ZERO );
+         }
+      }
+      else if( mMaterial->mDiffuseMapFilename[i].isNotEmpty() )
+#else
+   //   if( mMaterial->mDiffuseMapFilename[i].isNotEmpty() )
+      if(mMaterial->mWebViewData[i])
+      {
+         WebViewTexture* webTex = &(mMaterial->mWebViewData[i]->getWebViewTexture());
+         if(webTex)
+         {
+         //   webTex->refresh();
+            if(webTex->getTexture().isValid())
+               mStages[i].setTex( MFT_DiffuseMap, webTex->getTexture() );
+         }
+         if (!mStages[i].getTex( MFT_DiffuseMap ))
+         {
+            mMaterial->logError("Failed to load diffuse map %s for stage %i", mMaterial->mWebViewData[i]->getName(), i);
+            
+            // Load a debug texture to make it clear to the user 
+            // that the texture for this stage was missing.
+            mStages[i].setTex( MFT_DiffuseMap, _createTexture( "core/art/missingTexture", &GFXDefaultStaticDiffuseProfile ) );
+         }
+      }
+      else if( mMaterial->mDiffuseMapFilename[i].isNotEmpty() )
+#endif
+   // end jc
       {
          mStages[i].setTex( MFT_DiffuseMap, _createTexture( mMaterial->mDiffuseMapFilename[i], &GFXDefaultStaticDiffuseProfile ) );
          if (!mStages[i].getTex( MFT_DiffuseMap ))

@@ -37,6 +37,9 @@ ImplementFeatureType( MFT_OverlayMap, MFG_Texture, 3.0f, true );
 ImplementFeatureType( MFT_DetailMap, MFG_Texture, 4.0f, true );
 ImplementFeatureType( MFT_DiffuseColor, MFG_Texture, 5.0f, true );
 ImplementFeatureType( MFT_AlphaTest, MFG_Texture, 7.0f, true );
+// start jc
+ImplementFeatureType( MFT_AlphaScatter, MFG_Texture, 7.1f, true );
+// end jc
 ImplementFeatureType( MFT_SpecularMap, MFG_Texture, 8.0f, true );
 ImplementFeatureType( MFT_NormalMap, MFG_Texture, 9.0f, true );
 ImplementFeatureType( MFT_DetailNormalMap, MFG_Texture, 10.0f, true );
@@ -84,3 +87,7 @@ ImplementFeatureType( MFT_ParticleNormal, MFG_PreTransform, 2.0f, false );
 ImplementFeatureType( MFT_ForwardShading, U32(-1), -1, true );
 
 ImplementFeatureType( MFT_ImposterVert, MFG_PreTransform, 1.0, false );
+// start jc
+ImplementFeatureType( MFT_IsObjectSpaceNormals, MFG_PreTransform, 1.0, false );
+ImplementFeatureType( MFT_FogBlendAdd, MFG_PostProcess, 4.0f, true );
+// end jc

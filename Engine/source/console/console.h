@@ -33,6 +33,12 @@
 
 #include "core/util/journal/journaledSignal.h"
 
+// start jc
+#ifndef _MPOINT3_H_
+#include "math/mPoint3.h"
+#endif
+//class Point3F;
+// end jc
 class SimObject;
 class Namespace;
 struct ConsoleFunctionHeader;
@@ -441,6 +447,10 @@ namespace Con
    /// @param  name  Name of the variable.
    /// @param  def   Default value to supply if no matching variable is found.
    F32  getFloatVariable(const char* name,F32 def = .0f);
+
+// start jc
+   Point3F getPoint3FVariable(const char *varName, Point3F def = Point3F::Zero);
+// end jc
 
    /// @}
 

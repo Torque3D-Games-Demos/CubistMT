@@ -63,12 +63,19 @@ class SFXEmitter : public SceneObject
       /// Network update masks.
       enum UpdateMasks 
       {
+      // start jc
+      //   InitialUpdateMask    = BIT(0),
+      //   TransformUpdateMask  = BIT(1),
+      //   DirtyUpdateMask      = BIT(2),
+      //   SourcePlayMask       = BIT(3),
+      //   SourceStopMask       = BIT(4),
          InitialUpdateMask    = BIT(0),
-         TransformUpdateMask  = BIT(1),
-         DirtyUpdateMask      = BIT(2),
-
-         SourcePlayMask       = BIT(3),
-         SourceStopMask       = BIT(4),
+         TransformUpdateMask  = Parent::NextFreeMask << 0,
+         DirtyUpdateMask      = Parent::NextFreeMask << 1,
+         SourcePlayMask       = Parent::NextFreeMask << 2,
+         SourceStopMask       = Parent::NextFreeMask << 3,
+         NextFreeMask         = Parent::NextFreeMask << 4,
+      // end jc
 
          AllSourceMasks = SourcePlayMask | SourceStopMask,
       };

@@ -214,6 +214,9 @@ protected:
    F32 mSpecularPower;
    ColorF mSpecularColor;
    bool mEmissive;
+// start jc
+   bool mUnderwaterFog;
+// end jc
 
    // Reflection
    bool mFullReflect;

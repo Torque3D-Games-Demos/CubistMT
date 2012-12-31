@@ -180,6 +180,10 @@ enum GFXFormat
 
    // 32 bit texture formats...
    GFXFormatR8G8B8A8,// first in group...
+// start jc
+   GFXFormatB8G8R8A8,
+   GFXFormatD15S1,
+// end jc
    GFXFormatR8G8B8X8,
    GFXFormatR32F,
    GFXFormatR16G16,

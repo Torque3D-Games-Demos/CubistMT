@@ -650,6 +650,54 @@ bool TSShape::setNodeTransform(const String& name, const Point3F& pos, const Qua
 
    return true;
 }
+// start jc
+bool TSShape::setNodeTransform(S32 nodeIndex, const Point3F& pos, const QuatF& rot)
+{
+   // Find the node to be transformed
+//   S32 nodeIndex = findNode(name);
+   if (nodeIndex < 0)
+   {
+//      Con::errorf("TSShape::setNodeTransform: Could not find node '%s'", name.c_str());
+      return false;
+   }
+
+   // Update initial node position and rotation
+   defaultTranslations[nodeIndex] = pos;
+   defaultRotations[nodeIndex].set(rot);
+
+   return true;
+}
+bool TSShape::setNodePosition(S32 nodeIndex, const Point3F& pos)
+{
+   // Find the node to be transformed
+//   S32 nodeIndex = findNode(name);
+   if (nodeIndex < 0)
+   {
+//      Con::errorf("TSShape::setNodeTransform: Could not find node '%s'", name.c_str());
+      return false;
+   }
+
+   // Update initial node position and rotation
+   defaultTranslations[nodeIndex] = pos;
+
+   return true;
+}
+bool TSShape::setNodeRotation(S32 nodeIndex, const QuatF& rot)
+{
+   // Find the node to be transformed
+//   S32 nodeIndex = findNode(name);
+   if (nodeIndex < 0)
+   {
+//      Con::errorf("TSShape::setNodeTransform: Could not find node '%s'", name.c_str());
+      return false;
+   }
+
+   // Update initial node position and rotation
+   defaultRotations[nodeIndex].set(rot);
+
+   return true;
+}
+// end jc
 
 //-----------------------------------------------------------------------------
 
@@ -1960,6 +2008,52 @@ bool TSShape::removeTrigger(const String& seqName, S32 keyframe, S32 state)
 
    return false;
 }
+
+// start jc
+
+bool TSShape::addVisibility(const String& seqName, S32 startFrame, S32 endFrame, U32 objectIndex, bool visible)
+{
+   // Find the sequence
+   S32 seqIndex = findSequence(seqName);
+   if (seqIndex < 0)
+   {
+      Con::errorf("TSShape::addVisibility: Could not find sequence '%s'", seqName.c_str());
+      return false;
+   }
+
+   TSShape::Sequence& seq = sequences[seqIndex];
+   if (startFrame >= seq.numKeyframes || endFrame >= seq.numKeyframes)
+   {
+      Con::errorf("TSShape::addVisibility: Keyframe out of range (0-%d for sequence '%s')",
+         seq.numKeyframes-1, seqName.c_str());
+      return false;
+   }
+
+   if (objectIndex >= objects.size())
+   {
+      Con::errorf("TSShape::addVisibility: Could not find object '%d'", objectIndex);
+      return false;
+   }
+
+   seq.dirtyFlags |= TSShapeInstance::VisDirty;
+
+   static TSShape::ObjectState objState;
+ 
+   seq.visMatters.set(objectIndex);
+   objState.vis = visible;
+   objState.matFrameIndex = 0;
+   objState.frameIndex = 0;
+
+
+   for(U32 i = startFrame; i < endFrame; i++)
+   {
+      objState.frameIndex = i;
+      setObjectState(seq, i, objectIndex, objState);
+   }
+
+   return true;
+}
+// end jc
 
 void TSShape::getNodeKeyframe(S32 nodeIndex, const TSShape::Sequence& seq, S32 keyframe, MatrixF* mat) const
 {

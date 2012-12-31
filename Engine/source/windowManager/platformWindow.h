@@ -180,6 +180,14 @@ public:
    /// This is called to poll the window as to it's idle state.  
    virtual bool getOffscreenRender() { return mOffscreenRender; };
 
+// start jc
+   void touchWindowFocus()
+   {
+      if(mWindowInputGenerator)
+         mWindowInputGenerator->touchWindowFocus();
+   }
+   WindowInputGenerator* getWindowInputGenerator()  { return mWindowInputGenerator; } 
+// end jc
 
    /// Set Focused State (Foreground)
    ///
@@ -477,6 +485,10 @@ public:
    DisplayEvent      displayEvent;
    ResizeEvent       resizeEvent;
    IdleEvent         idleEvent;
+// start jc
+//   TouchEvent        touchEvent;
+   NativeKeyEvent    nativeKeyEvent;
+// end jc
 
    /// @}
    

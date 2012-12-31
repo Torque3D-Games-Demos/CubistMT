@@ -29,6 +29,9 @@
 #include "gfx/gfxStructs.h"
 #include "windowManager/win32/win32Window.h"
 #include "core/util/tVector.h"
+// start jc
+#include "core/util/tDictionary.h"
+// end jc
 
 /// Win32 implementation of the window manager interface.
 class Win32WindowManager : public PlatformWindowManager
@@ -65,7 +68,10 @@ class Win32WindowManager : public PlatformWindowManager
       );
 
    /// If a curtain window is present, then its HWND will be stored here.
-   HWND mCurtainWindow;
+   // start jc
+   //HWND mCurtainWindow;
+   Map<HWND,HWND> mCurtainWindow;
+   // end jc
 
 public:
    Win32WindowManager();
@@ -88,6 +94,10 @@ public:
 
    virtual void lowerCurtain();
    virtual void raiseCurtain();
+// start jc
+   virtual void lowerCurtain(HWND hwnd);
+   virtual void raiseCurtain(HWND hwnd);
+// end jc
 };
 
 #endif

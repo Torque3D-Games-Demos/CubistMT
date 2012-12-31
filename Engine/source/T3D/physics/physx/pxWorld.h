@@ -109,6 +109,9 @@ public:
    virtual void onDebugDraw( const SceneRenderState *state );
    virtual void reset() {}
    virtual bool isEnabled() const { return mIsEnabled; }
+// start pg
+   virtual  bool sweepSphere(SweepResult &res,  const Point3F &start, const Point3F &end, const F32 &radius );
+// end pg
 
    /// @name Static Methods
    /// @{
@@ -188,6 +191,12 @@ public:
 
    void setEditorTimeScale( F32 timeScale ) { mEditorTimeScale = timeScale; }
    const F32 getEditorTimeScale() const { return mEditorTimeScale; }
+
+// start jc
+   /// Returns the active gravity force.
+   void setGravity(const Point3F& gravity);
+// end jc
+
 };
 
 #endif // _PHYSX_WORLD_H_

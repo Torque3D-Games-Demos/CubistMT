@@ -97,6 +97,19 @@ void PhysicsForce::attach( const Point3F &start, const Point3F &direction, F32 m
    mBody = body;
 }
 
+// start jc
+void PhysicsForce::attach( PhysicsBody* body )
+{
+   detach();
+
+   // If there is no physics world then we cannot apply any forces.
+   if ( !mWorld && body )
+      return;
+
+   mBody = body;
+}
+// end jc
+
 void PhysicsForce::detach( const Point3F &force )
 {
    if ( mBody && !force.isZero() )

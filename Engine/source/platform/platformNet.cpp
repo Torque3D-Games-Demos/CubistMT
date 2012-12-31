@@ -28,6 +28,10 @@
 #define TORQUE_USE_WINSOCK
 #include <errno.h>
 #include <winsock.h>
+// start jc
+#include <iphlpapi.h>
+#pragma comment(lib, "IPHLPAPI.lib")
+// end jc
 #define EINPROGRESS             WSAEINPROGRESS
 #define ioctl ioctlsocket
 
@@ -500,7 +504,14 @@ bool Net::openPort(S32 port, bool doBind)
 	  }
 
       if(error == NoError)
-         error = setBufferSize(udpSocket, 32768);
+      // start jc
+      // this little sucker limits LAN utilization to 1% of 
+      // our modern 1Gb large window hardware.
+
+      // hard coded values ruin lives!
+      //   error = setBufferSize(udpSocket, 32768);
+         error = setBufferSize(udpSocket, 32768*8);
+      // end jc
 
       if(error == NoError && !useVDP)
          error = setBroadcast(udpSocket, true);
@@ -1049,3 +1060,27 @@ void Net::addressToString(const NetAddress *address, char  addressString[256])
    }
 }
 
+// start jc
+#if defined (TORQUE_OS_WIN32)
+
+#define INFO_BUFFER_SIZE 32767
+String Net::getLocalComputerName()
+{
+	TCHAR  infoBuf[INFO_BUFFER_SIZE];
+	DWORD  bufCharCount = INFO_BUFFER_SIZE;
+	if( !GetComputerName( infoBuf, &bufCharCount ) )
+	{
+		Con::warnf( "Net::getLocalComputerName: failed" );
+		return String::EmptyString;
+	}
+	return infoBuf;
+}
+
+#else
+
+String Net::getLocalComputerName()
+{
+	return String::EmptyString;
+}
+#endif
+// end jc

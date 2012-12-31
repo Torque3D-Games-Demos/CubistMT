@@ -46,6 +46,14 @@
 #endif
 #endif
 
+// start jc
+#ifndef _SIMTUIO_H_
+#include "console/simTUIO.h"
+#endif
+//class MultiTouchEvent;
+
+// end jc
+
 /// A canvas on which rendering occurs.
 ///
 ///
@@ -85,7 +93,9 @@
 ///
 class GuiCanvas : public GuiControl, public IProcessInput
 {
-
+// start jc
+   friend class guiTouchListner;
+// end jc
 protected:
    typedef GuiControl Parent;
 
@@ -132,6 +142,14 @@ protected:
    bool                       mRightMouseLast;
    Point2F                    mMouseDownPoint;
 
+// start jc
+//   MultiTouchEvent*           mMultiTouchEvent;
+   Map<U32, SimObjectPtr<GuiControl>> mTouchCapturedControl;
+   U32 mFullscreenMonitor;
+   bool  mTouchCapturedMouse;
+   U32   mTouchCapturedMouseId;
+// end jc
+
    /// Processes keyboard input events. Helper method for processInputEvent
    ///
    /// \param inputEvent Information on the input even to be processed.
@@ -143,6 +161,16 @@ protected:
    /// \param inputEvent Information on the input even to be processed.
    /// \return True if the event was handled or false if it was not.
    virtual bool processMouseEvent(InputEventInfo &inputEvent);
+
+// start jc
+   /// Processes mouse input events. Helper method for processInputEvent
+   ///
+   /// \param inputEvent Information on the input even to be processed.
+   /// \return True if the event was handled or false if it was not.
+//   virtual bool processMouseEvent(Point2I touchPosition, GuiTouchEvent::EventType eventType );
+
+   void findTouchControl(const GuiTouchEvent &event);
+// end jc
 
    /// Processes gamepad input events. Helper method for processInputEvent
    ///
@@ -202,6 +230,7 @@ public:
    virtual void onRemove();
 
    static void initPersistFields();
+   bool isLocked(S32 id);
 
    /// @name Rendering methods
    ///
@@ -322,6 +351,29 @@ public:
    /// Returns the point, in screenspace, at which the cursor is located.
    virtual Point2I getCursorPos();
 
+// start jc
+   /// Returns the point, in screenspace, at which the cursor is located.
+   virtual Point2I getCanvasCursorPos();
+
+   void setTouchCapturedMouse(U32 touchId)
+   {
+      mTouchCapturedMouseId = touchId;
+      mTouchCapturedMouse = true;
+   }
+   void clearTouchCapturedMouse(void)
+   {
+      mTouchCapturedMouse = false;
+   }
+   bool isTouchCapturedMouse(void)
+   {
+      return mTouchCapturedMouse;
+   }
+   U32 getTouchCapturedMouse(void)
+   {
+      return mTouchCapturedMouseId;
+   }
+// end jc
+
    /// Enable/disable rendering of the cursor.
    /// @param   state    True if we should render cursor
    virtual void showCursor(bool state);
@@ -341,7 +393,9 @@ public:
    /// @param   event   Input event to process
    virtual bool processInputEvent(InputEventInfo &inputEvent);
    /// @}
-
+// start jc
+   virtual bool processTouchEvent( U32 touchId, S32 x, S32 y, U32 eventType );
+// end jc
    /// @name Mouse Methods
    /// @{
 
@@ -359,6 +413,15 @@ public:
 
    /// Returns the control which the mouse is locked to if any
    virtual GuiControl* getMouseLockedControl() { return mMouseCapturedControl; }
+
+// start jc
+   virtual void touchIDLock(U32 touchID, GuiControl *lockingControl);
+   virtual void touchIDUnlock(U32 touchID, GuiControl *lockingControl);
+   virtual GuiControl* getTouchIDLockedControl(U32 touchID)
+   {
+      return mTouchCapturedControl[touchID];
+   }
+// end jc
 
    /// Returns true if the left mouse button is down
    virtual bool mouseButtonDown(void) { return mMouseButtonDown; }
@@ -392,6 +455,24 @@ public:
    virtual bool rootMouseWheelUp(const GuiEvent &event);
    virtual bool rootMouseWheelDown(const GuiEvent &event);
    /// @}
+
+// start jc
+   /// @name Mouse input methods
+   /// These events process the events before passing them down to the
+   /// controls they effect. This allows for things such as the input
+   /// locking and such.
+   ///
+   /// Each of these methods corresponds to the action in it's method name
+   /// and processes the GuiEvent passed as a parameter
+   /// @{
+   virtual bool rootTouchUp(const GuiTouchEvent &event);
+   virtual bool rootTouchMove(const GuiTouchEvent &event);
+   virtual bool rootTouchDown(const GuiTouchEvent &event);
+   /// @}
+   Point2I getLocalTouchPosition(Point2F& point);
+
+
+// end jc
 
    /// @name Keyboard input methods
    /// First responders

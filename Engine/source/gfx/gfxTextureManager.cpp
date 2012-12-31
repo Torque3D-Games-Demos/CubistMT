@@ -249,13 +249,32 @@ GFXTextureObject *GFXTextureManager::_lookupTexture( const DDSFile *ddsFile, con
    return NULL;
 }
 
+// start pg
+bool IsPowerOfTwo(U32 x)
+{
+   for(U32 mask=1; mask; mask<<=1){
+      if(x==mask)return true;
+   }
+   return false;
+}
+// end pg
+
 GFXTextureObject *GFXTextureManager::createTexture( GBitmap *bmp, const String &resourceName, GFXTextureProfile *profile, bool deleteBmp )
 {
    AssertFatal(bmp, "GFXTextureManager::createTexture() - Got NULL bitmap!");
 
+// start pg
+   if( (!IsPowerOfTwo(bmp->getWidth())) || (!IsPowerOfTwo(bmp->getHeight())) ){
+      Con::printf("WARNING: (%s) texture size = %dx%d",resourceName.c_str(),bmp->getWidth(),bmp->getHeight());
+   }
+// end pg
+
    GFXTextureObject *cacheHit = _lookupTexture( resourceName, profile );
    if( cacheHit != NULL)
    {
+// start pg
+      Con::printf("cached texture:%s",resourceName.c_str());
+// end pg
       // Con::errorf("Cached texture '%s'", (resourceName.isNotEmpty() ? resourceName.c_str() : "unknown"));
       if (deleteBmp)
          delete bmp;

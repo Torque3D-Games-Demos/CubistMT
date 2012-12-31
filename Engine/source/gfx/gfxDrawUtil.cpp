@@ -44,6 +44,10 @@ GFXDrawUtil::GFXDrawUtil( GFXDevice * d)
    mBitmapModulation.set(0xFF, 0xFF, 0xFF, 0xFF);
    mTextAnchorColor.set(0xFF, 0xFF, 0xFF, 0xFF);
    mFontRenderBatcher = new FontRenderBatcher();
+// start jc
+   mLockStateBlock = false;
+   mGenericShader = GFXDevice::GSModColorTexture;
+// end jc
 
    _setupStateBlocks();   
 }
@@ -398,6 +402,7 @@ void GFXDrawUtil::drawBitmapStretchSR( GFXTextureObject* texture, const RectF &d
 
    mDevice->setVertexBuffer( verts );
 
+   if(!mLockStateBlock) // start jc
    switch (filter)
    {
    case GFXTextureFilterPoint :
@@ -412,7 +417,10 @@ void GFXDrawUtil::drawBitmapStretchSR( GFXTextureObject* texture, const RectF &d
       break;
    }   
    mDevice->setTexture( 0, texture );
-   mDevice->setupGenericShaders( GFXDevice::GSModColorTexture );
+// start jc
+//   mDevice->setupGenericShaders( GFXDevice::GSModColorTexture );
+   mDevice->setupGenericShaders( mGenericShader );
+// end jc
 
    mDevice->drawPrimitive( GFXTriangleStrip, 0, 2 );
 }

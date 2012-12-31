@@ -114,6 +114,7 @@ SceneManager::SceneManager( bool isClient )
      mDefaultRenderPass( NULL ),
      mVisibleDistance( 500.f ),
      mNearClip( 0.1f ),
+     mFrustumOffset( Point4F::Zero ), // start jc
      mAmbientLightColor( ColorF( 0.1f, 0.1f, 0.1f, 1.0f ) ),
      mZoneManager( NULL )
 {
@@ -447,7 +448,10 @@ struct ScopingInfo
 
 static void _scopeCallback( SceneObject* object, void* data )
 {
-   if( !object->isScopeable() )
+// start jc
+//   if( !object->isScopeable() )
+   if( !object->isScopeable() || object->isNoAutoScope() )
+// end jc
       return;
 
    ScopingInfo* info = reinterpret_cast< ScopingInfo* >( data );

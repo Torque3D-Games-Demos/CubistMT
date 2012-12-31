@@ -28,7 +28,10 @@
 #endif
 
 enum MoveConstants {
-   MaxTriggerKeys = 6,
+// start jc
+//   MaxTriggerKeys = 6,
+   MaxTriggerKeys = 100,
+// end jc
    MaxMoveQueueSize = 45,
 };
 

@@ -402,3 +402,10 @@ void PxBody::applyImpulse( const Point3F &origin, const Point3F &force )
                               NX_IMPULSE );
 }
 
+// start jc
+void PxBody::moveGlobalPosition(const Point3F& vec)
+{
+   mActor->moveGlobalPosition(pxCast<NxVec3>(vec));
+}
+   
+// end jc

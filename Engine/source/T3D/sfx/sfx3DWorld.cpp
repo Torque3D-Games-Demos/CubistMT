@@ -91,7 +91,15 @@ void SFX3DObject::getEarTransform( MatrixF& transform ) const
    if ( !shapeInstance )
    {
       // Just in case.
-      transform = mObject->getTransform();
+   // start jc
+   //   transform = mObject->getTransform();
+      F32 pos = 0;
+      GameConnection * gc = shape->getControllingClient();
+      if (gc && !gc->isFirstPerson())
+         pos = 1.0f;
+
+      shape->getCameraEarTransform(&pos, &transform);
+   // end jc
       return;
    }
 
@@ -110,7 +118,10 @@ void SFX3DObject::getEarTransform( MatrixF& transform ) const
    else
    {
       GameConnection* connection = dynamic_cast<GameConnection *>(NetConnection::getConnectionToServer());
-      if ( !connection || !connection->getControlCameraTransform( 0.0f, &transform ) )
+// start jc
+//      if ( !connection || !connection->getControlCameraTransform( 0.0f, &transform ) )
+      if ( !connection || !connection->getControlCameraEarTransform( 0.0f, &transform ) )
+// end jc
          transform = mObject->getTransform();
    }
 }

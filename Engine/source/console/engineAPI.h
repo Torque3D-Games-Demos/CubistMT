@@ -147,7 +147,18 @@ inline const char* EngineMarshallData( U32 value )
 template< typename T >
 inline void EngineMarshallData( const T& arg, S32& argc, const char** argv )
 {
-   argv[ argc ] = Con::getStringArg( castConsoleTypeToString( arg ) );
+// start jc
+//   argv[ argc ] = castConsoleTypeToString( arg );
+//   argv[ argc ] = Con::getStringArg( castConsoleTypeToString( arg ) );
+   const char* tmpRes = Con::getStringArg( castConsoleTypeToString( arg ) );
+   
+   U32 size = dStrlen( tmpRes ) + 1;
+   char* tmp = ( char* ) Con::getArgBuffer( size );
+   dMemcpy( tmp, tmpRes, size );
+   
+   argv[ argc ] = tmp;
+// end jc
+
    argc ++;
 }
 inline void EngineMarshallData( bool arg, S32& argc, const char** argv )

@@ -86,6 +86,9 @@ private:
    F32   mCameraFov;       ///< Current camera fov (in degrees).
    F32   mCameraPos;       ///< Current camera pos (0-1).
    F32   mCameraSpeed;     ///< Camera in/out speed.
+// start jc
+   Point4F mCameraFrustumOffset;
+// end jc
    /// @}
 
 public:
@@ -258,6 +261,14 @@ public:
    bool setControlCameraFov(F32 fov);
    bool isValidControlCameraFov(F32 fov);
    
+// start jc
+   bool setControlCameraFrustumOffset(Point4F offset);
+   bool getControlCameraFrustumOffset(Point4F *offset);
+
+   bool getControlCameraEarTransform(F32 dt, MatrixF* mat);
+
+// end jc
+
    // Used by editor
    bool isControlObjectRotDampedCamera();
 

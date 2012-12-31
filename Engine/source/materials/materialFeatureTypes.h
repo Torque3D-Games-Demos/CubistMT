@@ -102,6 +102,9 @@ DeclareFeatureType( MFT_DiffuseVertColor );
 /// the shader which can be faster on SM3 and is needed
 /// when the render state alpha test is not available.
 DeclareFeatureType( MFT_AlphaTest );
+// start jc
+DeclareFeatureType( MFT_AlphaScatter );
+// end jc
 
 DeclareFeatureType( MFT_NormalMap );
 DeclareFeatureType( MFT_RTLighting );
@@ -170,5 +173,9 @@ DeclareFeatureType( MFT_ForwardShading );
 /// so that the rest of the material features can work on it.
 DeclareFeatureType( MFT_ImposterVert );
 
+// start jc
+DeclareFeatureType( MFT_IsObjectSpaceNormals );
+DeclareFeatureType( MFT_FogBlendAdd );
+// end jc
 
 #endif // _MATERIALFEATURETYPES_H_

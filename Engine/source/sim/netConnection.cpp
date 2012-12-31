@@ -312,12 +312,22 @@ void NetConnection::checkMaxRate()
    U32 packetRateToClient = gPacketRateToClient;
    U32 packetSize = gPacketSize;
 
+// start jc - lan needs more
+/*
    if (isLocalConnection())
    {
       packetRateToServer = 128;
       packetRateToClient = 128;
       packetSize = 1024;
    }
+*/
+   if (isLocalConnection())
+   {
+      packetRateToServer = mMax(128,gPacketRateToServer);
+      packetRateToClient = mMax(128,gPacketRateToClient);
+      packetSize = mMax(1024, gPacketSize);
+   }
+// end jc
 
    gPacketUpdateDelayToServer = 1024 / packetRateToServer;
    U32 toClientUpdateDelay = 1024 / packetRateToClient;
@@ -327,6 +337,12 @@ void NetConnection::checkMaxRate()
       mMaxRate.updateDelay = toClientUpdateDelay;
       mMaxRate.packetSize = packetSize;
       mMaxRate.changed = true;
+
+// start jc
+      mCurRate.updateDelay = toClientUpdateDelay;
+      mCurRate.packetSize = packetSize;
+      mCurRate.changed = true;
+// end jc
    }
 }
 

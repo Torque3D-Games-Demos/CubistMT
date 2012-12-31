@@ -173,6 +173,22 @@ ConsoleFunction( closeNetPort, void, 1, 1, "()"
 {
    Net::closePort();
 }
+// start jc
+/*
+ConsoleFunction( getLocalIPAddress, const char *, 3, 3, "(U32 adaptorIndex, U32 ipIndex)"
+   "@brief returns the current local IP address\n\n"
+   "@ingroup Networking")
+{
+    return Con::getReturnBuffer(Net::getLocalIPAddress(dAtoi(argv[1]), dAtoi(argv[2])));
+}
+*/
+ConsoleFunction( getLocalComputerName, const char *, 1, 1, "()"
+   "@brief returns the current local IP address\n\n"
+   "@ingroup Networking")
+{
+	return Con::getReturnBuffer(Net::getLocalComputerName());
+}
+// end jc
 
 ConsoleFunction( saveJournal, void, 2, 2, "(string filename)"
                 "Save the journal to the specified file.\n\n"
@@ -198,6 +214,15 @@ ConsoleFunction( getSimTime, S32, 1, 1, "()"
 {
    return Sim::getCurrentTime();
 }
+// start jc
+ConsoleFunction( setSimTime, void, 2, 2, "(S32 time)"
+				"Avance the current sim time in milliseconds.\n\n"
+                "@brief Sim time is time since the game started.\n\n"
+				"@ingroup Platform")
+{
+	return Sim::advanceToTime(dAtoi(argv[1]));
+}
+// end jc
 
 ConsoleFunction( getRealTime, S32, 1, 1, "()"
 				"@brief Return the current real time in milliseconds.\n\n"

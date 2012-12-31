@@ -56,7 +56,11 @@ public:
    {
       /// The maximum mipmap levels we support.  The current
       /// value lets us support up to 4096 x 4096 images.
-      c_maxMipLevels = 13 
+// start jc
+//      c_maxMipLevels = 13 
+// todo: may cause problems, why?
+      c_maxMipLevels = 14 
+// end jc
    };
 
    struct Registration
@@ -125,6 +129,19 @@ public:
    GBitmap(const U32  in_width,
            const U32  in_height,
            const U8*  data );
+
+// start jc
+   GBitmap(const U32  in_width,
+           const U32  in_height,
+           const GFXFormat in_format,
+           const U8*  data)   { GBitmap(in_width, in_height, in_format, data, false); }
+
+   GBitmap(const U32  in_width,
+           const U32  in_height,
+           const GFXFormat in_format,
+           const U8*  data,
+           const bool padded);
+// end jc
 
    virtual ~GBitmap();
 

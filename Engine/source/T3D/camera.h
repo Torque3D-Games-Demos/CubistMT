@@ -133,6 +133,9 @@ class Camera: public ShapeBase
       /// @}
 
       bool mLocked;
+// start jc
+      MatrixF mEarOffset;
+// end jc
 
       CameraMotionMode  mMode;
 
@@ -170,6 +173,10 @@ class Camera: public ShapeBase
       Point3F getOffset() { return mOffset; };
       void lookAt( const Point3F& pos);
       void setOffset( const Point3F& offset) { if( mOffset != offset ) mOffset = offset; setMaskBits( UpdateMask ); }
+   // start jc
+      void setEarOffset( const Point3F& offset) { if( mEarOffset.getPosition() != offset ) mEarOffset.setPosition(offset); setMaskBits( UpdateMask ); }
+      
+   // end jc
       void setFlyMode();
       void setOrbitMode( GameBase *obj, const Point3F& pos, const Point3F& rot, const Point3F& offset,
                          F32 minDist, F32 maxDist, F32 curDist, bool ownClientObject, bool locked = false );
@@ -213,6 +220,13 @@ class Camera: public ShapeBase
       void autoFitRadius( F32 radius );
 
       /// @}
+// start jc
+      /// Returns the transform which can be used to convert object space
+      /// to world space
+      void getCameraEarTransform(F32* pos, MatrixF* mat);
+ //     virtual MatrixF getEarTransform()   { return mEarOffset.isIdentity() ? getTransform() : MatrixF().mul(mObjToWorld,mEarOffset); }
+// end jc
+
 
       // ShapeBase.
       static void initPersistFields();

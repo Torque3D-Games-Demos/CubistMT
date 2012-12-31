@@ -30,6 +30,9 @@ IMPLEMENT_STRUCT( GFXVideoMode,
    GFXVideoMode, GFXAPI,
    "Descriptor for a specific video mode." )
    FIELD( resolution, resolution, 1, "Width and height of the mode's resolution in pixels." )
+// start jc
+   FIELD( position, position, 1, "position of the mode's window in pixels." )
+// end jc   
    FIELD( bitDepth, bitDepth, 1, "Bits per pixel." )
    FIELD( refreshRate, refreshRate, 1, "Frequency at which the screen is refreshed (in Hertz)." )
    FIELD( fullScreen, fullScreen, 1, "Whether this is a fullscreen or windowed mode." )
@@ -175,6 +178,10 @@ ImplementEnumType( GFXFormat,
 
    { GFXFormatR8G8B8, "GFXFormatR8G8B8" },
    { GFXFormatR8G8B8A8, "GFXFormatR8G8B8A8" },
+// start jc
+   { GFXFormatB8G8R8A8, "GFXFormatB8G8R8A8" },
+   { GFXFormatD15S1, "GFXFormatD15S1" }, 
+// end jc
    { GFXFormatR8G8B8X8, "GFXFormatR8G8B8X8" },
    { GFXFormatR32F, "GFXFormatR32F" },
    { GFXFormatR5G6B5, "GFXFormatR5G6B5" },

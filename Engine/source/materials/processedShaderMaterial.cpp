@@ -333,6 +333,11 @@ void ProcessedShaderMaterial::_determineFeatures(  U32 stageNum,
    if ( mMaterial->mAlphaTest )
       fd.features.addFeature( MFT_AlphaTest );
 
+// start jc
+   if ( mMaterial->mAlphaScatter )
+      fd.features.addFeature( MFT_AlphaScatter );
+// end jc
+
    if ( mMaterial->mEmissive[stageNum] )
       fd.features.addFeature( MFT_IsEmissive );
    else
@@ -352,11 +357,26 @@ void ProcessedShaderMaterial::_determineFeatures(  U32 stageNum,
 
    fd.features.addFeature( MFT_Visibility );
 
+// start jc
+/*
    if (  lastStage && 
          (  !gClientSceneGraph->usePostEffectFog() ||
             fd.features.hasFeature( MFT_IsTranslucent ) ||
             fd.features.hasFeature( MFT_ForwardShading )) )
       fd.features.addFeature( MFT_Fog );
+*/
+
+   if (  lastStage && 
+         (  !gClientSceneGraph->usePostEffectFog() ||
+            fd.features.hasFeature( MFT_IsTranslucent ) ||
+            fd.features.hasFeature( MFT_ForwardShading )) )
+   {
+      if(mMaterial->mTranslucentBlendOp == Material::Add)
+         fd.features.addFeature( MFT_FogBlendAdd );
+      else
+         fd.features.addFeature( MFT_Fog );
+   }
+// end jc
 
    if ( mMaterial->mMinnaertConstant[stageNum] > 0.0f )
       fd.features.addFeature( MFT_MinnaertShading );
@@ -382,6 +402,11 @@ void ProcessedShaderMaterial::_determineFeatures(  U32 stageNum,
       if (  mStages[stageNum].getTex( MFT_NormalMap )->mFormat == GFXFormatDXT5 &&   
            !mStages[stageNum].getTex( MFT_NormalMap )->mHasTransparency )   
          fd.features.addFeature( MFT_IsDXTnm );   
+
+   // start jc
+      if (  mMaterial->mObjectSpaceNormals )
+         fd.features.addFeature( MFT_IsObjectSpaceNormals );
+   // end jc
    }
 
    // Now for some more advanced features that we 

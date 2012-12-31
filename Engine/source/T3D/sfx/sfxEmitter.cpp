@@ -654,6 +654,10 @@ bool SFXEmitter::onAdd()
       if( mPlayOnAdd && mSource )
          mSource->play();
    }
+   // start jc
+   if(!mPlayOnAdd)
+      stop();
+   // end jc
    
    // Setup the bounds.
 

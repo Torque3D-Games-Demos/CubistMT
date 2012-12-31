@@ -39,7 +39,10 @@ AFTER_MODULE_INIT( Sim )
 {
    NamedFactory<PhysicsPlugin>::add( "PhysX", &PxPlugin::create );
 
-   #if defined(TORQUE_OS_WIN32) || defined(TORQUE_OS_XBOX) || defined(TORQUE_OS_XENON)   
+// start jc
+//   #if defined(TORQUE_OS_WIN32) || defined(TORQUE_OS_XBOX) || defined(TORQUE_OS_XENON)   
+   #if (defined(TORQUE_OS_WIN32) || defined(TORQUE_OS_XBOX) || defined(TORQUE_OS_XENON)) && !defined(TORQUE_PHYSICS_BULLET)
+// end jc
       NamedFactory<PhysicsPlugin>::add( "default", &PxPlugin::create );
    #endif   
 

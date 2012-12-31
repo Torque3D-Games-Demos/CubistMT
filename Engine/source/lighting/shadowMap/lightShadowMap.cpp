@@ -603,6 +603,8 @@ void ShadowMapParams::_validate()
    // We apply the hardware specific limits during 
    // shadow rendering.
    //
+// start jc
+   /*
    U32 maxTexSize = 4096;
 
    if ( mLight->getType() == LightInfo::Vector )
@@ -619,6 +621,25 @@ void ShadowMapParams::_validate()
    }
    else
       numSplits = 1;
+
+*/
+   U32 maxTexSize = 8192;
+
+   if ( mLight->getType() == LightInfo::Vector )
+   {
+      numSplits = mClamp( numSplits, 1, 4 );
+      
+      // Adjust the shadow texture size for the PSSM 
+      // based on the split count to keep the total
+      // shadow texture size within 4096.
+      if ( numSplits == 2 || numSplits == 4 )
+         maxTexSize = 4096;
+      if ( numSplits == 3 )
+         maxTexSize = 2048;
+   }
+   else
+      numSplits = 1;
+// end jc
 
    // Keep it in a valid range... less than 32 is dumb.
    texSize = mClamp( texSize, 32, maxTexSize );

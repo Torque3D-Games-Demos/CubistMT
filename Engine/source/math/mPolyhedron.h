@@ -177,6 +177,9 @@ struct PolyhedronVectorData : public PolyhedronData
 
       /// Build a polyhedron from the given set of planes.
       void buildFromPlanes( const PlaneSetF& planes );
+// start jc
+	  void buildFromRect(const Point3F &center, const Point3F &forward, F32 width, F32 height);
+// end jc
 };
 
 /// Polyhedron data stored as raw points with memory

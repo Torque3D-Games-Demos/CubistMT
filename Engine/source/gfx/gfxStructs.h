@@ -102,6 +102,10 @@ struct GFXVideoMode
    GFXVideoMode();
 
    Point2I resolution;
+// start jc
+   Point2I position;
+   bool borderless;
+// end jc
    U32 bitDepth;
    U32 refreshRate;
    bool fullScreen;
@@ -123,6 +127,12 @@ struct GFXVideoMode
          return false;
       if( otherMode.antialiasLevel != antialiasLevel)
          return false;
+   // start jc
+      if( otherMode.position != position)
+         return false;
+      if( otherMode.borderless != borderless)
+         return false;
+   // end jc
 
       return true;
    }

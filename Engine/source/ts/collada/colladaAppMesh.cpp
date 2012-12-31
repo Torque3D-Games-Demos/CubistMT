@@ -1080,11 +1080,14 @@ void ColladaAppMesh::lookupSkinData()
       MatrixF invBind = streams.invBindMatrices.getMatrixFValue(iJoint);
       if (!ColladaUtils::getOptions().ignoreNodeScale)
       {
+// start jc
          Point3F invScale = invBind.getScale();
+		
          invScale.x = invScale.x ? (1.0f / invScale.x) : 0;
          invScale.y = invScale.y ? (1.0f / invScale.y) : 0;
          invScale.z = invScale.z ? (1.0f / invScale.z) : 0;
-         initialTransforms[iJoint].scale(invScale);
+// end jc  
+		 initialTransforms[iJoint].scale(invScale);
       }
 
       // Inverted node coordinate spaces (negative scale factor) are corrected

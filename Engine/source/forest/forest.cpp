@@ -40,6 +40,9 @@
 #include "math/mathUtils.h"
 #include "T3D/physics/physicsBody.h"
 #include "forest/editor/forestBrushElement.h"
+// start jc
+#include "console/engineAPI.h"
+// end jc
 
 /// For frame signal
 #include "gui/core/guiCanvas.h"
@@ -374,3 +377,16 @@ ConsoleMethod(Forest, clear, void, 2, 2, "()" )
 {
    object->clear();
 }
+
+// start jc
+DefineEngineMethod( Forest, addItem, void, (ForestItemData *data, Point3F position, F32 rotation, F32 scale ),,".\n")
+{ 
+   if(object->getData() && data)
+      object->getData()->addItem(data, position, rotation, scale);
+}
+DefineEngineMethod( Forest, addItemWithTransform, void, (ForestItemData *data, TransformF trans, F32 scale ),,".\n")
+{ 
+   if(object->getData() && data)
+      object->getData()->addItem(data, trans.getMatrix(), scale);
+}
+// end jc

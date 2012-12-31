@@ -115,6 +115,9 @@ struct GFXStateBlockDesc
    bool alphaTestEnable;   
    S32 alphaTestRef;
    GFXCmpFunc alphaTestFunc;
+// start jc
+   bool alphaScatterEnable;
+// end jc
 
    // Color Writes
    bool colorWriteDefined;

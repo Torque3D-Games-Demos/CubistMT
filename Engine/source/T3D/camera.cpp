@@ -289,6 +289,10 @@ Camera::Camera()
    mCurrentEditOrbitDist = 2.0;
 
    mLocked = false;
+
+// start jc
+   mEarOffset.identity();
+// end jc
 }
 
 //----------------------------------------------------------------------------
@@ -351,6 +355,23 @@ void Camera::getCameraTransform(F32* pos, MatrixF* mat)
    // Apply Camera FX.
    mat->mul( gCamFXMgr.getTrans() );
 }
+
+// start jc
+void Camera::getCameraEarTransform(F32* pos, MatrixF* mat)
+{
+   // The camera doesn't support a third person mode,
+   // so we want to override the default ShapeBase behavior.
+   ShapeBase * obj = dynamic_cast<ShapeBase*>(static_cast<SimObject*>(mOrbitObject));
+   if(obj && static_cast<ShapeBaseData*>(obj->getDataBlock())->observeThroughObject)
+      obj->getCameraEarTransform(pos, mat);
+   else
+      getRenderEyeTransform(mat);
+
+   // Apply Camera FX.
+   mat->mul( mEarOffset );
+   mat->mul( gCamFXMgr.getTrans() );
+}
+// end jc
 
 //----------------------------------------------------------------------------
 
@@ -1000,6 +1021,9 @@ U32 Camera::packUpdate(NetConnection *con, U32 mask, BitStream *bstream)
    {
       bstream->writeFlag(mLocked);
       mathWrite(*bstream, mOffset);
+   // start jc
+      mathWrite(*bstream, mEarOffset);
+   // end jc
    }
 
    if(bstream->writeFlag(mask & NewtonCameraMask))
@@ -1076,6 +1100,9 @@ void Camera::unpackUpdate(NetConnection *con, BitStream *bstream)
    {
       mLocked = bstream->readFlag();
       mathRead(*bstream, &mOffset);
+   // start jc
+      mathRead(*bstream, &mEarOffset);
+   // end jc
    }
 
    // NewtonCameraMask
@@ -1169,6 +1196,12 @@ void Camera::initPersistFields()
       addProtectedField( "brakeMultiplier", TypeF32,    Offset(mBrakeMultiplier, Camera), &_setNewtonField, &defaultProtectedGetFn,
          "Speed multiplier when triggering the brake (Newton mode only).  Default value is 2." );
    endGroup( "Camera: Newton Mode" );
+
+// start jc
+   addGroup( "Audio" );
+      addField( "earOffset", TypeMatrixPosition, Offset( mEarOffset, Camera ), "@brief " );
+   endGroup( "Audio" );
+// end jc
 
    Parent::initPersistFields();
 }
@@ -1688,6 +1721,21 @@ DefineEngineMethod( Camera, setOffset, void, (Point3F offset), ,
 {
    object->setOffset(offset);
 }
+
+//-----------------------------------------------------------------------------
+
+
+
+// start jc
+DefineEngineMethod( Camera, setEarOffset, void, (Point3F offset), ,
+                   "Set the camera's ear offset.\n\n"
+                   ".\n"
+                   "@param .")
+{
+   object->setEarOffset(offset);
+}
+// end jc
+
 
 //-----------------------------------------------------------------------------
 

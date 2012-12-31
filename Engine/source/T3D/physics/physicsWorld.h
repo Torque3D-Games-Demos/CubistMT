@@ -37,7 +37,11 @@ class SceneRenderState;
 class PhysicsBody;
 
 
-
+struct   SweepResult{
+   Point3F  point;
+   Point3F  normal;
+   F32      pathFraction;
+};
 class PhysicsWorld
 {
 protected:
@@ -81,6 +85,11 @@ public:
    /// Returns the active gravity force.
    const Point3F& getGravity() const { return mGravity; }
 
+// start jc
+   /// Returns the active gravity force.
+   virtual void setGravity(const Point3F& gravity) = 0;
+// end jc
+
    /// An abstract way to raycast into any type of PhysicsWorld, in a way 
    /// that mirrors a Torque-style raycast.  
    //
@@ -104,6 +113,9 @@ public:
 
    ///
    virtual PhysicsBody* castRay( const Point3F &start, const Point3F &end, U32 bodyTypes = BT_All ) = 0;
+
+   //pghack
+   virtual bool   sweepSphere(SweepResult &sweepResult, const Point3F &start, const Point3F &end, const F32 &radius ){return false;}
 
    virtual void explosion( const Point3F &pos, F32 radius, F32 forceMagnitude ) = 0;
 };

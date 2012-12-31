@@ -37,7 +37,9 @@
 #include "core/stream/bitStream.h"
 #include "materials/materialManager.h"
 #include "materials/baseMatInstance.h"
-
+// start jc
+#include "console/engineAPI.h"
+// end jc
 
 IMPLEMENT_CO_NETOBJECT_V1( PxCloth );
 
@@ -114,6 +116,10 @@ PxCloth::PxCloth()
    mDampingCoefficient = 0.25f;
 
    mAttachmentMask = 0;
+
+// start jc
+   mAttachmentPointScale = Point3F::One;
+// end jc
 }
 
 PxCloth::~PxCloth()
@@ -240,6 +246,13 @@ void PxCloth::initPersistFields()
       "@brief Optional way to specify cloth verts that will be attached to the world position "
       "it is created at.\n\n" );
 
+// start jc
+   
+   addField( "attachmentPointScale", TypePoint3F, Offset( mAttachmentPointScale, PxCloth ),
+      "@brief .\n\n" );
+
+// end jc
+
    // Cloth doesn't support scale.
    removeField( "scale" );
 }
@@ -263,6 +276,11 @@ U32 PxCloth::packUpdate( NetConnection *conn, U32 mask, BitStream *stream )
 
    if ( stream->writeFlag( mask & TransformMask ) )
       mathWrite( *stream, getTransform() );
+
+   // start jc
+   if ( stream->writeFlag( mask & ScaleAttachmentPointsMask ) )
+      mathWrite( *stream, mAttachmentPointScale);
+   // end jc
 
    if ( stream->writeFlag( mask & MaterialMask ) )
       stream->write( mMaterialName );
@@ -298,8 +316,108 @@ void PxCloth::unpackUpdate( NetConnection *conn, BitStream *stream )
    {
       MatrixF mat;
       mathRead( *stream, &mat );
+   // start jc
+      if(mCloth)
+      {
+         NxVec3 delta(mat.getPosition() - getTransform().getPosition());
+
+         if(mCloth->isSleeping())
+            mCloth->wakeUp();
+
+         if ( mAttachmentMask & BIT( 0 ) )
+            mCloth->attachVertexToGlobalPosition( 0, mCloth->getPosition( 0 ) + delta );
+         if ( mAttachmentMask & BIT( 1 ) )
+            mCloth->attachVertexToGlobalPosition( mPatchVerts.x-1, mCloth->getPosition( mPatchVerts.x-1 ) + delta );   
+         if ( mAttachmentMask & BIT( 2 ) )
+            mCloth->attachVertexToGlobalPosition( mPatchVerts.x * mPatchVerts.y - mPatchVerts.x, mCloth->getPosition( mPatchVerts.x * mPatchVerts.y - mPatchVerts.x ) + delta );
+         if ( mAttachmentMask & BIT( 3 ) )
+            mCloth->attachVertexToGlobalPosition( mPatchVerts.x * mPatchVerts.y - 1, mCloth->getPosition( mPatchVerts.x * mPatchVerts.y - 1 ) + delta );   
+         if ( mAttachmentMask & BIT( 4 ) )
+            mCloth->attachVertexToGlobalPosition( mPatchVerts.x * mPatchVerts.y - (mPatchVerts.x/2), mCloth->getPosition( mPatchVerts.x * mPatchVerts.y - (mPatchVerts.x/2) ) + delta );
+         if ( mAttachmentMask & BIT( 5 ) )
+            mCloth->attachVertexToGlobalPosition( (mPatchVerts.x/2), mCloth->getPosition( (mPatchVerts.x/2) ) + delta );
+         if ( mAttachmentMask & BIT( 6 ) )
+            mCloth->attachVertexToGlobalPosition( mPatchVerts.x * (mPatchVerts.y/2), mCloth->getPosition( mPatchVerts.x * (mPatchVerts.y/2) ) + delta );
+         if ( mAttachmentMask & BIT( 7 ) )
+            mCloth->attachVertexToGlobalPosition( mPatchVerts.x * (mPatchVerts.y/2) + (mPatchVerts.x-1), mCloth->getPosition( mPatchVerts.x * (mPatchVerts.y/2) + (mPatchVerts.x-1) ) + delta );
+         
+         if ( mAttachmentMask & BIT( 8 ) )
+            for ( U32 i = mPatchVerts.x * mPatchVerts.y - mPatchVerts.x; i < mPatchVerts.x * mPatchVerts.y; i++ )
+               mCloth->attachVertexToGlobalPosition( i, mCloth->getPosition( i ) + delta );
+         
+         if ( mAttachmentMask & BIT( 9 ) )
+            for ( U32 i = 0; i < mPatchVerts.x; i++ )
+               mCloth->attachVertexToGlobalPosition( i, mCloth->getPosition( i ) + delta );
+
+         if ( mAttachmentMask & BIT( 10 ) )
+            for ( U32 i = 0; i < mPatchVerts.x * mPatchVerts.y; i+=mPatchVerts.x )
+               mCloth->attachVertexToGlobalPosition( i, mCloth->getPosition( i ) + delta );
+
+         if ( mAttachmentMask & BIT( 11 ) )
+            for ( U32 i = mPatchVerts.x-1; i < mPatchVerts.x * mPatchVerts.y; i+=mPatchVerts.x )
+               mCloth->attachVertexToGlobalPosition( i, mCloth->getPosition( i ) + delta );
+      }
+   // end jc
+
+
       setTransform( mat );
    }
+
+// start jc
+   // ScaleAttachmentPointsMask
+   if ( stream->readFlag() )
+   {
+      Point3F attachmentPointScale;
+      mathRead( *stream, &attachmentPointScale );
+
+      if(mCloth)
+      {
+         Point3F scale(Point3F::One);
+         scale.convolveInverse(mAttachmentPointScale);
+         scale.convolve(attachmentPointScale);
+         NxVec3 delta(scale);
+
+         if(mCloth->isSleeping())
+            mCloth->wakeUp();
+
+         static NxVec3 delta2;
+         if ( mAttachmentMask & BIT( 0 ) )
+         {  delta2.arrayMultiply(mCloth->getPosition( 0 ),delta);                                                       mCloth->attachVertexToGlobalPosition( 0, delta2); }
+         if ( mAttachmentMask & BIT( 1 ) )
+         {  delta2.arrayMultiply(mCloth->getPosition( mPatchVerts.x-1 ), delta);                                        mCloth->attachVertexToGlobalPosition( mPatchVerts.x-1, delta2); } 
+         if ( mAttachmentMask & BIT( 2 ) )
+         {  delta2.arrayMultiply(mCloth->getPosition( mPatchVerts.x * mPatchVerts.y - mPatchVerts.x ), delta);          mCloth->attachVertexToGlobalPosition( mPatchVerts.x * mPatchVerts.y - mPatchVerts.x, delta2); }
+         if ( mAttachmentMask & BIT( 3 ) )
+         {  delta2.arrayMultiply(mCloth->getPosition( mPatchVerts.x * mPatchVerts.y - 1 ), delta);                      mCloth->attachVertexToGlobalPosition( mPatchVerts.x * mPatchVerts.y - 1, delta2); }
+         if ( mAttachmentMask & BIT( 4 ) )
+         {   delta2.arrayMultiply(mCloth->getPosition( mPatchVerts.x * mPatchVerts.y - (mPatchVerts.x/2) ), delta);     mCloth->attachVertexToGlobalPosition( mPatchVerts.x * mPatchVerts.y - (mPatchVerts.x/2), delta2); }
+         if ( mAttachmentMask & BIT( 5 ) )
+         {  delta2.arrayMultiply(mCloth->getPosition( (mPatchVerts.x/2) ), delta);                                      mCloth->attachVertexToGlobalPosition( (mPatchVerts.x/2), delta2); }
+         if ( mAttachmentMask & BIT( 6 ) )
+         {  delta2.arrayMultiply(mCloth->getPosition( mPatchVerts.x * (mPatchVerts.y/2) ), delta);                      mCloth->attachVertexToGlobalPosition( mPatchVerts.x * (mPatchVerts.y/2), delta2); }
+         if ( mAttachmentMask & BIT( 7 ) )
+         {  delta2.arrayMultiply(mCloth->getPosition( mPatchVerts.x * (mPatchVerts.y/2) + (mPatchVerts.x-1) ), delta);  mCloth->attachVertexToGlobalPosition( mPatchVerts.x * (mPatchVerts.y/2) + (mPatchVerts.x-1), delta2); }
+         
+         if ( mAttachmentMask & BIT( 8 ) )
+            for ( U32 i = mPatchVerts.x * mPatchVerts.y - mPatchVerts.x; i < mPatchVerts.x * mPatchVerts.y; i++ )
+               {   delta2.arrayMultiply(mCloth->getPosition( i ), delta);     mCloth->attachVertexToGlobalPosition( i, delta2); }
+         
+         if ( mAttachmentMask & BIT( 9 ) )
+            for ( U32 i = 0; i < mPatchVerts.x; i++ )
+               {   delta2.arrayMultiply(mCloth->getPosition( i ), delta);     mCloth->attachVertexToGlobalPosition( i, delta2); }
+
+         if ( mAttachmentMask & BIT( 10 ) )
+            for ( U32 i = 0; i < mPatchVerts.x * mPatchVerts.y; i+=mPatchVerts.x )
+               {   delta2.arrayMultiply(mCloth->getPosition( i ), delta);     mCloth->attachVertexToGlobalPosition( i, delta2); }
+
+         if ( mAttachmentMask & BIT( 11 ) )
+            for ( U32 i = mPatchVerts.x-1; i < mPatchVerts.x * mPatchVerts.y; i+=mPatchVerts.x )
+               {   delta2.arrayMultiply(mCloth->getPosition( i ), delta);     mCloth->attachVertexToGlobalPosition( i, delta2); }
+      }
+
+      mAttachmentPointScale = attachmentPointScale;
+   }
+// end jc
 
    // MaterialMask
    if ( stream->readFlag() )
@@ -391,6 +509,14 @@ void PxCloth::setScale( const VectorF &scale )
    // transform origin, etc.
    return;
 }
+
+// start jc
+void PxCloth::setAttachmentPointScale( const Point3F &scale )
+{
+   mAttachmentPointScale = scale;
+   setMaskBits( ScaleAttachmentPointsMask );
+}
+// end jc
 
 void PxCloth::prepRenderImage( SceneRenderState *state )
 {  
@@ -650,6 +776,10 @@ bool PxCloth::_createClothPatch()
    desc.bendingStiffness = mBendingStiffness;   
    desc.dampingCoefficient = mDampingCoefficient;
    desc.friction = mFriction;
+// start jc
+   // todo: expose this
+   desc.sleepLinearVelocity = 0.0000001f;
+// end jc
    
    if ( mBendingEnabled )
       desc.flags |= NX_CLF_BENDING;   
@@ -921,3 +1051,14 @@ void PxCloth::_setupAttachments()
       for ( U32 i = mPatchVerts.x-1; i < mPatchVerts.x * mPatchVerts.y; i+=mPatchVerts.x )
          mCloth->attachVertexToGlobalPosition( i, mCloth->getPosition( i ) );
 }
+
+//-----------------------------------------------------------------------------
+
+DefineEngineMethod( PxCloth, setAttachmentPointScale, void, ( Point3F scale ),,
+   "Set the scale of attachment points.\n"
+   "@param scale object scale to set\n" )
+{
+   object->setAttachmentPointScale( scale );
+}
+
+//-----------------------------------------------------------------------------

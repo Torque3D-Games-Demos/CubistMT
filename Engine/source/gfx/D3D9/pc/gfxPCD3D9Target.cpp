@@ -365,12 +365,16 @@ void GFXPCD3D9WindowTarget::initPresentationParams()
    // Get some video mode related info.
    GFXVideoMode vm = mWindow->getVideoMode();
 
+// start jc
+/*
    // Do some validation...
    if(vm.fullScreen == true && mImplicit == false)
    {
       AssertISV(false, 
          "GFXPCD3D9WindowTarget::initPresentationParams - Cannot go fullscreen with secondary window!");
    }
+   */
+// end jc
 
    Win32Window *win = dynamic_cast<Win32Window*>(mWindow);
    AssertISV(win, "GFXPCD3D9WindowTarget::initPresentationParams() - got a non Win32Window window passed in! Did DX go crossplatform?");
@@ -484,7 +488,11 @@ void GFXPCD3D9WindowTarget::resetMode()
    // just kill the swapchain and reallocate to match new vid mode.
    if(mImplicit == false)
    {
+   // start jc
+   //   createAdditionalSwapChain();
+      if(!dynamic_cast<Win32Window*>(mWindow)->mFullscreen || mWindow->getVideoMode().fullScreen)
       createAdditionalSwapChain();
+   // end jc
    }
    else
    {
@@ -517,6 +525,9 @@ void GFXPCD3D9WindowTarget::resurrect()
    }
    else if(!mSwapChain)
    {
+   // start jc
+      if(!dynamic_cast<Win32Window*>(mWindow)->mFullscreen || mWindow->getVideoMode().fullScreen)
+   // end jc
       createAdditionalSwapChain();
    }
 }

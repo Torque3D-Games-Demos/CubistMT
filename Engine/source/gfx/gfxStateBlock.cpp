@@ -57,6 +57,9 @@ GFXStateBlockDesc::GFXStateBlockDesc()
    alphaTestEnable = false;   
    alphaTestRef = 0;
    alphaTestFunc = GFXCmpGreaterEqual;
+// start jc
+   alphaScatterEnable = false;
+// end jc
 
    // Color Writes
    colorWriteDefined = false;

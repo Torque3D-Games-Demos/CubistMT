@@ -93,6 +93,11 @@ class SimXMLDocument: public SimObject
 
       // Get attribute from top element on element stack.
       const char* attribute(const char* rAttribute);
+   // start jc
+      bool attributeS32(const char* rAttribute, S32* value);
+      bool attributeF32(const char* rAttribute, F32* value);
+      bool attributeF64(const char* rAttribute, F64* value);
+   // end jc
 
 	  // Does the attribute exist in the current element
       bool attributeExists(const char* rAttribute);

@@ -370,6 +370,9 @@ F32 GameBase::getUpdatePriority(CameraScopeQuery *camInfo, U32 updateMask, S32 u
 {
    TORQUE_UNUSED(updateMask);
 
+   // start jc
+/*
+
    // Calculate a priority used to decide if this object
    // will be updated on the client.  All the weights
    // are calculated 0 -> 1  Then weighted together at the
@@ -437,6 +440,83 @@ F32 GameBase::getUpdatePriority(CameraScopeQuery *camInfo, U32 updateMask, S32 u
       wVelocity  * sUpVelocity +
       wSkips     * sUpSkips +
       wInterest  * sUpInterest;
+*/
+
+   // Calculate a priority used to decide if this object
+   // will be updated on the client.  All the weights
+   // are calculated 0 -> 1  Then weighted together at the
+   // end to produce a priority.
+   Point3F pos;
+   getWorldBox().getCenter(&pos);
+   pos -= camInfo->pos;
+   F32 dist = pos.len();
+   if (dist == 0.0f) dist = 0.001f;
+   pos *= 1.0f / dist;
+
+   // Weight based on linear distance, the basic stuff.
+   F32 wDistance = (dist < camInfo->visibleDistance)?
+      1.0f - (dist / camInfo->visibleDistance): 0.0f;
+
+   // Weight by field of view, objects directly in front
+   // will be weighted 1, objects behind will be 0
+   F32 dot = mDot(pos,camInfo->orientation);
+// start jc - objects near the edge of screen need more priority to stay smooth
+//   bool inFov = dot > camInfo->cosFov;
+   bool inFov = dot > camInfo->cosFov*1.5f;
+
+   F32 wFov = inFov? 1.0f: 0;
+
+   // Weight by linear velocity parallel to the viewing plane
+   // (if it's the field of view, 0 if it's not).
+   F32 wVelocity = 0.0f;
+   if (inFov)
+   {
+      Point3F vec;
+      mCross(camInfo->orientation,getVelocity(),&vec);
+      wVelocity = (vec.len() * camInfo->fov) /
+         (camInfo->fov * camInfo->visibleDistance);
+      if (wVelocity > 1.0f)
+         wVelocity = 1.0f;
+   }
+
+   // Weight by interest.
+   F32 wInterest;
+
+//   if (getTypeMask() & PlayerObjectType)
+   if (getTypeMask() & (PlayerObjectType || VehicleObjectType || InputEventObjectType))
+
+      wInterest = 0.75f;
+   else if (getTypeMask() & ProjectileObjectType)
+   {
+      // Projectiles are more interesting if they
+      // are heading for us.
+      wInterest = 0.30f;
+      F32 dot = -mDot(pos,getVelocity());
+      if (dot > 0.0f)
+         wInterest += 0.20 * dot;
+   }
+   else
+   {
+      if (getTypeMask() & ItemObjectType)
+         wInterest = 0.25f;
+      else
+         // Everything else is less interesting.
+         wInterest = 0.0f;
+   }
+
+   // Weight by updateSkips
+   F32 wSkips = updateSkips * 0.5;
+
+   // Calculate final priority, should total to about 1.0f
+   //
+   return
+      wFov       * sUpFov +
+      wDistance  * sUpDistance +
+      wVelocity  * sUpVelocity +
+      wSkips     * sUpSkips +
+      wInterest  * sUpInterest;  
+   // end jc
+
 }
 
 //----------------------------------------------------------------------------
@@ -570,8 +650,26 @@ void GameBase::unpackUpdate(NetConnection *con, BitStream *stream)
       if ( stream->readFlag() )
          mOrderGUID = stream->readInt( 16 );
 
+// start jc
+      //*******************************************
+      bool  good = true;
+      if ( !Sim::findObject( id, dptr ) ){
+         good = false;
+         Con::printf("Failed to find object %d",id);
+      }
+      if ( !setDataBlock( dptr ) ){
+         good = false;
+         Con::printf("Failed to set data block");
+      }
+      if(!good){
+         con->setLastError( "Invalid packet GameBase::unpackUpdate()" );
+      }
+
+/*
       if ( !Sim::findObject( id, dptr ) || !setDataBlock( dptr ) )
          con->setLastError( "Invalid packet GameBase::unpackUpdate()" );
+*/
+// end jc
    }
 
 #ifdef TORQUE_DEBUG_NET_MOVES

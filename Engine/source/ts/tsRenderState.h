@@ -27,6 +27,11 @@
 #include "math/mMatrix.h"
 #endif
 
+// start jc
+#ifndef _GFXTEXTUREHANDLE_H_
+#include "gfx/gfxTextureHandle.h"
+#endif
+// end jc
 
 
 class SceneRenderState;
@@ -69,6 +74,9 @@ protected:
    const SceneRenderState *mState;
 
    GFXCubemap *mCubemap;
+// start jc
+   GFXTexHandle mReflectTex;
+// end jc
 
    /// Used to override the normal
    /// fade value of an object.
@@ -118,6 +126,10 @@ public:
    ///@see mCubemap
    GFXCubemap* getCubemap() const { return mCubemap; }
    void setCubemap( GFXCubemap *cubemap ) { mCubemap = cubemap; }
+// start jc
+   GFXTexHandle getReflectTex() const { return mReflectTex; }
+   void setReflectTex( GFXTexHandle reflectTex ) { mReflectTex = reflectTex; }
+// end jc
 
    ///@see mFadeOverride
    F32 getFadeOverride() const { return mFadeOverride; }

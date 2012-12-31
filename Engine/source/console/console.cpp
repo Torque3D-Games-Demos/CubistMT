@@ -889,6 +889,21 @@ F32 getFloatVariable(const char *varName, F32 def)
    const char *value = getVariable(varName);
    return *value ? dAtof(value) : def;
 }
+// start jc
+Point3F getPoint3FVariable(const char *varName, Point3F def)
+{
+   const char *value = getVariable(varName);
+   if(*value)
+   {
+      Point3F dptr(def);
+      dSscanf(value, "%g %g %g", &dptr.x, &dptr.y, &dptr.z);
+      return dptr;
+   }
+   
+   return def;
+}
+// end jc
+
 
 //---------------------------------------------------------------------------
 

@@ -86,6 +86,9 @@ public:
 
          CmdAddTrigger,
          CmdRemoveTrigger,
+      // start jc
+         CmdAddVisibility,
+      // end jc
 
          CmdInvalid
       };
@@ -206,6 +209,9 @@ public:
 
       bool addCmd_addTrigger( const Command& newCmd );
       bool addCmd_removeTrigger( const Command& newCmd );
+// start jc
+      bool addCmd_addVisibility( const Command& newCmd );
+// end jc
 
       void write(TSShape* shape, Stream& stream, const String& savePath);
    };
@@ -360,6 +366,9 @@ public:
    const char* getTrigger( const char* name, S32 index );
    bool addTrigger( const char* name, S32 keyframe, S32 state );
    bool removeTrigger( const char* name, S32 keyframe, S32 state );
+// start jc
+   bool addVisibility(const char* name, S32 startFrame, S32 endFrame, U32 objectIndex, bool visible);
+// end jc
    ///@}
 };
 

@@ -131,6 +131,10 @@ class SceneManager
 
       F32 mNearClip;
 
+  // start jc
+	  Point4F mFrustumOffset;
+  // end jc
+
       FogData mFogData;
 
       WaterFogData mWaterFogData;
@@ -316,6 +320,11 @@ class SceneManager
       F32 getNearClip() { return mNearClip; }
 
       /// @}
+
+// start jc
+	  void setFrustumOffset(const Point4F& offset) { mFrustumOffset = offset; }
+	  Point4F getFrustumOffset() { return mFrustumOffset; }
+// end jc
 
       /// @name dtr Display Target Resolution
       ///

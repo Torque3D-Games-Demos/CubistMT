@@ -34,6 +34,11 @@
 #ifndef _UTIL_DELEGATE_H_
 #include "core/util/delegate.h"
 #endif
+// start jc
+#ifndef _MATERIALDEFINITION_H_
+#include "materials/materialDefinition.h"
+#endif
+// end jc
 
 class SceneRenderState;
 
@@ -140,6 +145,16 @@ inline bool RenderBinManager::newPassNeeded( MeshRenderInst *ri, MeshRenderInst*
    // for changes in the material as it uniquely identifies it.
    if ( ri->matInst->getStateHint() != nextRI->matInst->getStateHint() )
       return true;
+
+
+// start jc
+   // todo: needs optimization
+   Material* mat = static_cast<Material*>(ri->matInst->getMaterial());
+   Material* nextMat = static_cast<Material*>(nextRI->matInst->getMaterial());
+  // if( mat && nextMat && mat->mWebViewData != nextMat->mWebViewData )
+   if( mat && nextMat && mat != nextMat )
+      return true;
+// end jc
 
    if (  ri->vertBuff != nextRI->vertBuff ||
          ri->primBuff != nextRI->primBuff ||

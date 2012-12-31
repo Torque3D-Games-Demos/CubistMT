@@ -80,6 +80,15 @@ struct PlayerData: public ShapeBaseData {
    /// @name Physics constants
    /// @{
 
+
+// start ds
+   F32 walkForce;                   ///< Force used to accelerate player 
+   F32 walkEnergyDrain;             ///< Energy drain/tick
+   F32 maxWalkForwardSpeed;            ///< Maximum forward speed when running
+   F32 maxWalkBackwardSpeed;           ///< Maximum backward speed when running
+   F32 maxWalkSideSpeed;          ///< Maximum side speed when running
+// end ds
+
    F32 maxStepHeight;         ///< Maximum height the player can step up
    F32 runSurfaceAngle;       ///< Maximum angle from vertical in degrees the player can run up
 
@@ -135,7 +144,9 @@ struct PlayerData: public ShapeBaseData {
    F32 maxUnderwaterForwardSpeed;   ///< Maximum underwater forward speed when running
    F32 maxUnderwaterBackwardSpeed;  ///< Maximum underwater backward speed when running
    F32 maxUnderwaterSideSpeed;      ///< Maximum underwater side speed when running
-
+// start ds
+   F32 swimDepth;
+// end ds
    // Crouching
    F32 crouchForce;                 ///< Force used to accelerate player while crouching
    F32 maxCrouchForwardSpeed;       ///< Maximum forward speed when crouching
@@ -155,6 +166,12 @@ struct PlayerData: public ShapeBaseData {
    F32 jetMinJumpSpeed;
    F32 jetMaxJumpSpeed;
    F32 jetJumpSurfaceAngle;   ///< Angle vertical degrees
+
+// strat jc
+   // Flying
+   bool canFly;
+// end jc
+
    /// @}
 
    /// @name Hitboxes
@@ -179,6 +196,15 @@ struct PlayerData: public ShapeBaseData {
    VectorF groundImpactShakeAmp;  ///< How much to shake
    F32 groundImpactShakeDuration; ///< How long to shake
    F32 groundImpactShakeFalloff;  ///< How fast the shake disapates
+// start jc - Dan&rsquo;s mods (turning intertia) ->  
+   F32 horizTurnSpeedInertia; ///< Amount of z-axis rotation to carry over from last tick  
+   F32 vertTurnSpeedInertia; ///< Amount of x-axis rotation to carry over from last tick  
+//   F32 AITurnSpeed; ///< Fraction of actual distance for AIPlayers to turn  
+   
+   F32 maxTurnRate;
+   bool conformToGround;
+   F32 smoothCamera;
+// end jc - <- Dan&rsquo;s mods (turning inertia)  
 
    /// Zounds!
    enum Sounds {
@@ -208,6 +234,9 @@ struct PlayerData: public ShapeBaseData {
    Point3F crouchBoxSize;
    Point3F proneBoxSize;
    Point3F swimBoxSize;
+// start ds - offset collision box and zrotation
+	Point3F renderOffset;
+// end ds
 
    /// Animation and other data initialized in onAdd
    struct ActionAnimationDef {
@@ -378,7 +407,7 @@ public:
       CrouchPose,
       PronePose,
       SwimPose,
-      NumPoseBits = 3
+      NumPoseBits = 4
    };
 
 protected:
@@ -442,6 +471,21 @@ protected:
 
    S32 mMountPending;               ///< mMountPending suppresses tickDelay countdown so players will sit until
                                     ///< their mount, or another animation, comes through (or 13 seconds elapses).
+
+// start ds
+   // Variable Movement! -- Zshazz
+   /*
+   F32 mRunForceMod; // Modifies the runForce
+   F32 mMaxForwardSpeedMod;
+   F32 mMaxBackwardSpeedMod;
+   F32 mMaxWalkForwardSpeedMod;
+   F32 mMaxWalkBackwardSpeedMod;
+   F32 mMaxSideSpeedMod; 
+   */
+// end ds
+// start jc - moved to player for variable motion.
+   F32 mMoveSpeed;
+// end jc
 
    /// Main player state
    enum ActionState {
@@ -512,6 +556,9 @@ protected:
 
    bool mInWater;            ///< Is true if WaterCoverage is greater than zero
    bool mSwimming;            ///< Is true if WaterCoverage is above the swimming threshold
+// start jc
+   bool mFlying;            ///< Is true if WaterCoverage is above the swimming threshold
+// end jc
    //
    PlayerData* mDataBlock;    ///< MMmmmmm...datablock...
 
@@ -588,6 +635,10 @@ protected:
 
    ///Update the movement
    virtual void updateMove(const Move *move);
+// start jc
+   void updateMoveFlight(const Move *move);
+   void updateMoveOriginal(const Move *move);
+// end jc
 
    ///Interpolate movement
    Point3F _move( const F32 travelTime, Collision *outCol );
@@ -620,6 +671,9 @@ protected:
    /// @}
 
    void setPosition(const Point3F& pos,const Point3F& viewRot);
+// start ds - conform to ground
+   void setRenderTransform(const MatrixF &);
+// end ds
    void setRenderPosition(const Point3F& pos,const Point3F& viewRot,F32 dt=-1);
    void _findContact( SceneObject **contactObject, VectorF *contactNormal, Vector<SceneObject*> *outOverlapObjects );
    void findContact( bool *run, bool *jump, VectorF *contactNormal );
@@ -748,6 +802,10 @@ public:
    void setControlObject(ShapeBase *obj);
    ShapeBase* getControlObject();
    
+// start ds
+   // Variable Movement -- Zshazz
+//	static void initPersistFields(); // Has to be declared so that the engine knows to use my persist fields 
+// end ds
    //
    void updateWorkingCollisionSet();
    virtual void processTick(const Move *move);
@@ -767,6 +825,14 @@ public:
    virtual void prepRenderImage( SceneRenderState* state );
    virtual void renderConvex( ObjectRenderInst *ri, SceneRenderState *state, BaseMatInstance *overrideMat );   
    virtual void renderMountedImage( U32 imageSlot, TSRenderState &rstate, SceneRenderState *state );
+// start ds
+	bool mFrozen;
+	void setFrozen(bool frozen) {if (frozen != mFrozen && isServerObject()) {setMaskBits(MoveMask);} mFrozen = frozen;}
+// end ds
+// start jc - moved to player for variable motion.
+   void setMoveSpeed( const F32 speed );
+   F32 getMoveSpeed() const { return mMoveSpeed; }
+// end jc
 };
 
 typedef Player::Pose PlayerPose;

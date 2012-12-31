@@ -50,7 +50,10 @@ class TSThread;
 class ConvexFeature;
 class SceneRenderState;
 class FeatureSet;
-
+// start jc
+class WebViewTexture;
+class WebViewData;
+// end jc
 
 //-------------------------------------------------------------------------------------
 // Instance versions of shape objects
@@ -207,6 +210,11 @@ class TSShapeInstance
 
    /// storage space for node transforms
    Vector<MatrixF> mNodeTransforms;
+// start jc
+#ifdef TORQUE_CUBE_NODESCALES
+   Vector<Point3F> mNodeScales;
+#endif
+// end jc
 
    /// @name Reference Transform Vectors
    /// unused until first transition
@@ -227,6 +235,12 @@ class TSShapeInstance
    static Vector<TSScale> smNodeCurrentArbitraryScales;
    static Vector<MatrixF> smNodeLocalTransforms;
    static TSIntegerSet    smNodeLocalTransformDirty;
+// start jc
+#ifdef TORQUE_CUBE_NODESCALES
+   static Vector<Point3F> smNodeCurrentScales;
+   static Vector<Point3F> smNodeLocalScales;
+#endif
+// end jc
    /// @}
 
    /// @name Threads
@@ -314,6 +328,9 @@ protected:
    void addPath(TSThread * gt, F32 start, F32 end, MatrixF * mat = NULL);
 
    public:
+// start jc
+   void  cloneMaterial(String name);
+// end jc
 
    TSShape* getShape() const { return mShape; }
 
@@ -359,8 +376,17 @@ protected:
          return getShape()->getTargetName( mapToNameIndex );
       }
    }
+// start pg
+   void  resetUVAnim();
+// end pg
 
-   void reSkin( String newBaseName, String oldBaseName = String::EmptyString );
+// start jc
+//   void reSkin( String newBaseName, String oldBaseName = String::EmptyString );
+
+   void reSkin( String newBaseName, String oldBaseName = String::EmptyString, bool ignoreResourcePath = true );
+   void webSkin( WebViewData *webViewData );
+//   void updateWebSkin( WebViewData &webViewData );
+// end jc
 
    enum
    {
@@ -394,6 +420,9 @@ protected:
    bool getTriggerState(U32 stateNum, bool clearState = true);
    void setTriggerState(U32 stateNum, bool on);
    void setTriggerStateBit(U32 stateBit, bool on);
+// start jc
+   U32 getTriggerState() { return mTriggerStates; }
+// end jc
    /// @}
 
    /// @name Debris Management
@@ -695,6 +724,9 @@ protected:
 class TSThread
 {
    friend class TSShapeInstance;
+// start jc
+   friend class ShapeBase;
+// end jc
 
    S32 priority;
 

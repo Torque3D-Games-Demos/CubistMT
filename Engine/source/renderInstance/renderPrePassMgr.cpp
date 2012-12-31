@@ -539,6 +539,13 @@ void ProcessedPrePassMaterial::_determineFeatures( U32 stageNum,
          newFeatures.addFeature( MFT_AlphaTest );
          newFeatures.addFeature( MFT_DiffuseMap );
       }
+   // start jc
+      if ( type == MFT_AlphaScatter )
+      {
+         newFeatures.addFeature( MFT_AlphaScatter );
+         newFeatures.addFeature( MFT_DiffuseMap );
+      }
+   // end jc
 
       else if ( type == MFT_IsTranslucentZWrite )
       {
@@ -556,7 +563,12 @@ void ProcessedPrePassMaterial::_determineFeatures( U32 stageNum,
                   type == MFT_InterlacedPrePass ||
                   type == MFT_Visibility ||
                   type == MFT_UseInstancing ||
-                  type == MFT_DiffuseVertColor )
+                  type == MFT_DiffuseVertColor ||
+              // start jc
+                  type == MFT_AlphaScatter ||
+                  type == MFT_IsObjectSpaceNormals
+              // end jc
+                  )
          newFeatures.addFeature( type );
 
       // Add any transform features.

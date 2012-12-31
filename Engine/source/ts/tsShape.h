@@ -424,6 +424,17 @@ class TSShape
    const Point3F & getAlignedScale(const Sequence & seq, S32 keyframeNum, S32 scaleNum) const;
    TSScale & getArbitraryScale(const Sequence & seq, S32 keyframeNum, S32 scaleNum, TSScale *) const;
    const ObjectState & getObjectState(const Sequence & seq, S32 keyframeNum, S32 objectNum) const;
+// start jc
+   void setObjectState(const Sequence & seq, S32 keyframeNum, S32 objectNum, const ObjectState & objState)
+   {
+      U32 index = seq.baseObjectState + objectNum*seq.numKeyframes + keyframeNum;
+      if(index >= objectStates.size())
+      {
+         objectStates.setSize(seq.baseObjectState + objects.size()*seq.numKeyframes);
+      }
+      objectStates.insert(index, objState);
+   }
+// end jc
    /// @}
 
    /// build LOS collision detail
@@ -513,6 +524,12 @@ class TSShape
    void getSubShapeDetails(S32 subShapeIndex, Vector<S32>& validDetails);
 
    void getNodeWorldTransform(S32 nodeIndex, MatrixF* mat) const;
+// start jc
+   void getNodeTransform(S32 nodeIndex, MatrixF* mat) const;
+   void getNodePosition(S32 nodeIndex, Point3F* pos) const;
+   void getNodeRotation(S32 nodeIndex, QuatF* rot) const;
+//   void getNodeScale(S32 nodeIndex, Point3F* scale) const;
+// end jc
    void getNodeKeyframe(S32 nodeIndex, const TSShape::Sequence& seq, S32 keyframe, MatrixF* mat) const;
    void getNodeObjects(S32 nodeIndex, Vector<S32>& nodeObjects);
    void getNodeChildren(S32 nodeIndex, Vector<S32>& nodeChildren);
@@ -622,6 +639,11 @@ class TSShape
    bool renameSequence(const String& oldName, const String& newName);
 
    bool setNodeTransform(const String& name, const Point3F& pos, const QuatF& rot);
+// start jc
+   bool setNodeTransform(S32 nodeIndex, const Point3F& pos, const QuatF& rot);
+   bool setNodePosition(S32 nodeIndex, const Point3F& pos);
+   bool setNodeRotation(S32 nodeIndex, const QuatF& rot);
+// end jc
    bool addNode(const String& name, const String& parentName, const Point3F& pos, const QuatF& rot);
    bool removeNode(const String& name);
 
@@ -645,6 +667,9 @@ class TSShape
 
    bool addTrigger(const String& seqName, S32 keyframe, S32 state);
    bool removeTrigger(const String& seqName, S32 keyframe, S32 state);
+// start jc
+   bool addVisibility(const String& seqName, S32 startFrame, S32 endFrame, U32 objectIndex, bool visible);
+// end jc
 
    bool setSequenceBlend(const String& seqName, bool blend, const String& blendRefSeqName, S32 blendRefFrame);
    bool setSequenceGroundSpeed(const String& seqName, const Point3F& trans, const Point3F& rot);

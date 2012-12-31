@@ -2200,7 +2200,10 @@ void FogFeatHLSL::processPix( Vector<ShaderComponent*> &componentList,
    }
 
    // Lerp between the fog color and diffuse color.
-   LangElement *fogLerp = new GenOp( "lerp( @.rgb, @.rgb, @ )", fogColor, color, fogAmount );
+// start jc
+//   LangElement *fogLerp = new GenOp( "lerp( @.rgb, @.rgb, @ )", fogColor, color, fogAmount );
+   LangElement *fogLerp = new GenOp( "BlendUnderwaterFog(@.rgb, @.rgb, @)", color, fogColor, fogAmount );
+// end jc
    meta->addStatement( new GenOp( "   @.rgb = @;\r\n", color, fogLerp ) );
 
    output = meta;
@@ -2212,6 +2215,91 @@ ShaderFeature::Resources FogFeatHLSL::getResources( const MaterialFeatureData &f
    res.numTexReg = 1;
    return res;
 }
+
+// start jc
+
+//****************************************************************************
+// FogBlendAdd
+//****************************************************************************
+
+FogBlendAddFeatHLSL::FogBlendAddFeatHLSL()
+   : mFogDep( "shaders/common/torque.hlsl" )
+{
+   addDependency( &mFogDep );
+}
+void FogBlendAddFeatHLSL::processPix( Vector<ShaderComponent*> &componentList, 
+                              const MaterialFeatureData &fd )
+{
+   MultiLine *meta = new MultiLine;
+
+   Var *fogColor = (Var*) LangElement::find( "col" );
+   if ( !fogColor )
+   {
+      fogColor = new Var;
+      fogColor->setType( "float4" );
+      fogColor->setName( "fogColor" );
+      fogColor->uniform = true;
+      fogColor->constSortPos = cspPass;
+   }
+
+   // Get the out color.
+   Var *color = (Var*) LangElement::find( "col" );
+   if ( !color )
+   {
+      color = new Var;
+      color->setType( "fragout" );
+      color->setName( "col" );
+      color->setStructName( "OUT" );
+   }
+
+   Var *fogAmount;
+
+   const bool vertexFog = Con::getBoolVariable( "$useVertexFog", false );
+   if ( vertexFog || GFX->getPixelShaderVersion() < 3.0 )
+   {
+      // Per-vertex.... just get the fog amount.
+      ShaderConnector *connectComp = dynamic_cast<ShaderConnector *>( componentList[C_CONNECTOR] );
+      fogAmount = connectComp->getElement( RT_TEXCOORD );
+      fogAmount->setName( "fogAmount" );
+      fogAmount->setStructName( "IN" );
+      fogAmount->setType( "float" );
+   }
+   else
+   {
+      Var *wsPosition = getInWsPosition( componentList );
+
+      // grab the eye position
+      Var *eyePos = (Var*)LangElement::find( "eyePosWorld" );
+      if ( !eyePos )
+      {
+         eyePos = new Var( "eyePosWorld", "float3" );
+         eyePos->uniform = true;
+         eyePos->constSortPos = cspPass;
+      }
+
+      Var *fogData = new Var( "fogData", "float3" );
+      fogData->uniform = true;
+      fogData->constSortPos = cspPass;   
+
+      /// Get the fog amount.
+      fogAmount = new Var( "fogAmount", "float" );
+      meta->addStatement( new GenOp( "   @ = saturate( computeSceneFog( @, @, @.r, @.g, @.b ) );\r\n", 
+         new DecOp( fogAmount ), eyePos, wsPosition, fogData, fogData, fogData ) );
+   }
+
+   // Lerp between the fog color and diffuse color.
+//   LangElement *fogLerp = new GenOp( "lerp( @.rgb, @.rgb, @ )", fogColor, color, fogAmount );
+ //  meta->addStatement( new GenOp( "   @.rgb = @;\r\n", color, fogLerp ) );
+
+   Var *fogTemp = new Var( "fogTemp", "float3" );
+   meta->addStatement( new GenOp( "   @ = BlendUnderwaterFog(@.rgb, @.rgb, @);\r\n", new DecOp(fogTemp), color, fogColor, fogAmount ) );
+   meta->addStatement( new GenOp( "   @.rgb = @ - (@ - @.rgb);\r\n", color, fogTemp, fogTemp, color ) );
+
+ //  meta->addStatement( new GenOp( "   @.rgb -= lerp(@.rgb, float3(0,0,0), @);\r\n", color, fogColor, fogAmount ) );
+
+   output = meta;
+}
+// end jc
 
 
 //****************************************************************************
@@ -2280,6 +2368,15 @@ void VisibilityFeatHLSL::processPix(   Vector<ShaderComponent*> &componentList,
          visibility->constSortPos = cspPotentialPrimitive;  
       }
    }
+// start jc
+   Var *accumTime = (Var*)LangElement::find( "accumTime" );
+   if ( !accumTime )
+   {
+      accumTime = new Var( "accumTime", "float" );
+      accumTime->uniform = true;
+      accumTime->constSortPos = cspPass;  
+   }
+// end jc
 
    MultiLine *meta = new MultiLine;
    output = meta;
@@ -2294,7 +2391,10 @@ void VisibilityFeatHLSL::processPix(   Vector<ShaderComponent*> &componentList,
 
    // Everything else does a fizzle.
    Var *vPos = getInVpos( meta, componentList );
-   meta->addStatement( new GenOp( "   fizzle( @, @ );\r\n", vPos, visibility ) );
+// start jc
+//   meta->addStatement( new GenOp( "   fizzle( @, @ );\r\n", vPos, visibility ) );
+   meta->addStatement( new GenOp( "   fizzle_random( @, @, @ );\r\n", vPos, visibility, accumTime ) );
+// end jc
 }
 
 ShaderFeature::Resources VisibilityFeatHLSL::getResources( const MaterialFeatureData &fd )
@@ -2344,6 +2444,48 @@ void AlphaTestHLSL::processPix(  Vector<ShaderComponent*> &componentList,
    // Do the clip.
    output = new GenOp( "   clip( @.a - @ );\r\n", color, alphaTestVal );
 }
+
+// start jc
+//****************************************************************************
+// AlphaScatter
+//****************************************************************************
+
+void AlphaScatterHLSL::processPix(  Vector<ShaderComponent*> &componentList,
+                                 const MaterialFeatureData &fd )
+{
+   // If we're below SM3 and don't have a depth output
+   // feature then don't waste an instruction here.
+   if ( GFX->getPixelShaderVersion() < 3.0 &&
+        !fd.features[ MFT_EyeSpaceDepthOut ]  &&
+        !fd.features[ MFT_DepthOut ] )
+   {
+      output = NULL;
+      return;
+   }
+
+   // If we don't have a color var then we cannot do an alpha test.
+   Var *color = (Var*)LangElement::find( "col" );
+   if ( !color )
+   {
+      output = NULL;
+      return;
+   }
+
+   Var *accumTime = (Var*)LangElement::find( "accumTime" );
+   if ( !accumTime )
+   {
+      accumTime = new Var( "accumTime", "float" );
+      accumTime->uniform = true;
+      accumTime->constSortPos = cspPrimitive;  
+   }
+
+   MultiLine *meta = new MultiLine;
+   output = meta;
+
+   Var *vPos = getInVpos( meta, componentList );
+   meta->addStatement(new GenOp( "   fizzle_random( @ ,@.a ,@ );\r\n", vPos, color, accumTime ));
+}
+// end jc
 
 
 //****************************************************************************

@@ -95,7 +95,10 @@ public:
    virtual Point3F move( const VectorF &displacement, CollisionList &outCol );
    virtual void findContact( SceneObject **contactObject, VectorF *contactNormal, Vector<SceneObject*> *outOverlapObjects ) const;
    virtual bool testSpacials( const Point3F &nPos, const Point3F &nSize ) const { return true; }
-   virtual void setSpacials( const Point3F &nPos, const Point3F &nSize ) {}
+// start jc
+//   virtual void setSpacials( const Point3F &nPos, const Point3F &nSize ) {}
+   virtual void setSpacials( const Point3F &nPos, const Point3F &nSize );
+// end jc
    virtual void enableCollision();
    virtual void disableCollision();
 };

@@ -151,7 +151,18 @@ enum SceneObjectTypes
    /// @see PhysicalZone
    PhysicalZoneObjectType = BIT( 23 ),
 
+// start jc
+   TurretObjectType = BIT( 24 ), // MACSK ++
+
+   AircraftObjectType = BIT ( 25 ), // MACSK ++
+
+   InputEventObjectType =    BIT(26),
+// end jc
+// start pg
+   TrafficControllerObjectType = BIT(27)
+// end pg
    /// @}
+
 };
 
 enum SceneObjectTypeMasks

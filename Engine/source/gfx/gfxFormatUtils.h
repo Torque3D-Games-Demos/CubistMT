@@ -119,6 +119,26 @@ inline void GFXPackPixel( GFXFormat format, U8*& ptr, U8 red, U8 green, U8 blue,
          ptr += 4;
          break;
          
+// start jc
+      case GFXFormatB8G8R8A8:
+         if( leastSignficantFirst )
+         {
+            ptr[ 0 ] = red;
+            ptr[ 1 ] = green;
+            ptr[ 2 ] = blue;
+            ptr[ 3 ] = alpha;
+         }
+         else
+         {
+            ptr[ 0 ] = blue;
+            ptr[ 1 ] = green;
+            ptr[ 2 ] = red;
+            ptr[ 3 ] = alpha;
+         }
+         ptr += 4;
+         break;
+// end jc
+
       case GFXFormatR8G8B8:
          if( leastSignficantFirst )
          {

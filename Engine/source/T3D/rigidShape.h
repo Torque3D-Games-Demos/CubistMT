@@ -268,6 +268,9 @@ public:
    // xgalaxy cool hacks
    void reset();
    void freezeSim(bool frozen);
+// start jc
+   bool isFrozen(void);
+// end jc
 
    ///@name Rigid body methods
    ///@{

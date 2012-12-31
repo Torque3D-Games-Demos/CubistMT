@@ -353,6 +353,47 @@ void TSShape::getNodeWorldTransform(S32 nodeIndex, MatrixF* mat) const
       }
    }
 }
+// start jc
+void TSShape::getNodeTransform(S32 nodeIndex, MatrixF* mat) const
+{
+   if ( nodeIndex == -1 )
+   {
+      mat->identity();
+   }
+   else
+   {
+      // Calculate the world transform of the given node
+      defaultRotations[nodeIndex].getQuatF().setMatrix(mat);
+      mat->setPosition(defaultTranslations[nodeIndex]);
+
+   }
+}
+void TSShape::getNodePosition(S32 nodeIndex, Point3F* pos) const
+{
+   if ( nodeIndex == -1 )
+   {
+      pos->zero();
+   }
+   else
+   {
+      // Calculate the world transform of the given node
+      pos->set(defaultTranslations[nodeIndex]);
+   }
+}
+void TSShape::getNodeRotation(S32 nodeIndex, QuatF* rot) const
+{
+   if ( nodeIndex == -1 )
+   {
+      rot->identity();
+   }
+   else
+   {
+      // Calculate the world transform of the given node
+      (*rot) = defaultRotations[nodeIndex].getQuatF();
+      
+   }
+}
+// end jc
 
 void TSShape::getNodeObjects(S32 nodeIndex, Vector<S32>& nodeObjects)
 {

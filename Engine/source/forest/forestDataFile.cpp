@@ -316,6 +316,18 @@ const ForestItem& ForestData::addItem( ForestItemData *data,
                      scale );
 }
 
+// start jc
+const ForestItem& ForestData::addItem( ForestItemData *data,
+                                       const MatrixF &mat,
+                                       F32 scale )
+{
+   return addItem(   smNextItemId++,
+                     data,
+                     mat, 
+                     scale );
+}
+// end jc
+
 const ForestItem& ForestData::addItem( ForestItemKey key,
                                        ForestItemData *data,
                                        const MatrixF &xfm,

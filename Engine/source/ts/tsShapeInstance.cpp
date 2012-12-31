@@ -38,6 +38,13 @@
 #include "gfx/primBuilder.h"
 #include "gfx/gfxDrawUtil.h"
 #include "core/module.h"
+// start jc
+#include "materials/matTextureTarget.h"
+// end jc
+
+
+//#define   NO_RESKIN
+
 
 
 MODULE_BEGIN( TSShapeInstance )
@@ -96,6 +103,12 @@ Vector<Point3F>               TSShapeInstance::smNodeCurrentAlignedScales(__FILE
 Vector<TSScale>               TSShapeInstance::smNodeCurrentArbitraryScales(__FILE__, __LINE__);
 Vector<MatrixF>               TSShapeInstance::smNodeLocalTransforms(__FILE__, __LINE__);
 TSIntegerSet                  TSShapeInstance::smNodeLocalTransformDirty;
+// start jc
+#ifdef TORQUE_CUBE_NODESCALES
+Vector<Point3F>               TSShapeInstance::smNodeLocalScales(__FILE__, __LINE__);
+Vector<Point3F>               TSShapeInstance::smNodeCurrentScales(__FILE__, __LINE__);
+#endif
+// end jc
 
 Vector<TSThread*>             TSShapeInstance::smRotationThreads(__FILE__, __LINE__);
 Vector<TSThread*>             TSShapeInstance::smTranslationThreads(__FILE__, __LINE__);
@@ -109,6 +122,11 @@ TSShapeInstance::TSShapeInstance( const Resource<TSShape> &shape, bool loadMater
 {
    VECTOR_SET_ASSOCIATION(mMeshObjects);
    VECTOR_SET_ASSOCIATION(mNodeTransforms);
+// start jc
+#ifdef TORQUE_CUBE_NODESCALES
+   VECTOR_SET_ASSOCIATION(mNodeScales);
+#endif
+// end jc
    VECTOR_SET_ASSOCIATION(mNodeReferenceRotations);
    VECTOR_SET_ASSOCIATION(mNodeReferenceTranslations);
    VECTOR_SET_ASSOCIATION(mNodeReferenceUniformScales);
@@ -126,6 +144,11 @@ TSShapeInstance::TSShapeInstance( TSShape *shape, bool loadMaterials )
 {
    VECTOR_SET_ASSOCIATION(mMeshObjects);
    VECTOR_SET_ASSOCIATION(mNodeTransforms);
+// start jc
+#ifdef TORQUE_CUBE_NODESCALES
+   VECTOR_SET_ASSOCIATION(mNodeScales);
+#endif
+// end jc
    VECTOR_SET_ASSOCIATION(mNodeReferenceRotations);
    VECTOR_SET_ASSOCIATION(mNodeReferenceTranslations);
    VECTOR_SET_ASSOCIATION(mNodeReferenceUniformScales);
@@ -203,6 +226,11 @@ void TSShapeInstance::initNodeTransforms()
    // set up node data
    S32 numNodes = mShape->nodes.size();
    mNodeTransforms.setSize(numNodes);
+// start jc
+#ifdef TORQUE_CUBE_NODESCALES
+   mNodeScales.setSize(numNodes);
+#endif
+// end jc
 }
 
 void TSShapeInstance::initMeshObjects()
@@ -279,7 +307,35 @@ void TSShapeInstance::initMaterialList( const FeatureSet *features )
    // reflections, and instancing.  This would keep these
    // hiccups from happening at runtime.
 }
+// start jc
+void TSShapeInstance::cloneMaterial(String name)
+{
+   TSMaterialList* pMatList = getMaterialList();
+   pMatList->cloneMaterial(name);
+}
+// end jc
 
+// start pg
+void TSShapeInstance::resetUVAnim()
+{
+//   if (ownMaterialList() == false)
+//      cloneMaterialList();
+
+   TSMaterialList* pMatList = getMaterialList();
+   for(U32 i=0; i<pMatList->size(); i++){
+      MatInstance   *mat = (MatInstance *)pMatList->getMaterialInst(i);
+      mat = (MatInstance *)pMatList->getMaterialInst(i);
+      mat->getMaterial()->mScrollOffset[0].x = 0;
+      mat->getMaterial()->mScrollOffset[0].y = 0;
+   }
+
+}
+// end pg
+
+
+// start jc
+// todo: update this function with fixes from 1.2
+/*
 void TSShapeInstance::reSkin( String newBaseName, String oldBaseName )
 {
    if( newBaseName.isEmpty() )
@@ -316,6 +372,131 @@ void TSShapeInstance::reSkin( String newBaseName, String oldBaseName )
    // Initialize the material instances
    initMaterialList();
 }
+*/
+//void TSShapeInstance::reSkin( String newBaseName, String oldBaseName )
+void TSShapeInstance::reSkin( String newBaseName, String oldBaseName, bool ignoreResourcePath )
+{
+#ifdef   NO_RESKIN
+   return;
+#endif
+   if( newBaseName.isEmpty() )
+      newBaseName = "base";
+
+   if ( newBaseName.equal( oldBaseName, String::NoCase ) )
+      return;
+
+   // Make our own copy of the materials list from the resource if necessary
+   if (ownMaterialList() == false)
+      cloneMaterialList();
+
+   TSMaterialList* pMatList = getMaterialList();
+   pMatList->setTextureLookupPath( mShapeResource.getPath().getPath() );
+
+   // Cycle through the materials.
+   String oldBaseNamePlusDot;
+   if( !oldBaseName.isEmpty() )
+      oldBaseNamePlusDot = oldBaseName + String( "." );
+
+   const Vector<String> &materialNames = pMatList->getMaterialNameList();
+
+   if( oldBaseName.isEmpty() )
+      oldBaseName = "base";
+
+   const U32 oldBaseNameLength = oldBaseName.length();
+
+   Torque::Path   shapePath = mShapeResource.getPath();
+   const String   resourcePath = shapePath.getPath();
+
+
+   for (S32 j = 0; j < materialNames.size(); j++) 
+   {
+      // Get the name of this material.
+      const String &pName = materialNames[j];
+      bool  sameRoot = !pName.compare(oldBaseName, oldBaseNameLength, String::NoCase);
+      if( !pName.isEmpty() && pName.size()>=oldBaseNameLength  && sameRoot )
+      {
+         // Try changing base.
+         bool replacedRoot = false;
+         
+         if(ignoreResourcePath)
+         {
+            String newName( pName );
+            newName.replace( 0, oldBaseNameLength, newBaseName );
+            pMatList->setTextureLookupPath( String::EmptyString );
+            pMatList->renameMaterial( j, newName );
+         }
+         else
+         {
+            if(pName.compare( oldBaseName, oldBaseNameLength, String::NoCase )==0 || pName.compare( oldBaseNamePlusDot, oldBaseNameLength+1, String::NoCase )==0)
+            {
+               String matName = pName;
+               String newPath = resourcePath + "/" + matName.replace( 0, oldBaseNameLength, newBaseName );
+               replacedRoot = pMatList->renameMaterial( j, newPath );
+            }
+            if( !replacedRoot )
+               pMatList->renameMaterial( j, resourcePath + "/" + pName );
+         }
+         // If we did not change base, set the old material.
+      }
+   }
+
+   // Initialize the material instances.
+   initMaterialList();
+}
+// end jc
+
+// start jc
+void TSShapeInstance::webSkin( WebViewData *webViewData )
+{
+#ifdef   NO_RESKIN
+   return;
+#endif
+   String oldBaseName = "web";
+   const U32 oldBaseNameLength = oldBaseName.length();
+/*
+   String oldBaseNamePlusDot;
+   if( !oldBaseName.isEmpty() )
+      oldBaseNamePlusDot = oldBaseName + String( "." );
+*/
+   // Make our own copy of the materials list from the resource
+   // if necessary.
+   if (ownMaterialList() == false)
+      cloneMaterialList();
+
+   Torque::Path   shapePath = mShapeResource.getPath();
+   const String   resourcePath = shapePath.getPath();
+
+   // Cycle through the materials.
+   TSMaterialList* pMatList = getMaterialList();
+   const Vector<String> &materialNames = pMatList->getMaterialNameList();
+
+   for (S32 j = 0; j < materialNames.size(); j++) 
+   {
+      // Get the name of this material.
+      const String &pName = materialNames[j];
+      if( !pName.isEmpty() )
+      {
+         // Try changing base.
+
+         bool replacedRoot = false;
+         if( !oldBaseName.isEmpty() && pName.compare( oldBaseName, oldBaseNameLength, String::NoCase ) == 0 )
+         {
+         //   String matName = pName;
+         //   String newPath = resourcePath + "/" + matName.replace( 0, oldBaseNameLength, newBaseName );
+            replacedRoot = pMatList->setWebViewMaterial( j, webViewData );
+         }
+
+         // If we did not change base, set the old material.
+         if( !replacedRoot )
+            pMatList->setWebViewMaterial( j, webViewData );
+      }
+   }
+
+   // Initialize the material instances.
+
+   initMaterialList();
+}
+// end jc
 
 //-------------------------------------------------------------------------------------
 // Render & detail selection

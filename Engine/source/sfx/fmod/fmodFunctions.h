@@ -87,6 +87,10 @@ FMOD_FUNCTION( FMOD_System_Init, (FMOD_SYSTEM *system, int maxchannels, FMOD_INI
 FMOD_FUNCTION( FMOD_System_PlaySound, (FMOD_SYSTEM *system, FMOD_CHANNELINDEX channelid, FMOD_SOUND *sound, FMOD_BOOL paused, FMOD_CHANNEL **channel))
 FMOD_FUNCTION( FMOD_System_Set3DListenerAttributes, (FMOD_SYSTEM *system, int listener, const FMOD_VECTOR *pos, const FMOD_VECTOR *vel, const FMOD_VECTOR *forward, const FMOD_VECTOR *up))
 FMOD_FUNCTION( FMOD_System_Set3DNumListeners, ( FMOD_SYSTEM* system, int numlisteners ) )
+// start jc
+FMOD_FUNCTION( FMOD_System_Set3DSpeakerPosition, (FMOD_SYSTEM *system, FMOD_SPEAKER speaker, float x, float y, FMOD_BOOL active))
+FMOD_FUNCTION( FMOD_System_Get3DSpeakerPosition, (FMOD_SYSTEM *system, FMOD_SPEAKER speaker, float *x, float *y, FMOD_BOOL *active))
+// end jc
 FMOD_FUNCTION( FMOD_System_SetGeometrySettings, ( FMOD_SYSTEM* system, float maxworldsize ) )
 FMOD_FUNCTION( FMOD_System_Get3DSettings, (FMOD_SYSTEM* system, float* dopplerFactor, float* distanceFactor, float* rolloffFactor))
 FMOD_FUNCTION( FMOD_System_Set3DSettings, (FMOD_SYSTEM *system, float dopplerscale, float distancefactor, float rolloffscale))

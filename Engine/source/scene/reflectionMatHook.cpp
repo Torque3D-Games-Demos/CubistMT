@@ -30,7 +30,9 @@
 #include "shaderGen/featureType.h"
 #include "shaderGen/featureMgr.h"
 #include "scene/sceneRenderState.h"
-
+// start jc
+#include "materials/processedMaterial.h"
+// end jc
 
 const MatInstanceHookType ReflectionMaterialHook::Type( "Reflection" );
 
@@ -91,7 +93,13 @@ void ReflectionMaterialHook::_overrideFeatures(  ProcessedMaterial *mat,
 
    // Forward shading on materials in reflections
    fd.features.addFeature( MFT_ForwardShading );
-   fd.features.addFeature( MFT_Fog );
+// start jc
+//   fd.features.addFeature( MFT_Fog );
+   if(mat->getMaterial() && mat->getMaterial()->mTranslucentBlendOp == Material::Add)
+      fd.features.addFeature( MFT_FogBlendAdd );
+   else
+      fd.features.addFeature( MFT_Fog );
+// end jc
 }
 
 //------------------------------------------------------------------------------

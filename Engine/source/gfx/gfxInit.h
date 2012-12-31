@@ -91,6 +91,9 @@ public:
 
    /// Get the initial video mode based on user preferences (or a heuristic).
    static GFXVideoMode getInitialVideoMode();
+// start jc
+   static GFXVideoMode getInitialVideoMode(U32 screen);
+// end jc
 private:
    /// List of known adapters.
    static Vector<GFXAdapter*> smAdapters;

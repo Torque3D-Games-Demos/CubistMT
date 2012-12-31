@@ -86,6 +86,9 @@ ReflectorDesc::ReflectorDesc()
    priority = 1.0f;
    maxRateMs = 15;
    useOcclusionQuery = true;
+// start jc
+   type = ReflectorDesc::CUBE;
+// end jc
 }
 
 ReflectorDesc::~ReflectorDesc()
@@ -95,6 +98,11 @@ ReflectorDesc::~ReflectorDesc()
 void ReflectorDesc::initPersistFields()
 {
    addGroup( "ReflectorDesc" );
+// start jc
+      addField( "type", TypeS32, Offset( type, ReflectorDesc ), 
+         "Type of reflection to generate. Temp: plane = 0, cubemap = 1"
+         "this value is interpreted as." );
+// end jc
 
       addField( "texSize", TypeS32, Offset( texSize, ReflectorDesc ), 
          "Size in pixels of the (square) reflection texture. For a cubemap "
@@ -135,6 +143,9 @@ void ReflectorDesc::packData( BitStream *stream )
 {
    Parent::packData( stream );
 
+// start jc
+   stream->write( type );
+// end jc
    stream->write( texSize );
    stream->write( nearDist );
    stream->write( farDist );
@@ -149,6 +160,9 @@ void ReflectorDesc::unpackData( BitStream *stream )
 {
    Parent::unpackData( stream );
 
+// start jc
+   stream->read( &type );
+// end jc
    stream->read( &texSize );
    stream->read( &nearDist );
    stream->read( &farDist );
@@ -555,6 +569,15 @@ void PlaneReflector::updateReflection( const ReflectParams &params )
    const bool screenShotMode = gScreenShot && gScreenShot->isPending();
    if ( screenShotMode )
       gScreenShot->tileFrustum( frustum );
+
+// start jc
+   //if(params.culler.getNumTiles())
+   //   frustum.tileFrustum(params.culler.getNumTiles(), params.culler.getCurTile(), params.culler.getTileOverlap());
+   
+//   if (params.query && params.query->frustumOffset != Point4F::Zero)
+   if(params.query && params.query->frustumOffset.z != 0.0f && params.query->frustumOffset.w != 0.0f)
+      frustum.offsetFrustum(params.query->frustumOffset);
+// end jc
 
    GFX->setFrustum( frustum );
       

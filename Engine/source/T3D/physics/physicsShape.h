@@ -41,12 +41,24 @@
 #ifndef _SIMOBJECTREF_H_
    #include "console/simObjectRef.h"
 #endif
+// start jc
+#ifndef _NETSTRINGTABLE_H_
+   #include "sim/netStringTable.h"
+#endif
+#ifndef _SIMTUIO_H_
+#include "console/simTUIO.h"
+#endif
+class PhysicsShape;
+// end jc
 
 class TSShapeInstance;
 class PhysicsBody;
 class PhysicsWorld;
 class PhysicsDebrisData;
 class ExplosionData;
+// start jc
+class WebViewData;
+// end jc
 
 
 class PhysicsShapeData : public GameBaseData
@@ -135,6 +147,27 @@ public:
    SimObjectRef< PhysicsDebrisData > debris;   
    SimObjectRef< ExplosionData > explosion;   
    SimObjectRef< PhysicsShapeData > destroyedShape;
+
+// start jc
+//   DECLARE_CALLBACK( void, onCollision, ( PhysicsShape* obj, SceneObject* collObj, VectorF vec, F32 len ) );
+   DECLARE_CALLBACK( void, onAddClient, ( PhysicsShape* obj ) );
+   DECLARE_CALLBACK( void, onMouseDown, ( PhysicsShape* obj, U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+   DECLARE_CALLBACK( void, onMouseUp, ( PhysicsShape* obj, U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+   DECLARE_CALLBACK( void, onMouseMove, ( PhysicsShape* obj, U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+   DECLARE_CALLBACK( void, onMouseDragged, ( PhysicsShape* obj, U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+   DECLARE_CALLBACK( void, onMouseEnter, ( PhysicsShape* obj, U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+   DECLARE_CALLBACK( void, onMouseLeave, ( PhysicsShape* obj, U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+   DECLARE_CALLBACK( void, onRightMouseDown, ( PhysicsShape* obj, U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+   DECLARE_CALLBACK( void, onRightMouseUp, ( PhysicsShape* obj, U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+   DECLARE_CALLBACK( void, onRightMouseDragged, ( PhysicsShape* obj, U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ));
+
+   DECLARE_CALLBACK( bool, onTouchDown, ( PhysicsShape* obj, S32 id, Point2I touchPoint, Point3F pos, Point3F vec, Point2F touchUVCoord ));
+   DECLARE_CALLBACK( bool, onTouchMove, ( PhysicsShape* obj, S32 id, Point2I touchPoint, Point3F pos, Point3F vec, Point2F touchUVCoord ));
+   DECLARE_CALLBACK( bool, onTouchUp, ( PhysicsShape* obj, S32 id, Point2I touchPoint, Point3F pos, Point3F vec, Point2F touchUVCoord ));
+
+   DECLARE_CALLBACK(void, onMaterialsLoaded, (PhysicsShape* obj) );
+
+// end jc
 };
 
 typedef PhysicsShapeData::SimType PhysicsSimType;
@@ -175,6 +208,17 @@ protected:
 
    /// True if the PhysicsShape has been destroyed ( gameplay ).
    bool mDestroyed;
+
+// start jc
+   U32 mSkinHash;
+   NetStringHandle   mSkinNameHandle;
+   String            mAppliedSkinName;
+   WebViewData* mWebViewData;
+   SimObjectId mWebViewID;
+
+   bool mEnableInputEvents;
+//   F32 mGravityMod;
+// end jc
 
    /// Enables automatic playing of the animation named "ambient" (if it exists) 
    /// when the PhysicsShape is loaded.
@@ -264,6 +308,65 @@ public:
    /// event occurs. This is automatically set in onAdd but some manipulators
    /// such as Prefab need to make use of this.
    void storeRestorePos();
+
+// start jc
+   void setEnableInputEvents( bool enable );
+   virtual void onMouseDown(const ShapeInputEvent & event);
+   virtual void onMouseUp(const ShapeInputEvent & event);
+   virtual void onMouseMove(const ShapeInputEvent & event);
+   virtual void onMouseDragged(const ShapeInputEvent & event);
+   virtual void onMouseEnter(const ShapeInputEvent & event);
+   virtual void onMouseLeave(const ShapeInputEvent & event);
+   virtual void onRightMouseDown(const ShapeInputEvent & event);
+   virtual void onRightMouseUp(const ShapeInputEvent & event);
+   virtual void onRightMouseDragged(const ShapeInputEvent & event);
+
+   virtual bool onTouchDown(const ShapeTouchEvent & event);
+   virtual bool onTouchMove(const ShapeTouchEvent & event);
+   virtual bool onTouchUp(const ShapeTouchEvent & event);
+
+   bool castRay(const Point3F &start, const Point3F &end, RayInfo* info);
+   bool castRayRendered(const Point3F &start, const Point3F &end, RayInfo* info);
+
+   Point3F getCMassPosition(void);
+   void setLinVelocity(const Point3F velocity);
+   Point3F getLinVelocity() const;
+   void moveGlobalPosition(const Point3F& vec);
+
+   void setSkinName(const char*);
+   const char* getSkinName();
+
+   void reSkin();
+   void reSkinNewPath();
+   void reSkin(const char* oldSkin);
+   void webSkin();
+   Point2I getTextureResolution(U32 index);
+   bool rayCrossesTransparency(RayInfo* ri);
+
+   void setWebViewData(WebViewData* webview)
+   {
+      mWebViewData = webview;
+      setMaskBits(SkinMask);
+   }
+   WebViewData* getWebViewData()
+   {
+      return mWebViewData;
+   }
+   bool hasWebViewData()
+   {
+      return bool(mWebViewData);
+   }
+
+// end jc
+
 };
+
+// start jc
+inline const char* PhysicsShape::getSkinName()
+{
+   return mSkinNameHandle.getString();
+}
+// end jc
+
 
 #endif // _PHYSICSSHAPE_H_

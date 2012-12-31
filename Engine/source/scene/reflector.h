@@ -62,6 +62,14 @@ class ReflectorDesc : public SimDataBlock
 
 public:
 
+// start jc
+   enum Type {
+      PLANE,
+      CUBE
+   };
+   U32 type;
+// end jc
+
    ReflectorDesc();
    virtual ~ReflectorDesc();
 

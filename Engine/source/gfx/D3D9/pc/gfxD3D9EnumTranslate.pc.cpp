@@ -113,6 +113,10 @@ void GFXD3D9EnumTranslate::init()
    GFXD3D9TextureFormat[GFXFormatD24S8] = D3DFMT_D24S8;
    GFXD3D9TextureFormat[GFXFormatD24FS8] = D3DFMT_D24FS8;
    GFXD3D9TextureFormat[GFXFormatD16] = D3DFMT_D16;
+// start jc
+   GFXD3D9TextureFormat[GFXFormatD15S1] = D3DFMT_D15S1;
+   GFXD3D9TextureFormat[GFXFormatB8G8R8A8] = D3DFMT_A8B8G8R8;
+// end jc
    VALIDATE_LOOKUPTABLE( GFXD3D9TextureFormat, GFXFormat);
 //------------------------------------------------------------------------------
 //------------------------------------------------------------------------------

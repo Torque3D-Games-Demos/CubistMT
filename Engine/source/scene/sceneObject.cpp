@@ -42,6 +42,9 @@
 #include "math/mathIO.h"
 #include "math/mTransform.h"
 #include "T3D/gameBase/gameProcess.h"
+// start jc
+#include "math/mathUtils.h"
+// end jc
 
 IMPLEMENT_CONOBJECT(SceneObject);
 
@@ -140,6 +143,9 @@ SceneObject::SceneObject()
 
    mObjectFlags.set( RenderEnabledFlag | SelectionEnabledFlag );
    mIsScopeAlways = false;
+// start jc
+   mNoAutoScope = false;
+// end jc
 }
 
 //-----------------------------------------------------------------------------
@@ -323,7 +329,11 @@ void SceneObject::addToScene()
    if( isClientObject() )
       gClientSceneGraph->addObjectToScene( this );
    else
+// start jc
+//      gServerSceneGraph->addObjectToScene( this );
+      if(!isNoAutoScope())
       gServerSceneGraph->addObjectToScene( this );
+// end jc
 }
 
 //-----------------------------------------------------------------------------
@@ -425,14 +435,24 @@ void SceneObject::setScale( const VectorF &scale )
 
 void SceneObject::resetWorldBox()
 {
-   AssertFatal(mObjBox.isValidBox(), "SceneObject::resetWorldBox - Bad object box!");
+// start jc
+//   AssertFatal(mObjBox.isValidBox(), "SceneObject::resetWorldBox - Bad object box!");
+   AssertWarn(mObjBox.isValidBox(), "SceneObject::resetWorldBox - Bad object box!");
+// end jc
 
    mWorldBox = mObjBox;
    mWorldBox.minExtents.convolve(mObjScale);
    mWorldBox.maxExtents.convolve(mObjScale);
    mObjToWorld.mul(mWorldBox);
 
-   AssertFatal(mWorldBox.isValidBox(), "SceneObject::resetWorldBox - Bad world box!");
+// start jc
+//   AssertFatal(mWorldBox.isValidBox(), "SceneObject::resetWorldBox - Bad world box!");
+   AssertWarn(mWorldBox.isValidBox(), "SceneObject::resetWorldBox - Bad world box!");
+// end jc
+
+   if( !mWorldBox.isValidBox() ){
+      Con::printf("invalid box");
+   }
 
    // Create mWorldSphere from mWorldBox
    mWorldBox.getCenter(&mWorldSphere.center);
@@ -480,7 +500,11 @@ void SceneObject::setRenderTransform(const MatrixF& mat)
    mRenderObjToWorld = mRenderWorldToObj = mat;
    mRenderWorldToObj.affineInverse();
 
-   AssertFatal(mObjBox.isValidBox(), "Bad object box!");
+// start jc
+//   AssertFatal(mObjBox.isValidBox(), "Bad object box!");
+   AssertWarn(mObjBox.isValidBox(), "Bad object box!");
+// end jc
+
    resetRenderWorldBox();
    PROFILE_END();
 }
@@ -489,14 +513,20 @@ void SceneObject::setRenderTransform(const MatrixF& mat)
 
 void SceneObject::resetRenderWorldBox()
 {
-   AssertFatal( mObjBox.isValidBox(), "Bad object box!" );
+// start jc
+//   AssertFatal( mObjBox.isValidBox(), "Bad object box!" );
+   AssertWarn( mObjBox.isValidBox(), "Bad object box!" );
+// end jc
 
    mRenderWorldBox = mObjBox;
    mRenderWorldBox.minExtents.convolve( mObjScale );
    mRenderWorldBox.maxExtents.convolve( mObjScale );
    mRenderObjToWorld.mul( mRenderWorldBox );
 
-   AssertFatal( mRenderWorldBox.isValidBox(), "Bad world box!" );
+// start jc
+//   AssertFatal( mRenderWorldBox.isValidBox(), "Bad world box!" );
+   AssertWarn( mRenderWorldBox.isValidBox(), "Bad world box!" );
+// end jc
 
    // Create mRenderWorldSphere from mRenderWorldBox.
 
@@ -563,6 +593,14 @@ void SceneObject::initPersistFields()
          &_setSelectionEnabled, &_getSelectionEnabled,
          "Determines if the object may be selected from wihin the Tools.\n"
          "@see isSelectable()\n" );
+
+// start jc
+      addProtectedField( "noAutoScope", TypeBool, Offset( mNetFlags, SceneObject ),
+         &_setNoAutoScope, &_getNoAutoScope,
+         ".\n"
+         "@see isSelectable()\n" );
+// end jc
+      
 
    endGroup( "Editing" );
 
@@ -666,7 +704,10 @@ void SceneObject::onCameraScopeQuery( NetConnection* connection, CameraScopeQuer
 {
    // Object itself is in scope.
 
-   if( this->isScopeable() )
+// start jc
+//   if( this->isScopeable() )
+   if( this->isScopeable() && !this->isNoAutoScope() )
+// end jc
       connection->objectInScope( this );
 
    // If we're mounted to something, that object is in scope too.
@@ -764,6 +805,33 @@ bool SceneObject::_setSelectionEnabled( void *object, const char *index, const c
 }
 
 //--------------------------------------------------------------------------
+
+// start jc
+const char* SceneObject::_getNoAutoScope( void* object, const char* data )
+{
+   SceneObject* obj = reinterpret_cast< SceneObject* >( object );
+   if( obj->isNoAutoScope() )
+      return "true";
+   else
+      return "false";
+}
+
+//-----------------------------------------------------------------------------
+
+bool SceneObject::_setNoAutoScope( void *object, const char *index, const char *data )
+{
+   SceneObject* obj = reinterpret_cast< SceneObject* >( object );
+   if(dAtob( data ))
+      obj->setNoAutoScope();
+   else
+      obj->clearNoAutoScope();
+
+   return false;
+}
+
+//--------------------------------------------------------------------------
+// end jc
+
 
 U32 SceneObject::packUpdate( NetConnection* conn, U32 mask, BitStream* stream )
 {
@@ -1011,6 +1079,13 @@ SceneObject* SceneObject::getMountNodeObject(S32 node)
          return itr;
    return NULL;
 }
+
+// start jc
+void SceneObject::getMountedTransform(MatrixF *mat)
+{
+   mMount.object->getMountTransform( mMount.node, mMount.xfm, mat );
+}
+// end jc
 
 //-----------------------------------------------------------------------------
 
@@ -1287,6 +1362,20 @@ DefineEngineMethod( SceneObject, getMountNodeObject, S32, ( S32 node ),,
    return mobj? mobj->getId(): 0;
 }
 
+// start jc
+
+DefineEngineMethod( SceneObject, getMountedTransform, TransformF, (),,
+   "@brief Get the world space transform.\n\n"
+   "@param node mount node index to query\n"
+   "@return ID of the first object mounted at the node, or 0 if none found." )
+{
+   MatrixF *mat = new MatrixF(true);
+   object->getMountedTransform( mat );
+   return *mat;
+}
+
+// end jc
+
 //-----------------------------------------------------------------------------
 
 DefineEngineMethod( SceneObject, getTransform, TransformF, (),,
@@ -1295,6 +1384,15 @@ DefineEngineMethod( SceneObject, getTransform, TransformF, (),,
 {
    return object->getTransform();
 }
+
+// start jc
+DefineEngineMethod( SceneObject, getWorldTransform, TransformF, (),,
+   "Get the object's transform.\n"
+   "@return the current transform of the object\n" )
+{
+   return object->getWorldTransform();
+}
+// end jc
 
 //-----------------------------------------------------------------------------
 
@@ -1432,3 +1530,23 @@ DefineEngineMethod( SceneObject, isGlobalBounds, bool, (),,
 {
    return object->isGlobalBounds();
 }
+// start jc
+//-----------------------------------------------------------------------------
+DefineEngineMethod( SceneObject, disableCollision, void, (),,
+   "Disable physics collisions.\n" )
+{
+   object->disableCollision();
+}
+//-----------------------------------------------------------------------------
+DefineEngineMethod( SceneObject, enableCollision, void, (),,
+   "Enable physics collisions.\n" )
+{
+   object->enableCollision();
+}
+//-----------------------------------------------------------------------------
+DefineEngineMethod( SceneObject, isCollisionEnabled, bool, (),,
+   "Tell if physics collisions are enabled.\n" )
+{
+   return object->isCollisionEnabled();
+}
+// end jc

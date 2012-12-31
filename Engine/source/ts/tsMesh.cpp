@@ -168,6 +168,32 @@ void TSMesh::innerRender( TSMaterialList *materials, const TSRenderState &rdata,
    const MatrixF &objToWorld = GFX->getWorldMatrix();
 
    // Sort by the center point or the bounds.
+// start pg
+#ifdef   TORQUE_SORT_BY_CAMERA_DEPTH
+   {
+      if ( rdata.useOriginSort() )
+      {
+         Point3F  rel = objToWorld.getPosition() - state->getCameraPosition();
+         const MatrixF  &m = state->getCameraTransform();
+         Point3F  facing;
+         m.getColumn(1,&facing);
+         F32      distance = mDot(rel, facing);
+         coreRI->sortDistSq = distance*distance;     
+      }
+      else 
+      {
+         Box3F rBox = mBounds;
+         objToWorld.mul( rBox );
+         Point3F  rel = rBox.getCenter() - state->getCameraPosition();
+         const MatrixF  &m = state->getCameraTransform();
+         Point3F  facing;
+         m.getColumn(1,&facing);
+         F32      distance = mDot(rel, facing);
+         coreRI->sortDistSq = distance*distance;     
+      }
+   }
+#else
+// end pg
    if ( rdata.useOriginSort() )
       coreRI->sortDistSq = ( objToWorld.getPosition() - state->getCameraPosition() ).lenSquared();
    else
@@ -176,6 +202,7 @@ void TSMesh::innerRender( TSMaterialList *materials, const TSRenderState &rdata,
       objToWorld.mul( rBox );
       coreRI->sortDistSq = rBox.getSqDistanceToPoint( state->getCameraPosition() );      
    }
+#endif
 
    if (getFlags(Billboard))
    {
@@ -209,6 +236,9 @@ void TSMesh::innerRender( TSMaterialList *materials, const TSRenderState &rdata,
 
    coreRI->visibility = meshVisibility;  
    coreRI->cubemap = rdata.getCubemap();
+// start jc
+   coreRI->reflectTex = rdata.getReflectTex();
+// end jc
 
    // NOTICE: SFXBB is removed and refraction is disabled!
    //coreRI->backBuffTex = GFX->getSfxBackBuffer();
@@ -766,6 +796,9 @@ bool TSMesh::castRayRendered( S32 frame, const Point3F & start, const Point3F & 
    U32 bestIdx0 = 0, bestIdx1 = 0, bestIdx2 = 0;
    BaseMatInstance* bestMaterial = NULL;
 	Point3F dir = end - start;
+// start jc
+	Point2F uv(0,0);
+// end jc
 
    for ( S32 i = 0; i < primitives.size(); i++ )
    {
@@ -801,6 +834,7 @@ bool TSMesh::castRayRendered( S32 frame, const Point3F & start, const Point3F & 
                   bestIdx1 = idx1;
                   bestIdx2 = idx2;
                   bestMaterial = material;
+                  uv = b; // start jc
 					   found = true;
 				   }
 			   }
@@ -835,6 +869,7 @@ bool TSMesh::castRayRendered( S32 frame, const Point3F & start, const Point3F & 
                   bestIdx1 = firstVert + idx1;
                   bestIdx2 = firstVert + idx2;
                   bestMaterial = material;
+                  uv = b; // start jc
 					   found = true;
 				   }
 			   }
@@ -847,18 +882,33 @@ bool TSMesh::castRayRendered( S32 frame, const Point3F & start, const Point3F & 
    {
       rayInfo->t = best_t;
 
+      U8 pointOrder = 0;  // start jc
       Point3F normal;
       mCross(mVertexData[bestIdx2].vert()-mVertexData[bestIdx0].vert(),mVertexData[bestIdx1].vert()-mVertexData[bestIdx0].vert(),&normal);
       if ( mDot( normal, normal ) < 0.001f )
       {
+         pointOrder = 1;  // start jc
          mCross( mVertexData[bestIdx0].vert() - mVertexData[bestIdx1].vert(), mVertexData[bestIdx2].vert() - mVertexData[bestIdx1].vert(), &normal );
          if ( mDot( normal, normal ) < 0.001f )
          {
+            pointOrder = 2;  // start jc
             mCross( mVertexData[bestIdx1].vert() - mVertexData[bestIdx2].vert(), mVertexData[bestIdx0].vert() - mVertexData[bestIdx2].vert(), &normal );
          }
       }
       normal.normalize();
       rayInfo->normal = normal;
+
+// start jc
+	   if(rayInfo->generateTexCoord)
+	   {
+         Point2F uv1 = mVertexData[bestIdx0].tvert();
+         Point2F uv2 = mVertexData[bestIdx2].tvert();
+         Point2F uv3 = mVertexData[bestIdx1].tvert();
+         Point2F t2 = uv2-uv1;
+         Point2F t1 = uv3-uv1;
+         rayInfo->texCoord = uv1 + (t1*uv.x) + (t2*uv.y);
+ 	   }
+// end jc
 
       rayInfo->material = bestMaterial;
 

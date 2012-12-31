@@ -55,9 +55,16 @@ class GuiShapeNameHud : public GuiControl {
    F32      mDistanceFade;
    bool     mShowFrame;
    bool     mShowFill;
+// start pg
+   bool     mMultiLine;
+   bool     mHideFurtherBack;
+// end pg
 
 protected:
    void drawName( Point2I offset, const char *buf, F32 opacity);
+// start pg
+   void drawNameMultiLine( Point2I offset, const char *buf, F32 opacity);
+// end pg
 
 public:
    GuiShapeNameHud();
@@ -111,6 +118,10 @@ GuiShapeNameHud::GuiShapeNameHud()
    mShowFrame = mShowFill = true;
    mVerticalOffset = 0.5f;
    mDistanceFade = 0.1f;
+// start pg
+   mMultiLine = false;
+   mHideFurtherBack = true;
+// end pg
 }
 
 void GuiShapeNameHud::initPersistFields()
@@ -126,6 +137,12 @@ void GuiShapeNameHud::initPersistFields()
    addField( "showFrame",  TypeBool, Offset( mShowFrame, GuiShapeNameHud ), "If true, we draw the frame of the control."  );
    addField( "verticalOffset", TypeF32, Offset( mVerticalOffset, GuiShapeNameHud ), "Amount to vertically offset the control in relation to the ShapeBase object in focus." );
    addField( "distanceFade", TypeF32, Offset( mDistanceFade, GuiShapeNameHud ), "Visibility distance (how far the player must be from the ShapeBase object in focus) for this control to render." );
+
+// start pg
+   addField( "multiLine",   TypeBool, Offset( mMultiLine, GuiShapeNameHud ), "If true, draw info over multiple lines." );
+   addField( "hideFurtherBack",   TypeBool, Offset( mHideFurtherBack, GuiShapeNameHud ), "If true, dont hide text if parent object hidden" );
+// end pg
+
    endGroup("Misc");
    Parent::initPersistFields();
 }
@@ -223,19 +240,25 @@ void GuiShapeNameHud::onRender( Point2I, const RectI &updateRect)
             if (dot < camFov)
                continue;
 
-            // Test to see if it's behind something, and we want to
-            // ignore anything it's mounted on when we run the LOS.
-            RayInfo info;
-            shape->disableCollision();
-            SceneObject *mount = shape->getObjectMount();
-            if (mount)
-               mount->disableCollision();
-            bool los = !gClientContainer.castRay(camPos, shapePos,losMask, &info);
-            shape->enableCollision();
-            if (mount)
-               mount->enableCollision();
-            if (!los)
-               continue;
+// start pg
+            if(mHideFurtherBack){
+// end pg
+              // Test to see if it's behind something, and we want to
+              // ignore anything it's mounted on when we run the LOS.
+              RayInfo info;
+              shape->disableCollision();
+              SceneObject *mount = shape->getObjectMount();
+              if (mount)
+                 mount->disableCollision();
+              bool los = !gClientContainer.castRay(camPos, shapePos,losMask, &info);
+              shape->enableCollision();
+              if (mount)
+                 mount->enableCollision();
+              if (!los)
+                 continue;
+// start pg
+            }
+// end pg
 
             // Project the shape pos into screen space and calculate
             // the distance opacity used to fade the labels into the
@@ -248,10 +271,18 @@ void GuiShapeNameHud::onRender( Point2I, const RectI &updateRect)
                1.0 - (shapeDist - fadeDistance) / (visDistance - fadeDistance);
 
             // Render the shape's name
+// start pg
+            if(mMultiLine){
+               drawNameMultiLine(Point2I((S32)projPnt.x, (S32)projPnt.y),shape->getShapeName(),opacity);
+            }else{
+// end pg
             drawName(Point2I((S32)projPnt.x, (S32)projPnt.y),shape->getShapeName(),opacity);
          }
       }
    }
+// start pg
+   }
+// end pg
 
    // Restore control object collision
    control->enableCollision();
@@ -282,6 +313,64 @@ void GuiShapeNameHud::drawName(Point2I offset, const char *name, F32 opacity)
    mTextColor.alpha = opacity;
    GFX->getDrawUtil()->setBitmapModulation(mTextColor);
    GFX->getDrawUtil()->drawText(mProfile->mFont, offset, name);
+
+
    GFX->getDrawUtil()->clearBitmapModulation();
 }
 
+// start pg
+
+void GuiShapeNameHud::drawNameMultiLine(Point2I offset, const char *name, F32 opacity)
+{
+   int   nLine = 0;
+   const char  *startLine = name;
+   int   nChar = 0;
+   int   width=0;
+   while(true){
+      char  c = startLine[nChar];
+      if(c=='\n' || c==0 ){
+         int   w = mProfile->mFont->getStrNWidth( (const UTF8 *)startLine, nChar );
+         width = getMax(w,width);
+         nLine++;
+         if(c==0){
+            break;
+         }else{
+            startLine = &startLine[nChar+1];
+            nChar=0;
+         }
+      }else{
+         nChar++;
+      }
+   }
+   int   height = nLine*mProfile->mFont->getHeight();
+
+
+   offset.x -= (width/2);
+//   offset.y -= height;
+
+   // Deal with opacity and draw.
+   mTextColor.alpha = opacity;
+   GFX->getDrawUtil()->setBitmapModulation(mTextColor);
+   startLine = name;
+   nChar = 0;
+   while(true){
+      char  c = startLine[nChar];
+      if(c=='\n' || c==0 ){
+         int   w = mProfile->mFont->getStrNWidth( (const UTF8 *)startLine, nChar );
+         Point2I  plot;
+         plot.x = offset.x + (width-w)/2;
+         plot.y = offset.y;
+         GFX->getDrawUtil()->drawTextN(mProfile->mFont, plot, startLine,nChar);
+         offset.y += mProfile->mFont->getHeight();
+         if(c==0){
+            break;
+         }else{
+            startLine = &startLine[nChar+1];
+            nChar=0;
+         }
+      }else{
+         nChar++;
+      }
+   }
+   GFX->getDrawUtil()->clearBitmapModulation();
+}

@@ -36,6 +36,12 @@
 #include "T3D/gameBase/gameProcess.h"
 #include "lighting/lightInfo.h"
 #include "console/engineAPI.h"
+// start jc
+#include "math/mathIO.h"
+#include "materials/materialManager.h"
+#include "materials/matInstance.h"
+#include "materials/sceneData.h"
+// end jc
 
 #if defined(TORQUE_OS_XENON)
 #  include "gfx/D3D9/360/gfx360MemVertexBuffer.h"
@@ -150,6 +156,10 @@ ParticleEmitterData::ParticleEmitterData()
    
    alignParticles = false;
    alignDirection = Point3F(0.0f, 1.0f, 0.0f);
+
+// start jc
+   overrideBounds = Box3F(0,0,0,0,0,0);
+// end jc
 }
 
 
@@ -277,6 +287,11 @@ void ParticleEmitterData::initPersistFields()
       addField( "renderReflection", TYPEID< bool >(), Offset(renderReflection, ParticleEmitterData),
          "Controls whether particles are rendered onto reflective surfaces like water." );
 
+  // start jc
+	  addField( "overrideBounds", TypeBox3F, Offset(overrideBounds, ParticleEmitterData),
+	     "overrideBounds flag; when false the shape will not be reflected." );	  
+  // end jc
+
       //@}
 
    endGroup( "ParticleEmitterData" );
@@ -302,7 +317,10 @@ void ParticleEmitterData::packData(BitStream* stream)
 {
    Parent::packData(stream);
 
-   stream->writeInt(ejectionPeriodMS, 10);
+// start jc
+//   stream->writeInt(ejectionPeriodMS, 10);
+   stream->writeInt(ejectionPeriodMS, 16);
+// end jc
    stream->writeInt(periodVarianceMS, 10);
    stream->writeInt((S32)(ejectionVelocity * 100), 16);
    stream->writeInt((S32)(velocityVariance * 100), 14);
@@ -343,6 +361,10 @@ void ParticleEmitterData::packData(BitStream* stream)
    stream->writeFlag(highResOnly);
    stream->writeFlag(renderReflection);
    stream->writeInt( blendStyle, 4 );
+
+// start jc
+   mathWrite(*stream, overrideBounds );
+// end jc
 }
 
 //-----------------------------------------------------------------------------
@@ -352,7 +374,10 @@ void ParticleEmitterData::unpackData(BitStream* stream)
 {
    Parent::unpackData(stream);
 
-   ejectionPeriodMS = stream->readInt(10);
+// start jc
+//   ejectionPeriodMS = stream->readInt(10);
+   ejectionPeriodMS = stream->readInt(16);
+// end jc
    periodVarianceMS = stream->readInt(10);
    ejectionVelocity = stream->readInt(16) / 100.0f;
    velocityVariance = stream->readInt(14) / 100.0f;
@@ -402,6 +427,10 @@ void ParticleEmitterData::unpackData(BitStream* stream)
    highResOnly = stream->readFlag();
    renderReflection = stream->readFlag();
    blendStyle = stream->readInt( 4 );
+
+// start jc
+   mathRead(*stream, &overrideBounds);
+// end jc
 }
 
 //-----------------------------------------------------------------------------
@@ -815,6 +844,10 @@ bool ParticleEmitter::onNewDataBlock( GameBaseData *dptr, bool reload )
       part_list_head.next = NULL;
       n_parts = 0;
    }
+  // start jc
+  if(!mDataBlock->overrideBounds.isEmpty())
+	mObjBox = mDataBlock->overrideBounds;
+  // end jc
 
    scriptOnNewDataBlock();
    return true;
@@ -878,7 +911,12 @@ void ParticleEmitter::prepRenderImage(SceneRenderState* state)
    ri->primBuff = &getDataBlock()->primBuff;
    ri->translucentSort = true;
    ri->type = RenderPassManager::RIT_Particle;
-   ri->sortDistSq = getRenderWorldBox().getSqDistanceToPoint( camPos );
+// start jc
+//   ri->sortDistSq = getRenderWorldBox().getSqDistanceToPoint( camPos );
+
+   // todo: find out why 2 works?  I through this in as a guess but now I have to move on.
+   ri->sortDistSq = ((getRenderWorldBox().getCenter() - camPos )/2).lenSquared();
+// end jc
 
    // Draw the system offscreen unless the highResOnly flag is set on the datablock
    ri->systemState = ( getDataBlock()->highResOnly ? PSS_AwaitingHighResDraw : PSS_AwaitingOffscreenDraw );
@@ -1207,6 +1245,15 @@ void ParticleEmitter::emitParticles(const Point3F& rCenter,
 //-----------------------------------------------------------------------------
 void ParticleEmitter::updateBBox()
 {
+// start jc
+   if(!mDataBlock->overrideBounds.isEmpty())
+   {
+	  mObjBox = mDataBlock->overrideBounds;
+   }
+   else
+   {
+// end jc
+
    Point3F minPt(1e10,   1e10,  1e10);
    Point3F maxPt(-1e10, -1e10, -1e10);
 
@@ -1218,6 +1265,9 @@ void ParticleEmitter::updateBBox()
    }
    
    mObjBox = Box3F(minPt, maxPt);
+// start jc
+   }
+// end jc
    MatrixF temp = getTransform();
    setTransform(temp);
 
@@ -2004,3 +2054,34 @@ DefineEngineMethod(ParticleEmitterData, reload, void,(),,
 {
    object->reload();
 }
+
+// start jc
+DefineEngineMethod(ParticleEmitterData, onAdd, bool,(),,
+   "")
+{
+   return object->onAdd();
+}
+
+DefineEngineMethod(ParticleEmitter, emitParticles, void,(Point3F point, bool useLastPoint,
+               Point3F emitAxis, Point3F emitVelocity, U32 dt),,
+   "")
+{
+   object->emitParticles(point, useLastPoint,
+               emitAxis, emitVelocity, (U32)(dt * 1000.0f));
+}
+DefineEngineMethod(ParticleEmitter, deleteWhenEmpty, void,(),,
+   "")
+{
+   object->deleteWhenEmpty();
+}
+DefineEngineMethod(ParticleEmitter, onNewDataBlock, void,(GameBaseData *dptr, bool reload),,
+   "")
+{
+   object->onNewDataBlock( dptr, reload );
+}
+DefineEngineMethod(ParticleEmitter, onAdd, bool,(),,
+   "")
+{
+   return object->onAddClient();
+}
+// end jc

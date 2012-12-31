@@ -535,6 +535,9 @@ void TSShapeLoader::generateSkins()
                delete skin->bones[iBone];
                skin->bones[iBone] = appNodes[iNode];
                skin->nodeIndex[iBone] = iNode;
+			   // start jc
+			   skin->initialTransforms[iBone].scale(appNodes[iNode]->getNodeTransform(-1).getScale());
+			   // end jc
                break;
             }
          }

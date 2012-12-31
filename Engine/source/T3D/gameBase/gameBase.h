@@ -217,7 +217,14 @@ protected:
 public:
 
    GameBase();
-   ~GameBase();
+// start jc
+//   ~GameBase();
+   // The code is incorrect and leads to memory leak. At the moment of deleting the object only  
+   // the destructor in the 'GameBase' class is called. To call the 'Son' class' destructor you 
+   // should make the destructor virtual. 
+   virtual ~GameBase(); 
+// end jc
+
 
    enum GameBaseMasks {      
       DataBlockMask     = Parent::NextFreeMask << 0,
@@ -414,6 +421,9 @@ public:
    
    // Not implemented here, but should return the Camera to world transformation matrix
    virtual void getCameraTransform (F32 *pos, MatrixF *mat ) { *mat = MatrixF::Identity; }
+// start jc
+   virtual void getCameraEarTransform (F32 *pos, MatrixF *mat ) { *mat = MatrixF::Identity; }
+// end jc
 
    /// Returns the water object we are colliding with, it is up to derived
    /// classes to actually set this object.

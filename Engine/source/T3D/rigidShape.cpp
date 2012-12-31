@@ -196,7 +196,10 @@ namespace {
 
    // Physics and collision constants
    static F32 sRestTol = 0.5;             // % of gravity energy to be at rest
-   static int sRestCount = 10;            // Consecutive ticks before comming to rest
+// start jc
+//   static int sRestCount = 10;            // Consecutive ticks before comming to rest
+   static int sRestCount = 1000;            // Consecutive ticks before comming to rest
+// end jc
 
    const U32 sCollisionMoveMask = (TerrainObjectType        | InteriorObjectType   |
       PlayerObjectType         | StaticShapeObjectType    | VehicleObjectType    |
@@ -794,6 +797,16 @@ void RigidShape::interpolateTick(F32 dt)
 {     
    Parent::interpolateTick(dt);
 
+// start jc
+   if ( isMounted() )
+   {
+      MatrixF mat;
+      setTransform(mat);
+   }
+   else
+   {
+// end jc
+
    if(dt == 0.0f)
       setRenderPosition(mDelta.pos, mDelta.rot[1]);
    else
@@ -804,6 +817,9 @@ void RigidShape::interpolateTick(F32 dt)
       setRenderPosition(pos,rot);
    }
    mDelta.dt = dt;
+// start jc
+   }
+// end jc
 }
 
 void RigidShape::advanceTime(F32 dt)
@@ -997,8 +1013,24 @@ void RigidShape::setRenderPosition(const Point3F& pos, const QuatF& rot)
 
 void RigidShape::setTransform(const MatrixF& newMat)
 {
-   mRigid.setTransform(newMat);
-   Parent::setTransform(newMat);
+// start jc
+//   mRigid.setTransform(newMat);
+//   Parent::setTransform(newMat);
+   if ( isMounted() )
+   {
+      MatrixF mat;
+      mMount.object->getMountTransform( mMount.node, mMount.xfm, &mat );
+
+		mRigid.setTransform(mat);
+		Parent::setTransform(mat);
+   }
+   else
+   {
+      mRigid.setTransform(newMat);
+      Parent::setTransform(newMat);
+   }
+// end jc
+
    mRigid.atRest = false;
    mContacts.clear();
 }
@@ -1040,6 +1072,8 @@ void RigidShape::updatePos(F32 dt)
       // the shape is less than some percentage of the energy added
       // by gravity for a short period, we're considered at rest.
       // This should really be part of the rigid class...
+// start jc
+ /*
       if (mCollisionList.getCount()) 
       {
          F32 k = mRigid.getKineticEnergy();
@@ -1050,6 +1084,8 @@ void RigidShape::updatePos(F32 dt)
       }
       else
          restCount = 0;
+*/
+// end jc
    }
 
    // Integrate forward
@@ -1686,6 +1722,13 @@ void RigidShape::freezeSim(bool frozen)
    setMaskBits(FreezeMask);
 }
 
+// start jc
+bool RigidShape::isFrozen(void)
+{
+   return mDisableMove;
+}
+// end jc
+
 DefineEngineMethod( RigidShape, reset, void, (),,
    "@brief Clears physic forces from the shape and sets it at rest.\n\n"
    "@tsexample\n"
@@ -1710,3 +1753,19 @@ DefineEngineMethod( RigidShape, freezeSim, void, (bool isFrozen),,
 {
    object->freezeSim(isFrozen);
 }
+
+// start jc
+DefineEngineMethod( RigidShape, isFrozen, bool, (),,
+   "@brief Enables or disables the physics simulation on the RigidShape object.\n\n"
+   "@param isFrozen Boolean frozen state to set the object.\n"
+   "@tsexample\n"
+   "// Define the frozen state.\n"
+   "%isFrozen = \"true\";\n\n"
+   "// Inform the object of the defined frozen state\n"
+   "%thisRigidShape.freezeSim(%isFrozen);\n"
+   "@endtsexample\n\n"
+   "@see ShapeBaseData")
+{
+   return object->isFrozen();
+}
+// end jc

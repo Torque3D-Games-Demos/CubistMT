@@ -645,6 +645,47 @@ DefineConsoleFunction( VectorNormalize, VectorF, ( VectorF v ),,
    return n;
 }
 
+// start pg
+//-----------------------------------------------------------------------------
+
+DefineConsoleFunction( VectorNormalizePG, VectorF, ( VectorF v ),,
+   "Brings a vector into its unit form, i.e. such that it has the magnitute 1.\n"
+   "@param v The vector to normalize.\n"
+   "@return The vector @a v scaled to length 1.\n\n"
+   "@tsexample\n"
+	"//-----------------------------------------------------------------------------\n"
+	"//\n"
+	"// VectorNormalize( %a );\n"
+	"//\n"
+	"// The normalized vector a, (ax, ay, az), is:\n"
+	"//\n"
+	"//     a^ = a / ||a||\n"
+	"//        = ( ax / ||a||, ay / ||a||, az / ||a|| )\n"
+	"//\n"
+	"//-----------------------------------------------------------------------------\n\n"
+
+	"%a = \"1 1 0\";\n"
+	"%l = 1.414;\n\n"
+
+	"// %r = \"( 1 / 1.141, 1 / 1.141, 0 / 1.141 )\";\n"
+	"// %r = \"0.707 0.707 0\";\n"
+	"%r = VectorNormalize( %a );\n"
+   "@endtsexample\n\n"
+   "@ingroup Vectors" )
+{
+   VectorF n( v );
+
+   F32   len = n.len();
+   if( len!=0 ){
+      n.x /= len;
+      n.y /= len;
+      n.z /= len;
+   }
+   return n;
+}
+
+// end pg
+
 //-----------------------------------------------------------------------------
 
 DefineConsoleFunction( VectorDot, F32, ( VectorF a, VectorF b ),,
@@ -820,6 +861,92 @@ DefineConsoleFunction( VectorLerp, VectorF, ( VectorF a, VectorF b, F32 t ),,
    return c;
 }
 
+// start jc
+DefineConsoleFunction( VectorDivF, VectorF, ( VectorF a, F32 scalar ),,
+   "Scales a vector by a scalar.\n"
+   "@param a The vector to scale.\n"
+   "@param scalar The scale factor.\n"
+   "@return The vector @a a * @a scalar.\n\n"
+   "@tsexample\n"
+	"//-----------------------------------------------------------------------------\n"
+	"//\n"
+	"// VectorScale( %a, %v );\n"
+	"//\n"
+	"// Scaling vector a, (ax, ay, az), but the scalar, v, is:\n"
+	"//\n"
+	"//     a * v = ( ax * v, ay * v, az * v )\n"
+	"//\n"
+	"//-----------------------------------------------------------------------------\n\n"
+
+	"%a = \"1 1 0\";\n"
+	"%v = \"2\";\n\n"
+
+	"// %r = \"( 1 * 2, 1 * 2, 0 * 2 )\";\n"
+	"// %r = \"2 2 0\";\n"
+	"%r = VectorScale( %a, %v );\n"
+   "@endtsexample\n\n"
+   "@ingroup Vectors" )
+{
+   if(scalar)
+      return a / scalar;
+   return Point3F(0, 0, 0);
+}
+DefineConsoleFunction( VectorDiv, VectorF, ( VectorF a, VectorF b ),,
+   "Scales a vector by a scalar.\n"
+   "@param a The vector to scale.\n"
+   "@param scalar The scale factor.\n"
+   "@return The vector @a a * @a scalar.\n\n"
+   "@tsexample\n"
+	"//-----------------------------------------------------------------------------\n"
+	"//\n"
+	"// VectorScale( %a, %v );\n"
+	"//\n"
+	"// Scaling vector a, (ax, ay, az), but the scalar, v, is:\n"
+	"//\n"
+	"//     a * v = ( ax * v, ay * v, az * v )\n"
+	"//\n"
+	"//-----------------------------------------------------------------------------\n\n"
+
+	"%a = \"1 1 0\";\n"
+	"%v = \"2\";\n\n"
+
+	"// %r = \"( 1 * 2, 1 * 2, 0 * 2 )\";\n"
+	"// %r = \"2 2 0\";\n"
+	"%r = VectorScale( %a, %v );\n"
+   "@endtsexample\n\n"
+   "@ingroup Vectors" )
+{
+   return a / b;
+}
+DefineConsoleFunction( VectorMul, VectorF, ( VectorF a, VectorF b ),,
+   "Scales a vector by a scalar.\n"
+   "@param a The vector to scale.\n"
+   "@param scalar The scale factor.\n"
+   "@return The vector @a a * @a scalar.\n\n"
+   "@tsexample\n"
+	"//-----------------------------------------------------------------------------\n"
+	"//\n"
+	"// VectorScale( %a, %v );\n"
+	"//\n"
+	"// Scaling vector a, (ax, ay, az), but the scalar, v, is:\n"
+	"//\n"
+	"//     a * v = ( ax * v, ay * v, az * v )\n"
+	"//\n"
+	"//-----------------------------------------------------------------------------\n\n"
+
+	"%a = \"1 1 0\";\n"
+	"%v = \"2\";\n\n"
+
+	"// %r = \"( 1 * 2, 1 * 2, 0 * 2 )\";\n"
+	"// %r = \"2 2 0\";\n"
+	"%r = VectorScale( %a, %v );\n"
+   "@endtsexample\n\n"
+   "@ingroup Vectors" )
+{
+   return a * b;
+}
+// end jc
+
 //-----------------------------------------------------------------------------
 
 DefineConsoleFunction( MatrixCreate, TransformF, ( VectorF position, AngAxisF orientation ),,
@@ -895,6 +1022,40 @@ DefineConsoleFunction( MatrixMulPoint, Point3F, ( TransformF transform, Point3F 
    m.mulP( point );
    return point;
 }
+// start jc
+ConsoleFunction( MatrixDisplace, const char*, 3, 3, "(MatrixF xfrm, Point3F pnt)"
+				"@brief Multiply pnt by xfrm.\n\n"
+				"@ingroup Matrices")
+{
+   Point3F pos1;
+   AngAxisF aa1(Point3F(0,0,0),0);
+   dSscanf(argv[1], "%g %g %g %g %g %g %g", &pos1.x, &pos1.y, &pos1.z, &aa1.axis.x, &aa1.axis.y, &aa1.axis.z, &aa1.angle);
+
+   MatrixF temp1(true);
+   aa1.setMatrix(&temp1);
+   temp1.setColumn(3, pos1);
+
+   Point3F vec1;
+   dSscanf(argv[2], "%g %g %g", &vec1.x, &vec1.y, &vec1.z);
+
+
+   temp1.displace(vec1);
+
+
+   Point3F pos;
+   AngAxisF aa(temp1);
+
+   aa.axis.normalize();
+   temp1.getColumn(3, &pos);
+
+   char* ret = Con::getReturnBuffer(256);
+   dSprintf(ret, 255, "%g %g %g %g %g %g %g",
+            pos.x, pos.y, pos.z,
+            aa.axis.x, aa.axis.y, aa.axis.z,
+            aa.angle);
+   return ret;
+}
+// end jc
 
 ConsoleFunctionGroupEnd(MatrixMath);
 
@@ -908,6 +1069,74 @@ DefineConsoleFunction( getBoxCenter, Point3F, ( Box3F box ),,
 {
    return box.getCenter();
 }
+// start jc
+ConsoleFunction( BoxCreateFromPoint, const char*, 2, 2, "(Point3F point)"
+				"@brief Get the center point of a box.\n\n"
+				"@param b A Box3F, in string format using \"minExtentX minExtentY minExtentZ maxExtentX maxExtentY maxExtentZ\"\n"
+				"@return Center of the box in string format using \"X Y Z\"\n"
+				"@ingroup Math")
+{
+   Box3F box;
+   box.minExtents.set(0,0,0);
+   dSscanf(argv[1],"%g %g %g", &box.minExtents.x,&box.minExtents.y,&box.minExtents.z);
+   box.maxExtents.set(box.minExtents);
+
+   char* returnBuffer = Con::getReturnBuffer(256);
+   dSprintf(returnBuffer,256,"%g %g %g %g %g %g",
+           box.minExtents.x,box.minExtents.y,box.minExtents.z,
+           box.maxExtents.x,box.maxExtents.y,box.maxExtents.z);
+   return returnBuffer;
+}
+ConsoleFunction( BoxCreate, const char*, 3, 3, "(Point3F point, Point3F point2)"
+				"@brief Get the center point of a box.\n\n"
+				"@param b A Box3F, in string format using \"minExtentX minExtentY minExtentZ maxExtentX maxExtentY maxExtentZ\"\n"
+				"@return Center of the box in string format using \"X Y Z\"\n"
+				"@ingroup Math")
+{
+   Box3F box;
+   box.minExtents.set(0,0,0);
+   dSscanf(argv[1],"%g %g %g", &box.minExtents.x,&box.minExtents.y,&box.minExtents.z);
+   box.maxExtents.set(box.minExtents);
+
+   Point3F point2;
+   point2.set(0,0,0);
+   dSscanf(argv[2],"%g %g %g", &point2.x,&point2.y,&point2.z);
+
+   box.extend(point2);
+
+   char* returnBuffer = Con::getReturnBuffer(256);
+   dSprintf(returnBuffer,256,"%g %g %g %g %g %g",
+           box.minExtents.x,box.minExtents.y,box.minExtents.z,
+           box.maxExtents.x,box.maxExtents.y,box.maxExtents.z);
+   return returnBuffer;
+}
+ConsoleFunction( BoxExtend, const char*, 3, 3, "(Box b, Point3F point)"
+				"@brief Get the center point of a box.\n\n"
+				"@param b A Box3F, in string format using \"minExtentX minExtentY minExtentZ maxExtentX maxExtentY maxExtentZ\"\n"
+				"@return Center of the box in string format using \"X Y Z\"\n"
+				"@ingroup Math")
+{
+   Box3F box;
+   box.minExtents.set(0,0,0);
+   box.maxExtents.set(0,0,0);
+   dSscanf(argv[1],"%g %g %g %g %g %g",
+           &box.minExtents.x,&box.minExtents.y,&box.minExtents.z,
+           &box.maxExtents.x,&box.maxExtents.y,&box.maxExtents.z);
+
+   Point3F point;
+   point.set(0,0,0);
+   dSscanf(argv[2],"%g %g %g", &point.x,&point.y,&point.z);
+
+   box.extend(point);
+
+   char* returnBuffer = Con::getReturnBuffer(256);
+   dSprintf(returnBuffer,256,"%g %g %g %g %g %g",
+           box.minExtents.x,box.minExtents.y,box.minExtents.z,
+           box.maxExtents.x,box.maxExtents.y,box.maxExtents.z);
+   return returnBuffer;
+}
+// end jc
+
 
 //------------------------------------------------------------------------------
 

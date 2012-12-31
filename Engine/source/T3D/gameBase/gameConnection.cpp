@@ -202,6 +202,10 @@ GameConnection::GameConnection()
    mCameraFov = 90.f;
    mUpdateCameraFov = false;
 
+// start jc
+   mCameraFrustumOffset = Point4F::Zero;
+// end jc
+
    mAIControlled = false;
 
    mDisconnectReason[0] = 0;
@@ -636,6 +640,57 @@ bool GameConnection::getControlCameraTransform(F32 dt, MatrixF* mat)
    return true;
 }
 
+// start jc
+bool GameConnection::getControlCameraEarTransform(F32 dt, MatrixF* mat)
+{
+   GameBase* obj = getCameraObject();
+   if(!obj)
+      return false;
+
+   GameBase* cObj = obj;
+   while((cObj = cObj->getControlObject()) != 0)
+   {
+      if(cObj->useObjsEyePoint())
+         obj = cObj;
+   }
+
+   if (dt) 
+   {
+      if (mFirstPerson || obj->onlyFirstPerson()) 
+      {
+         if (mCameraPos > 0)
+            if ((mCameraPos -= mCameraSpeed * dt) <= 0)
+               mCameraPos = 0;
+      }
+      else 
+      {
+         if (mCameraPos < 1)
+            if ((mCameraPos += mCameraSpeed * dt) > 1)
+               mCameraPos = 1;
+      }
+   }
+
+   if (!sChaseQueueSize || mFirstPerson || obj->onlyFirstPerson())
+      obj->getCameraEarTransform(&mCameraPos,mat);
+   else 
+   {
+      MatrixF& hm = sChaseQueue[sChaseQueueHead];
+      MatrixF& tm = sChaseQueue[sChaseQueueTail];
+      obj->getCameraEarTransform(&mCameraPos,&hm);
+      *mat = tm;
+      if (dt) 
+      {
+         if ((sChaseQueueHead += 1) >= sChaseQueueSize)
+            sChaseQueueHead = 0;
+         if (sChaseQueueHead == sChaseQueueTail)
+            if ((sChaseQueueTail += 1) >= sChaseQueueSize)
+               sChaseQueueTail = 0;
+      }
+   }
+   return true;
+}
+// end jc
+
 bool GameConnection::getControlCameraDefaultFov(F32 * fov)
 {
    //find the last control object in the chain (client->player->turret->whatever...)
@@ -673,6 +728,13 @@ bool GameConnection::getControlCameraFov(F32 * fov)
 
    return(false);
 }
+// start jc
+bool GameConnection::getControlCameraFrustumOffset(Point4F *offset)
+{
+	*offset = mCameraFrustumOffset;
+	return true;
+}
+// end jc
 
 bool GameConnection::isValidControlCameraFov(F32 fov)
 {
@@ -722,6 +784,25 @@ bool GameConnection::getControlCameraVelocity(Point3F *vel)
    }
    return false;
 }
+// start jc
+bool GameConnection::setControlCameraFrustumOffset(Point4F offset)
+{
+   //find the last control object in the chain (client->player->turret->whatever...)
+   GameBase *obj = getCameraObject();
+   GameBase *cObj = NULL;
+   while (obj)
+   {
+      cObj = obj;
+      obj = obj->getControlObject();
+   }
+   if (cObj)
+   {
+	   mCameraFrustumOffset = offset;
+      return(true);
+   }
+   return(false);
+}
+// end jc
 
 bool GameConnection::isControlObjectRotDampedCamera()
 {
@@ -1351,7 +1432,19 @@ void GameConnection::play3D(SFXProfile* profile, const MatrixF *transform)
       // of the control object.
       Point3F ear,pos;
       transform->getColumn(3,&pos);
-      mControlObject->getTransform().getColumn(3,&ear);
+   // start jc
+   //   mControlObject->getTransform().getColumn(3,&ear);
+   //   mControlObject->getEarTransform().getColumn(3,&ear);
+
+      static MatrixF mat;
+      static F32 state = 0;
+      if (!this->isFirstPerson())
+         state = 1.0f;
+
+      mControlObject->getCameraEarTransform(&state, &mat);
+      mat.getColumn(3,&ear);
+   // end jc
+
       if ((ear - pos).len() < profile->getDescription()->mMaxDistance)
          postNetEvent(new Sim3DAudioEvent(profile,transform));
    } 

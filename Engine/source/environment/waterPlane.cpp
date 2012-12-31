@@ -675,7 +675,10 @@ void WaterPlane::setShaderParams( SceneRenderState *state, BaseMatInstance* mat,
    
    // By default we need to show a true reflection is fullReflect is enabled and
    // we are above water.
-   F32 reflect = mPlaneReflector.isEnabled() && !isUnderwater( state->getCameraPosition() );
+// start jc
+//   F32 reflect = mPlaneReflector.isEnabled() && !isUnderwater( state->getCameraPosition() );
+   F32 reflect = mPlaneReflector.isEnabled();
+// end jc
    
    // If we were occluded the last frame a query was fetched ( not necessarily last frame )
    // and we weren't updated last frame... we don't have a valid texture to show
@@ -700,11 +703,28 @@ void WaterPlane::prepRenderImage( SceneRenderState *state )
 {
    PROFILE_SCOPE(WaterPlane_prepRenderImage);
 
-   if( !state->isDiffusePass() )
+// start jc
+//   if( !state->isDiffusePass() )
+//      return;
+   if( !state->isDiffusePass() && !state->isReflectPass() )
       return;
+// end jc
 
    mBasicLighting = dStricmp( LIGHTMGR->getId(), "BLM" ) == 0;
    mUnderwater = isUnderwater( state->getCameraPosition() );
+// start jc
+   if(state->isReflectPass())
+   {
+      if(mUnderwater)
+         return;
+
+      mUnderwater = true;
+      _getWaterPlane( state->getDiffuseCameraPosition(), mWaterPlane, mWaterPos );
+      mWaterFogData.plane = mWaterPlane;
+   }
+   else
+   {
+// end jc
 
    mMatrixSet->setSceneView(GFX->getWorldMatrix());
    
@@ -726,7 +746,19 @@ void WaterPlane::prepRenderImage( SceneRenderState *state )
    _getWaterPlane( state->getCameraPosition(), mWaterPlane, mWaterPos );
    mWaterFogData.plane = mWaterPlane;
    mPlaneReflector.refplane = mWaterPlane;
+// start jc
+   }
+// end jc
+
+// start jc
+//   if(mUnderwater)
+//      mPlaneReflector.refplane.invert();
+// end jc
+// start jc
+//   updateUnderwaterEffect( state );
+   if ( mUnderwaterFog )
    updateUnderwaterEffect( state );
+// end jc
 
    ObjectRenderInst *ri = state->getRenderPass()->allocInst<ObjectRenderInst>();
    ri->renderDelegate.bind( this, &WaterObject::renderObject );

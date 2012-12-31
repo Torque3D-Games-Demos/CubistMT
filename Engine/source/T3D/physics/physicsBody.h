@@ -113,6 +113,10 @@ public:
 
    ///
    virtual void applyImpulse( const Point3F &origin, const Point3F &force ) = 0;
+
+// start jc
+   virtual void moveGlobalPosition(const Point3F& vec) = 0;
+// end jc
 };
 
 

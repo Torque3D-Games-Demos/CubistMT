@@ -215,8 +215,21 @@ bool ParticleEmitterNode::onAdd()
       setMaskBits( StateMask | EmitterDBMask );
    }
 
+// start jc
+//   mObjBox.minExtents.set(-0.5, -0.5, -0.5);
+//   mObjBox.maxExtents.set( 0.5,  0.5,  0.5);
+
+   if(mEmitterDatablock && !mEmitterDatablock->overrideBounds.isEmpty())
+   {
+	  mObjBox = mEmitterDatablock->overrideBounds;
+   }
+   else
+   {
    mObjBox.minExtents.set(-0.5, -0.5, -0.5);
    mObjBox.maxExtents.set( 0.5,  0.5,  0.5);
+   }
+// end jc
+
    resetWorldBox();
    addToScene();
 
@@ -393,6 +406,13 @@ void ParticleEmitterNode::setEmitterDataBlock(ParticleEmitterData* data)
 
    mEmitterDatablock = data;
 }
+// start jc
+void ParticleEmitterNode::setObjectBox(Box3F objBox)
+{
+   mObjBox = objBox;
+   resetWorldBox();
+}
+// end jc
  
 DefineEngineMethod(ParticleEmitterNode, setEmitterDataBlock, void, (ParticleEmitterData* emitterDatablock), (0),
    "Assigns the datablock for this emitter node.\n"
@@ -417,3 +437,33 @@ DefineEngineMethod(ParticleEmitterNode, setActive, void, (bool active),,
 {
    object->setActive( active );
 }
+
+// start jc
+DefineEngineMethod(ParticleEmitterNode, onAdd, bool,(),,
+   "")
+{
+   return object->onAdd();
+}
+
+DefineEngineMethod( ParticleEmitterNode, setObjectBox, void, (Box3F objBox),,
+   "Get the model filename used by this shape.\n"
+   "@return the shape filename\n\n" )
+{
+   object->setObjectBox(objBox);
+}
+// end jc
+
+
+// start jc
+IMPLEMENT_CO_NETOBJECT_V1(ParticleEmitterNodeClient);
+
+ParticleEmitterNodeClient::ParticleEmitterNodeClient()
+{
+   mNetFlags.clear(Ghostable | ScopeAlways);
+   mNetFlags.set(IsGhost);
+}
+ParticleEmitterNodeClient::~ParticleEmitterNodeClient()
+{
+}
+
+// end jc

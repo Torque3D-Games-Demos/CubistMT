@@ -261,7 +261,10 @@ class ResizeBitStream : public BitStream
 protected:
    U32 mMinSpace;
 public:
-   ResizeBitStream(U32 minSpace = 1500, U32 initialSize = 0);
+// start jc
+//   ResizeBitStream(U32 minSpace = 1500, U32 initialSize = 0);
+   ResizeBitStream(U32 minSpace = MAXPACKETSIZE, U32 initialSize = 0);
+// end jc
    void validate();
    ~ResizeBitStream();
 };

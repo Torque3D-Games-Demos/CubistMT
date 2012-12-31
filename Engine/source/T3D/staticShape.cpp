@@ -242,6 +242,10 @@ void StaticShape::processTick(const Move* move)
 
 void StaticShape::interpolateTick(F32 delta)
 {
+// start jc
+   Parent::interpolateTick(delta);
+// end jc
+
    if (isMounted()) {
       MatrixF mat;
       mMount.object->getRenderMountTransform( delta, mMount.node, mMount.xfm, &mat );

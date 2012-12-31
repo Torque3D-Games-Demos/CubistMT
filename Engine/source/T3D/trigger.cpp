@@ -366,6 +366,13 @@ void Trigger::initPersistFields()
    addProtectedField("tickCommand", TypeCommand, Offset(mTickCommand, Trigger), &setTickCmd, &defaultProtectedGetFn,
       "The command to execute while an object is inside this trigger. Maximum 1023 characters." );
 
+//start pg
+   addGroup("PG");
+      addField( "direction", TypePoint3F, Offset( mDirection, Trigger ), 
+         "@brief .\n");
+   endGroup("PG");
+// end pg
+
    Parent::initPersistFields();
 }
 
@@ -409,6 +416,15 @@ bool Trigger::onAdd()
 
 void Trigger::onRemove()
 {
+// start jc - if trigger deleted call leave event for internal objects
+   for ( U32 i = 0; i < mObjects.size(); i++ )
+   {
+      if (mDataBlock){
+         mDataBlock->onLeaveTrigger_callback( this, mObjects[i] );
+      }
+   }
+// end jc
+
    onRemove_callback( getId() );
 
    mConvexList->nukeList();
@@ -529,8 +545,31 @@ void Trigger::prepRenderImage( SceneRenderState *state )
    ri->translucentSort = true;
    ri->defaultKey = 1;
    state->getRenderPass()->addInst( ri );
-}
 
+   //start pg
+   ri = state->getRenderPass()->allocInst<ObjectRenderInst>();
+   ri->renderDelegate.bind( this, &Trigger::renderTransform );
+   ri->type = RenderPassManager::RIT_Editor;      
+   ri->translucentSort = false;
+   ri->defaultKey = 1;
+   state->getRenderPass()->addInst( ri );
+   //end pg
+
+}
+//start pg
+void Trigger::renderTransform( ObjectRenderInst *ri,
+                            SceneRenderState *state,
+                            BaseMatInstance *overrideMat )
+{
+   GFXStateBlockDesc desc;
+   desc.setBlend( false );
+   desc.setZReadWrite( false, false );
+
+   Point3F  scale = Point3F(3.0f, 3.0f, 3.0f);
+   GFXDrawUtil *drawer = GFX->getDrawUtil();
+   drawer->drawTransform( desc, getTransform(), &scale, NULL );
+}
+//end pg
 void Trigger::renderObject( ObjectRenderInst *ri,
                             SceneRenderState *state,
                             BaseMatInstance *overrideMat )
@@ -667,6 +706,14 @@ void Trigger::potentialEnterObject(GameBase* enter)
 void Trigger::processTick(const Move* move)
 {
    Parent::processTick(move);
+
+   //start pg
+   if( isMounted() ){
+      MatrixF  mat;
+      getMountedTransform(&mat);
+      setTransform(mat);
+   }
+   //end pg
 
    if (!mDataBlock)
       return;

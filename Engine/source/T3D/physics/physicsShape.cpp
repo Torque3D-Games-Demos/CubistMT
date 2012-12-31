@@ -21,6 +21,9 @@
 //-----------------------------------------------------------------------------
 
 #include "platform/platform.h"
+// start jc
+#include "gfx/video/webTexture.h"
+// end jc
 #include "T3D/physics/physicsShape.h"
 
 #include "console/consoleTypes.h"
@@ -40,6 +43,17 @@
 #include "T3D/containerQuery.h"
 #include "lighting/lightQuery.h"
 #include "console/engineAPI.h"
+// start jc
+//#include "gui/controls/guiWebViewCtrl.h"
+//#include "gfx/video/webTexture.h"
+#include "console/simTUIO.h"
+#include "collision/earlyOutPolyList.h"
+#include "sim/netConnection.h"
+#include "T3D/gameBase/gameConnection.h"
+//#include "materials/baseMatInstance.h"
+#include "materials/matInstance.h"
+#include "materials/ProcessedMaterial.h"
+// end jc
 
 
 bool PhysicsShape::smNoCorrections = false;
@@ -62,6 +76,307 @@ ConsoleDocClass( PhysicsShapeData,
    "@see PhysicsShape.\n"   
    "@ingroup Physics"
 );
+
+// start jc
+IMPLEMENT_CALLBACK( PhysicsShapeData, onMouseDown, void, ( PhysicsShape* obj, U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ),
+														  ( obj, modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the mouse is pressed down while in this control.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Mouse was pressed down in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onMouseDown(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( PhysicsShapeData, onMouseUp, void, ( PhysicsShape* obj, U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord ),
+													    ( obj, modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the mouse is released while in this control.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Mouse was released in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onMouseUp(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( PhysicsShapeData, onMouseMove, void, ( PhysicsShape* obj, U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord  ),
+												   ( obj, modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the mouse is moved (without dragging) while in this control.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Mouse was moved in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onMouseMove(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( PhysicsShapeData, onMouseDragged, void, (  PhysicsShape* obj, U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord  ),
+												   ( obj, modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the mouse is dragged while in this control.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Mouse was dragged in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onMouseDragged(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( PhysicsShapeData, onMouseEnter, void, (  PhysicsShape* obj, U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord  ),
+												   ( obj, modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the mouse enters this control.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Mouse entered this control, causing the callback\n"
+   "GuiMouseEventCtrl::onMouseEnter(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( PhysicsShapeData, onMouseLeave, void, (  PhysicsShape* obj, U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord  ),
+												   ( obj, modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the mouse leaves this control.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Mouse left this control, causing the callback\n"
+   "GuiMouseEventCtrl::onMouseLeave(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( PhysicsShapeData, onRightMouseDown, void, (  PhysicsShape* obj, U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord  ),
+												   ( obj, modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the right mouse button is pressed while in this control.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Right mouse button was pressed in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onRightMouseDown(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( PhysicsShapeData, onRightMouseUp, void, (  PhysicsShape* obj, U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord  ),
+												   ( obj, modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the right mouse button is released while in this control.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Right mouse button was released in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onRightMouseUp(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( PhysicsShapeData, onRightMouseDragged, void, (  PhysicsShape* obj, U8 modifier, Point2I mousePoint,U8 mouseClickCount, Point3F pos, Point3F vec, Point2F mouseUVCoord  ),
+												   ( obj, modifier, mousePoint, mouseClickCount, pos, vec, mouseUVCoord ),
+   "@brief Callback that occurs whenever the mouse is dragged in this control while the right mouse button is pressed.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Right mouse button was dragged in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onRightMouseDragged(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( PhysicsShapeData, onTouchDown, bool, ( PhysicsShape* obj, S32 id, Point2I touchPoint, Point3F pos, Point3F vec, Point2F touchUVCoord  ),
+												   ( obj, id, touchPoint, pos, vec, touchUVCoord ),
+   "@brief Callback that occurs whenever the mouse is dragged in this control while the right mouse button is pressed.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Right mouse button was dragged in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onRightMouseDragged(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( PhysicsShapeData, onTouchMove, bool, ( PhysicsShape* obj, S32 id, Point2I touchPoint, Point3F pos, Point3F vec, Point2F touchUVCoord  ),
+												   ( obj, id, touchPoint, pos, vec, touchUVCoord ),
+   "@brief Callback that occurs whenever the mouse is dragged in this control while the right mouse button is pressed.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Right mouse button was dragged in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onRightMouseDragged(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+
+IMPLEMENT_CALLBACK( PhysicsShapeData, onTouchUp, bool, ( PhysicsShape* obj, S32 id, Point2I touchPoint, Point3F pos, Point3F vec, Point2F touchUVCoord  ),
+												   ( obj, id, touchPoint, pos, vec, touchUVCoord ),
+   "@brief Callback that occurs whenever the mouse is dragged in this control while the right mouse button is pressed.\n\n"
+   "@param modifier Key that was pressed during this callback. Values are:\n\n" 
+   "$EventModifier::RSHIFT\n\n"
+   "$EventModifier::SHIFT\n\n"
+   "$EventModifier::LCTRL\n\n"
+   "$EventModifier::RCTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::CTRL\n\n"
+   "$EventModifier::RALT\n\n"
+   "$EventModifier::ALT\n\n"
+   "@param mousePoint X/Y location of the mouse point\n"
+   "@param mouseClickCount How many mouse clicks have occured for this event\n\n"
+   "@tsexample\n"
+   "// Right mouse button was dragged in this control, causing the callback\n"
+   "GuiMouseEventCtrl::onRightMouseDragged(%this,%modifier,%mousePoint,%mouseClickCount)\n"
+   "{\n"
+   "	// Code to call when a mouse event occurs.\n"
+   "}\n"
+   "@endtsexample\n\n"
+   "@see GuiControl\n\n"
+);
+IMPLEMENT_CALLBACK( PhysicsShapeData, onAddClient, void, ( PhysicsShape* obj ), ( obj ),
+	"Called when this ScriptGroup is added to the system.\n"
+	"@param ID Unique object ID assigned when created (%this in script).\n" 
+);
+
+IMPLEMENT_CALLBACK( PhysicsShapeData, onMaterialsLoaded, void, (PhysicsShape* obj), (obj),
+	"Called when this ScriptGroup is added to the system.\n"
+	"@param ID Unique object ID assigned when created (%this in script).\n" 
+);
+
+
+// end jc
 
 PhysicsShapeData::PhysicsShapeData()
    :  shapeName( NULL ),
@@ -197,6 +512,14 @@ void PhysicsShapeData::packData( BitStream *stream )
    stream->writeRangedU32( debris ? debris->getId() : 0, 0, DataBlockObjectIdLast );
    stream->writeRangedU32( explosion ? explosion->getId() : 0, 0, DataBlockObjectIdLast );
    stream->writeRangedU32( destroyedShape ? destroyedShape->getId() : 0, 0, DataBlockObjectIdLast );
+
+// start jc
+   //stream->writeFlag( renderInReflections );
+
+   // allow for client side callbacks
+   stream->writeString(mSuperClassName);
+   stream->writeString(mClassName);
+// end jc
 }
 
 void PhysicsShapeData::unpackData( BitStream *stream )
@@ -221,6 +544,11 @@ void PhysicsShapeData::unpackData( BitStream *stream )
    debris = stream->readRangedU32( 0, DataBlockObjectIdLast );
    explosion = stream->readRangedU32( 0, DataBlockObjectIdLast );   
    destroyedShape = stream->readRangedU32( 0, DataBlockObjectIdLast );
+// start jc
+//   renderInReflections = stream->readFlag();
+   setSuperClassNamespace(stream->readSTString());
+   setClassNamespace(stream->readSTString());
+// end jc
 }
 
 bool PhysicsShapeData::onAdd()
@@ -396,7 +724,13 @@ PhysicsShape::PhysicsShape()
       mDestroyed( false ),
       mPlayAmbient( false ),
       mAmbientThread( NULL ),
-      mAmbientSeq( -1 )
+      mAmbientSeq( -1 ),
+// start jc
+    mWebViewData(NULL),
+    mWebViewID(0),
+	mEnableInputEvents(false)
+//   mGravityMod(1.0)
+// end jc
 {
    mNetFlags.set( Ghostable | ScopeAlways );
    mTypeMask |= DynamicShapeObjectType;
@@ -432,10 +766,21 @@ void PhysicsShape::initPersistFields()
             "@note The ambient animation must be named \"ambient\"." );
    
    endGroup( "PhysicsShape" );
+// start jc
+   addGroup("web");
 
+      addField( "webViewData", TYPEID< WebViewData >(), Offset( mWebViewData, PhysicsShape ),
+         "Link to a WebViewData object used to render the 'web' material." );
+      addField( "enableInputEvents", TypeBool, Offset( mEnableInputEvents, PhysicsShape ),
+         "If true recieve 3D input events." );
+
+   endGroup("web");
+// end jc
    Parent::initPersistFields();   
 
-   removeField( "scale" );
+// start jc
+ //  removeField( "scale" );
+// end jc
 }
 
 void PhysicsShape::inspectPostApply()
@@ -449,12 +794,34 @@ U32 PhysicsShape::packUpdate( NetConnection *con, U32 mask, BitStream *stream )
 {
    U32 retMask = Parent::packUpdate( con, mask, stream );
 
-   if ( stream->writeFlag( mask & InitialUpdateMask ) )
+// start jc
+//   if ( stream->writeFlag( mask & InitialUpdateMask ) )
+   if ( stream->writeFlag( mask & InitialUpdateMask || mask & SkinMask ) )
+// end jc
    {
       stream->writeAffineTransform( getTransform() );
       stream->writeFlag( mPlayAmbient );
 
       stream->writeFlag( mDestroyed );
+
+   // start jc
+
+	  // allow for client side callbacks
+	  if (stream->writeFlag(mask & SkinMask))
+      {
+         con->packNetStringHandleU(stream, mSkinNameHandle);
+
+        if(stream->writeFlag(bool(mWebViewData)))
+         {
+            S32 gIndex = con->getGhostIndex(mWebViewData);
+            if(stream->writeFlag(bool(gIndex != -1)))
+               stream->writeRangedU32( U32(gIndex), 0, NetConnection::MaxGhostCount );
+         }
+		 stream->writeFlag(mEnableInputEvents);
+      }
+	  //stream->writeFlag(mGravityMod);
+
+	// end jc
 
       return retMask;
    }
@@ -462,7 +829,10 @@ U32 PhysicsShape::packUpdate( NetConnection *con, U32 mask, BitStream *stream )
    // If we got here its not an initial update.  So only send
    // the least amount of data possible.
 
-   if ( stream->writeFlag( mask & StateMask ) )
+// start jc
+//   if ( stream->writeFlag( mask & StateMask ) )
+   if ( stream->writeFlag( mask & StateMask || mask & ScaleMask ) )
+// end jc
    {
       // This will encode the position relative to the control
       // object position.  
@@ -478,6 +848,15 @@ U32 PhysicsShape::packUpdate( NetConnection *con, U32 mask, BitStream *stream )
 
       // Use only 3.5 bytes to send the orientation.
       stream->writeQuat( mState.orientation, 9 );
+
+	// start jc
+      if ( stream->writeFlag( mask & ScaleMask ) )  
+      {
+         // Only write one bit if the scale is one.
+         if ( stream->writeFlag( mObjScale != Point3F::One ) )
+            mathWrite( *stream, mObjScale );   
+      }
+	// end jc
 
       // If the server object has been set to sleep then
       // we don't need to send any velocity.
@@ -534,6 +913,28 @@ void PhysicsShape::unpackUpdate( NetConnection *con, BitStream *stream )
             mDestroyed = true;
          }
       }
+	  // start jc
+	  if (stream->readFlag())
+	  {  // SkinMask
+
+         NetStringHandle skinDesiredNameHandle = con->unpackNetStringHandleU(stream);
+
+         if (mSkinNameHandle != skinDesiredNameHandle)
+		 {
+            mSkinNameHandle = skinDesiredNameHandle;
+            reSkinNewPath();
+         }
+         if( stream->readFlag() )
+            if(stream->readFlag())
+               mWebViewID = stream->readRangedU32( 0, NetConnection::MaxGhostCount );
+
+		 mEnableInputEvents = stream->readFlag();
+		 if(isProperlyAdded())
+		    setEnableInputEvents(mEnableInputEvents);
+	  }
+	  //stream->read(mGravityMod);
+     // end jc
+
 
       return;
    }
@@ -547,6 +948,20 @@ void PhysicsShape::unpackUpdate( NetConnection *con, BitStream *stream )
 
       // Read the compressed quaternion... 3.5 bytes.
       stream->readQuat( &state.orientation, 9 );
+
+   // start jc
+      if ( stream->readFlag() ) 
+      {
+         if ( stream->readFlag() )
+         {
+            VectorF scale;
+            mathRead( *stream, &scale );
+            setScale( scale );
+         }
+         else
+            setScale( Point3F::One );
+      }
+   // end jc
 
       state.sleeping = stream->readFlag();
       if ( !state.sleeping )
@@ -588,6 +1003,13 @@ void PhysicsShape::unpackUpdate( NetConnection *con, BitStream *stream )
 
 bool PhysicsShape::onAdd()
 {
+// start jc
+   if(mEnableInputEvents)
+      mTypeMask |= InputEventObjectType;
+   else
+      mTypeMask &= ~InputEventObjectType;
+// end jc
+
    if ( !Parent::onAdd() )
       return false;
 
@@ -630,6 +1052,15 @@ bool PhysicsShape::onAdd()
       // Stop doing tick processing for this SceneObject.
       setProcessTick( false );
    }
+// start jc
+   if(isClientObject())
+   {
+      getDataBlock()->onAddClient_callback(this);
+
+      if(mShapeInst && mShapeInst->getMaterialList())
+         getDataBlock()->onMaterialsLoaded_callback(this);
+   }
+// end jc
 
    return true;
 }
@@ -827,6 +1258,17 @@ void PhysicsShape::setTransform( const MatrixF &newMat )
 void PhysicsShape::setScale( const VectorF &scale )
 {
    // Cannot scale PhysicsShape.
+   // start jc
+   Parent::setScale( scale );
+
+   if ( mPhysicsRep )
+   {
+      MatrixF mat;
+      mPhysicsRep->getTransform(&mat);
+      mat.scale(scale);
+      mPhysicsRep->setTransform(mat);
+   }
+   // end jc
    return;
 }
 
@@ -887,6 +1329,16 @@ void PhysicsShape::interpolateTick( F32 delta )
 {
    AssertFatal( !mDestroyed, "PhysicsShape::interpolateTick - Shouldn't be processing a destroyed shape!" );
 
+// start jc
+   if (isGhost())
+   {
+      if(mWebViewID && !mWebViewData)
+         webSkin();
+
+      if(mWebViewData)
+         mWebViewData->refresh();
+   }
+// end jc
    if ( !mPhysicsRep->isDynamic() )
       return;
 
@@ -897,6 +1349,350 @@ void PhysicsShape::interpolateTick( F32 delta )
    // Set the transform to the interpolated transform.
    setRenderTransform( state.getTransform() );
 }
+
+// start jc
+void PhysicsShape::setEnableInputEvents( bool enable )
+{
+   if ( enable != mEnableInputEvents )
+   {
+      removeFromScene();
+      if(enable)
+         mTypeMask |= InputEventObjectType;
+      else
+         mTypeMask &= ~InputEventObjectType;
+      addToScene();
+   }
+}
+
+void PhysicsShape::onMouseDown(const ShapeInputEvent &event)
+{
+   getDataBlock()->onMouseDown_callback(this, event.modifier, event.mousePoint, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+void PhysicsShape::onMouseUp(const ShapeInputEvent & event)
+{
+   getDataBlock()->onMouseUp_callback(this, event.modifier, event.mousePoint, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+void PhysicsShape::onMouseMove(const ShapeInputEvent & event)
+{
+   getDataBlock()->onMouseMove_callback(this, event.modifier, event.mousePoint, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+void PhysicsShape::onMouseDragged(const ShapeInputEvent & event)
+{
+   getDataBlock()->onMouseDragged_callback(this, event.modifier, event.mousePoint, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+void PhysicsShape::onMouseEnter(const ShapeInputEvent & event)
+{
+   getDataBlock()->onMouseEnter_callback(this, event.modifier, event.mousePoint, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+void PhysicsShape::onMouseLeave(const ShapeInputEvent & event)
+{
+   getDataBlock()->onMouseLeave_callback(this, event.modifier, event.mousePoint, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+void PhysicsShape::onRightMouseDown(const ShapeInputEvent & event)
+{
+   getDataBlock()->onRightMouseDown_callback(this, event.modifier, event.mousePoint, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+void PhysicsShape::onRightMouseUp(const ShapeInputEvent & event)
+{
+   getDataBlock()->onRightMouseUp_callback(this, event.modifier, event.mousePoint, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+void PhysicsShape::onRightMouseDragged(const ShapeInputEvent & event)
+{
+   getDataBlock()->onRightMouseDragged_callback(this, event.modifier, event.mousePoint, event.mouseClickCount, event.pos, event.vec, event.ri.texCoord);
+}
+bool PhysicsShape::onTouchDown(const ShapeTouchEvent & event)
+{
+   return getDataBlock()->onTouchDown_callback(this, event.touchId, event.touchPosition, event.pos, event.vec, event.ri.texCoord);
+}
+bool PhysicsShape::onTouchMove(const ShapeTouchEvent & event)
+{
+   return getDataBlock()->onTouchMove_callback(this, event.touchId, event.touchPosition, event.pos, event.vec, event.ri.texCoord);
+}
+bool PhysicsShape::onTouchUp(const ShapeTouchEvent & event)
+{
+   return getDataBlock()->onTouchUp_callback(this, event.touchId, event.touchPosition, event.pos, event.vec, event.ri.texCoord);
+}
+
+bool PhysicsShape::castRay(const Point3F &start, const Point3F &end, RayInfo* info)
+{
+   if (mShapeInst) 
+   {
+      RayInfo shortest;
+      shortest.t = 1e8;
+
+      info->object = NULL;
+	  /*
+      for (U32 i = 0; i < getDataBlock()->LOSDetails.size(); i++)
+      {
+         mShapeInst->animate(getDataBlock()->LOSDetails[i]);
+         if (mShapeInst->castRay(start, end, info, getDataBlock()->LOSDetails[i]))
+         {
+            info->object = this;
+            if (info->t < shortest.t)
+               shortest = *info;
+         }
+      }
+	  */
+         mShapeInst->animate(0);
+         if (mShapeInst->castRay(start, end, info, 0))
+         {
+            info->object = this;
+            if (info->t < shortest.t)
+               shortest = *info;
+         }
+     // }
+
+
+      if (info->object == this) 
+      {
+         // Copy out the shortest time...
+         *info = shortest;
+         return true;
+      }
+   }
+
+   return false;
+}
+
+bool PhysicsShape::castRayRendered(const Point3F &start, const Point3F &end, RayInfo* info)
+{
+   if (mShapeInst) 
+   {
+      RayInfo localInfo;
+   // start jc
+	  localInfo.generateTexCoord = info->generateTexCoord;
+  // end jc
+      mShapeInst->animate();
+      bool res = mShapeInst->castRayRendered(start, end, &localInfo, mShapeInst->getCurrentDetail());
+      if (res)
+      {
+         *info = localInfo;
+         info->object = this;
+         return true;
+      }
+   }
+
+   return false;
+}
+
+Point3F PhysicsShape::getCMassPosition(void)
+{
+   return mPhysicsRep->getCMassPosition();
+}
+void PhysicsShape::setLinVelocity(const Point3F velocity)
+{
+   return mPhysicsRep->setLinVelocity(velocity);
+}
+Point3F PhysicsShape::getLinVelocity() const
+{
+   return mPhysicsRep->getLinVelocity();
+}
+
+
+void PhysicsShape::moveGlobalPosition(const Point3F& vec)
+{
+   mPhysicsRep->moveGlobalPosition(vec);
+}
+  
+void PhysicsShape::setSkinName(const char* name)
+{
+   if (isServerObject()) {
+      if (name[0] != '\0') {
+
+         // Use tags for better network performance
+         // Should be a tag, but we'll convert to one if it isn't.
+         if (name[0] == StringTagPrefixByte) {
+            mSkinNameHandle = NetStringHandle(U32(dAtoi(name + 1)));
+         }
+         else {
+            mSkinNameHandle = NetStringHandle(name);
+         }
+      }
+      else {
+         mSkinNameHandle = NetStringHandle();
+      }
+      setMaskBits(SkinMask);
+   }
+}
+
+void PhysicsShape::reSkin()
+{
+   if ( isGhost() && mShapeInst && mSkinNameHandle.isValidString() )
+   {
+      const char* newSkin = mSkinNameHandle.getString();
+      mShapeInst->reSkin( newSkin, mAppliedSkinName );
+      mAppliedSkinName = newSkin;
+      mSkinHash = _StringTable::hashString( newSkin );
+   }
+}
+
+void PhysicsShape::reSkinNewPath()
+{
+   if ( isGhost() && mShapeInst && mSkinNameHandle.isValidString() )
+   {
+      const char* newSkin = mSkinNameHandle.getString();
+      mShapeInst->reSkin( newSkin, mAppliedSkinName, true );
+      mAppliedSkinName = newSkin;
+      mSkinHash = _StringTable::hashString( newSkin );
+   }
+}
+void PhysicsShape::reSkin(const char* oldSkin)
+{
+   if ( oldSkin && isGhost() && mShapeInst && mSkinNameHandle.isValidString() )
+   {
+      mAppliedSkinName = oldSkin;
+      const char* newSkin = mSkinNameHandle.getString();
+      mShapeInst->reSkin( newSkin, mAppliedSkinName );
+      mAppliedSkinName = newSkin;
+      mSkinHash = _StringTable::hashString( newSkin );
+   }
+}
+/*
+void PhysicsShape::webSkin()
+{
+	if(!mWebViewData)
+	{
+		GameConnection *con = GameConnection::getConnectionToServer();
+		mWebViewData = static_cast<WebViewData*>(con->resolveGhost(mWebViewID));
+	}
+	if(mWebViewData)
+	{
+		mShapeInst->webSkin(mWebViewData);
+	}
+}
+*/
+void PhysicsShape::webSkin()
+{
+   if(!mWebViewData)
+   {
+      GameConnection *con = GameConnection::getConnectionToServer();
+      mWebViewData = static_cast<WebViewData*>(con->resolveGhost(mWebViewID));
+   }
+
+   if(mWebViewData)
+      mShapeInst->webSkin(mWebViewData);
+}
+
+
+Point2I PhysicsShape::getTextureResolution(U32 index)
+{
+   if(!mShapeInst)
+      return Point2I(0, 0);
+
+   TSMaterialList* matList = mShapeInst->getMaterialList();
+   if(!matList)
+       return Point2I(0, 0);
+
+   MatInstance *matInst = static_cast<MatInstance*>(matList->getMaterialInst(index));
+   if(!matInst || !(matInst->getProcessedMaterial()))
+	   return Point2I(0, 0);
+
+   const RenderPassData *rpd = matInst->getProcessedMaterial()->getPass(0);
+   if(!rpd || !(rpd->mTexSlot[0].texObject))
+	   return Point2I(0, 0);
+
+   return rpd->mTexSlot[0].texObject.getWidthHeight();
+}
+bool PhysicsShape::rayCrossesTransparency(RayInfo* ri)
+{
+   if(mWebViewData && ri->texCoord.x != -1)
+   {
+      // todo: use the new filp value on RenderBuffer and fix all the v flips
+      return mWebViewData->isSeeThruPixel(Point2F(ri->texCoord.x-0.5f, 0.5f-ri->texCoord.y));
+   }
+
+   return false;
+}
+//----------------------------------------------------------------------------
+/*
+void PhysicsShape::queueCollision( SceneObject *obj, const VectorF &vec)
+{
+   // Add object to list of collisions.
+   SimTime time = Sim::getCurrentTime();
+   S32 num = obj->getId();
+
+   CollisionTimeout** adr = &mTimeoutList;
+   CollisionTimeout* ptr = mTimeoutList;
+   while (ptr) {
+      if (ptr->objectNumber == num) {
+         if (ptr->expireTime < time) {
+            ptr->expireTime = time + CollisionTimeoutValue;
+            ptr->object = obj;
+            ptr->vector = vec;
+         }
+         return;
+      }
+      // Recover expired entries
+      if (ptr->expireTime < time) {
+         CollisionTimeout* cur = ptr;
+         *adr = ptr->next;
+         ptr = ptr->next;
+         cur->next = sFreeTimeoutList;
+         sFreeTimeoutList = cur;
+      }
+      else {
+         adr = &ptr->next;
+         ptr = ptr->next;
+      }
+   }
+
+   // New entry for the object
+   if (sFreeTimeoutList != NULL)
+   {
+      ptr = sFreeTimeoutList;
+      sFreeTimeoutList = ptr->next;
+      ptr->next = NULL;
+   }
+   else
+   {
+      ptr = sTimeoutChunker.alloc();
+   }
+
+   ptr->object = obj;
+   ptr->objectNumber = obj->getId();
+   ptr->vector = vec;
+   ptr->expireTime = time + CollisionTimeoutValue;
+   ptr->next = mTimeoutList;
+
+   mTimeoutList = ptr;
+}
+
+void PhysicsShape::notifyCollision()
+{
+   // Notify all the objects that were just stamped during the queueing
+   // process.
+   SimTime expireTime = Sim::getCurrentTime() + CollisionTimeoutValue;
+   for (CollisionTimeout* ptr = mTimeoutList; ptr; ptr = ptr->next)
+   {
+      if (ptr->expireTime == expireTime && ptr->object)
+      {
+         SimObjectPtr<SceneObject> safePtr(ptr->object);
+         SimObjectPtr<PhysicsShape> safeThis(this);
+         onCollision(ptr->object,ptr->vector);
+         ptr->object = 0;
+
+         if(!bool(safeThis))
+            return;
+
+         if(bool(safePtr))
+            safePtr->onCollision(this,ptr->vector);
+
+         if(!bool(safeThis))
+            return;
+      }
+   }
+}
+
+void PhysicsShape::onCollision( SceneObject *object, const VectorF &vec )
+{
+   if (!isGhost())
+      getDataBlock()->onCollision_callback( this, object, vec, vec.len() );
+}
+*/
+//--------------------------------------------------------------------------
+
+// end jc
+
 
 void PhysicsShape::processTick( const Move *move )
 {
@@ -1014,9 +1810,24 @@ void PhysicsShape::_updateContainerForces()
       // Based on this blog post:
       // (http://reinot.blogspot.com/2005/11/oh-yes-they-float-georgie-they-all.html)
       // JCF: disabled!
-      Point3F buoyancyForce = buoyancy * -mWorld->getGravity() * TickSec * getDataBlock()->mass;
+   // start jc
+   //   Point3F buoyancyForce = buoyancy * -mWorld->getGravity() * TickSec * getDataBlock()->mass;
+      Point3F buoyancyForce = buoyancy * -mWorld->getGravity() * TickSec * mPhysicsRep->getMass();
+      /*
+      Point3F buoyancyForce;
+      if( info.gravityScale != 1.0 )
+      //   buoyancyForce = buoyancy * -mWorld->getGravity() * TickSec * getDataBlock()->mass * (-mWorld->getGravity() * (1.0f - info.gravityScale));
+         buoyancyForce = (buoyancy * -mWorld->getGravity() * TickSec * getDataBlock()->mass)*(1.0f - info.gravityScale);
+      else
+         buoyancyForce = buoyancy * -mWorld->getGravity() * TickSec * getDataBlock()->mass;     
+         */
+   // end jc
       mPhysicsRep->applyImpulse( cmass, buoyancyForce );      
    }
+// start jc
+   else if ( info.gravityScale != 1.0 )
+      mPhysicsRep->applyImpulse( cmass, -(mWorld->getGravity())*(1.0f - info.gravityScale) * TickSec * mPhysicsRep->getMass());
+// end jc
 
    // Update the dampening as the container might have changed.
    mPhysicsRep->setDamping( linDrag, angDrag );
@@ -1170,3 +1981,374 @@ DefineEngineMethod( PhysicsShape, restore, void, (),,
 {
    object->restore();
 }
+// start jc
+DefineEngineMethod( PhysicsShape, getCMassPosition, Point3F, (),,
+   "get the world position of the center of mass." )
+{
+   return object->getCMassPosition();
+}
+DefineEngineMethod( PhysicsShape, setLinVelocity, void, (Point3F velocity),,
+   "get the world position of the center of mass." )
+{
+   object->setLinVelocity(velocity);
+}
+DefineEngineMethod( PhysicsShape, getLinVelocity, Point3F, (),,
+   "get the world position of the center of mass." )
+{
+   return object->getLinVelocity();
+}
+DefineEngineMethod( PhysicsShape, moveGlobalPosition, void, (Point3F pos),,
+   "move to world position." )
+{
+   object->moveGlobalPosition(pos);
+}
+DefineEngineMethod( PhysicsShape, getTextureResolution, Point2I, (U32 index),,
+   "Get the model filename used by this shape.\n"
+   "@return the shape filename\n\n" )
+{
+   return object->getTextureResolution(index);
+}
+
+DefineEngineMethod( PhysicsShape, setSkinName, void, ( const char* name ),,
+   "@brief Apply a new skin to this shape.\n\n"
+
+   "@param name name of the skin to apply\n\n" 
+   
+   "@see getSkinName()\n")
+{
+   object->setSkinName( name );
+}
+DefineEngineMethod( PhysicsShape, getSkinName, const char*, (),,
+   "@brief Get the name of the skin applied to this shape.\n\n"
+
+   "@return the name of the skin\n\n" 
+   
+   "@see setSkinName()\n")
+{
+   return object->getSkinName();
+}
+DefineEngineMethod( PhysicsShape, setWebViewData, void, (WebViewData* vebView),,
+   "Apply a new skin to this shape.\n"
+   "@param name name of the skin to apply\n\n" )
+{ 
+   object->setWebViewData( vebView );
+}
+DefineEngineMethod( PhysicsShape, hasWebViewData, bool, (),,
+   "Get the model filename used by this shape.\n"
+   "@return the shape filename\n\n" )
+{
+   return object->hasWebViewData();
+}
+
+// end jc
+
+
+
+// start jc
+/*
+PhysicsAnimatedShape::PhysicsAnimatedShape()
+   :  mPhysicsRep( NULL ),
+      mWorld( NULL ),
+      mShapeInst( NULL ),
+      mResetPos( MatrixF::Identity ),
+      mDestroyed( false ),
+      mPlayAmbient( false ),
+      mAmbientThread( NULL ),
+      mAmbientSeq( -1 ),
+// start jc
+//   mWebViewData(NULL),
+//   mWebViewID(0),
+	mEnableInputEvents(false)
+//   mGravityMod(1.0)
+// end jc
+{
+   mNetFlags.set( Ghostable | ScopeAlways );
+   mTypeMask |= DynamicShapeObjectType;
+
+}
+
+PhysicsAnimatedShape::~PhysicsAnimatedShape()
+{
+}
+
+void PhysicsAnimatedShape::consoleInit()
+{
+   Con::addVariable( "$PhysicsAnimatedShape::noCorrections", TypeBool, &PhysicsAnimatedShape::smNoCorrections,
+      "If set true, client-side shapes will recieve no corrections from the server and will instead by allowed to diverge.\n"
+	  "@ingroup Physics");
+
+   Con::addVariable( "$PhysicsAnimatedShape::noSmoothing", TypeBool, &PhysicsAnimatedShape::smNoSmoothing,
+      "If set true, client-side shapes will render immediately at the position they are corrected to when a correction is recieved from the server.\n"
+	  "@ingroup Physics" );
+
+   Parent::consoleInit();   
+}
+
+void PhysicsAnimatedShape::initPersistFields()
+{   
+   addGroup( "PhysicsAnimatedShape" );
+
+      addField( "playAmbient", TypeBool, Offset( mPlayAmbient, PhysicsAnimatedShape ),
+            "Enables automatic playing of the animation named \"ambient\" (if it exists) when the PhysicsAnimatedShape is loaded.");
+   // start jc
+      addField( "enableInputEvents", TypeBool, Offset( mEnableInputEvents, PhysicsAnimatedShape ),
+         "If true recieve 3D input events." );
+   //   addField( "gravityMod", TypeFloat, Offset( mGravityMod, PhysicsAnimatedShape ),
+   //      "If true recieve 3D input events." );
+   // end jc
+   endGroup( "PhysicsAnimatedShape" );
+
+   Parent::initPersistFields();   
+
+   removeField( "scale" );
+}
+
+void PhysicsAnimatedShape::inspectPostApply()
+{
+   Parent::inspectPostApply();
+
+   setMaskBits( InitialUpdateMask );
+}
+
+U32 PhysicsAnimatedShape::packUpdate( NetConnection *con, U32 mask, BitStream *stream )
+{
+   U32 retMask = Parent::packUpdate( con, mask, stream );
+
+   if ( stream->writeFlag( mask & InitialUpdateMask ) )
+   {
+      stream->writeAffineTransform( getTransform() );
+      stream->writeFlag( mPlayAmbient );
+
+      stream->writeFlag( mDestroyed );
+	  // start jc
+	  stream->writeFlag(mEnableInputEvents);
+	  //stream->writeFlag(mGravityMod);
+	  // end jc
+
+      return retMask;
+   }
+
+   // If we got here its not an initial update.  So only send
+   // the least amount of data possible.
+
+   if ( stream->writeFlag( mask & StateMask ) )
+   {
+      // This will encode the position relative to the control
+      // object position.  
+      //
+      // This will compress the position to as little as 6.25
+      // bytes if the position is within about 300 meters of the
+      // control object.
+      //
+      // Worst case its a full 12 bytes + 2 bits if the position
+      // is more than 5000 meters from the control object.
+      //
+      stream->writeCompressedPoint( mState.position );
+
+      // Use only 3.5 bytes to send the orientation.
+      stream->writeQuat( mState.orientation, 9 );
+
+      // If the server object has been set to sleep then
+      // we don't need to send any velocity.
+      if ( !stream->writeFlag( mState.sleeping ) )
+      {
+         // This gives me ~0.015f resolution in velocity magnitude
+         // while only costing me 1 bit of the velocity is zero length,
+         // <5 bytes in normal cases, and <8 bytes if the velocity is
+         // greater than 1000.
+         AssertWarn( mState.linVelocity.len() < 1000.0f, 
+            "PhysicsAnimatedShape::packUpdate - The linVelocity is out of range!" );
+         stream->writeVector( mState.linVelocity, 1000.0f, 16, 9 );
+
+         // For angular velocity we get < 0.01f resolution in magnitude
+         // with the most common case being under 4 bytes.
+         AssertWarn( mState.angVelocity.len() < 10.0f, 
+            "PhysicsAnimatedShape::packUpdate - The angVelocity is out of range!" );
+         stream->writeVector( mState.angVelocity, 10.0f, 10, 9 );
+      }
+   }
+
+   if ( stream->writeFlag( mask & DamageMask ) )
+      stream->writeFlag( mDestroyed );
+
+   return retMask;
+}   
+
+void PhysicsAnimatedShape::unpackUpdate( NetConnection *con, BitStream *stream )
+{
+   Parent::unpackUpdate( con, stream );
+
+   if ( stream->readFlag() ) // InitialUpdateMask
+   {
+      MatrixF mat;
+      stream->readAffineTransform( &mat );
+      setTransform( mat );
+      mPlayAmbient = stream->readFlag();
+		
+      if ( isProperlyAdded() )
+         _initAmbient();
+
+      if ( stream->readFlag() )
+      {
+         if ( isProperlyAdded() )
+         {
+            // Destroy immediately if we've already been added
+            // to the scene.
+            destroy();
+         }
+         else
+         {
+            // Indicate the shape should be destroyed when the
+            // shape is added.
+            mDestroyed = true;
+         }
+      }
+	  // start jc
+	  mEnableInputEvents = stream->readFlag();
+	  if(isProperlyAdded())
+		setEnableInputEvents(mEnableInputEvents);
+
+	  //stream->read(mGravityMod);
+     // end jc
+
+
+      return;
+   }
+
+   if ( stream->readFlag() ) // StateMask
+   {
+      PhysicsState state;
+      
+      // Read the encoded and compressed position... commonly only 6.25 bytes.
+      stream->readCompressedPoint( &state.position );
+
+      // Read the compressed quaternion... 3.5 bytes.
+      stream->readQuat( &state.orientation, 9 );
+
+      state.sleeping = stream->readFlag();
+      if ( !state.sleeping )
+      {
+         stream->readVector( &state.linVelocity, 1000.0f, 16, 9 );
+         stream->readVector( &state.angVelocity, 10.0f, 10, 9 );
+      }
+
+      if ( !smNoCorrections && mPhysicsRep && mPhysicsRep->isDynamic() && !mDestroyed )
+      {
+         // Set the new state on the physics object immediately.
+         mPhysicsRep->applyCorrection( state.getTransform() );
+
+         mPhysicsRep->setSleeping( state.sleeping );
+         if ( !state.sleeping )
+         {
+            mPhysicsRep->setLinVelocity( state.linVelocity ); 
+            mPhysicsRep->setAngVelocity( state.angVelocity ); 
+         }
+
+         mPhysicsRep->getState( &mState );
+      }
+
+      // If there is no physics object then just set the
+      // new state... the tick will take care of the 
+      // interpolation and extrapolation.
+      if ( !mPhysicsRep || !mPhysicsRep->isDynamic() )
+         mState = state;
+   }
+
+   if ( stream->readFlag() ) // DamageMask
+   {
+      if ( stream->readFlag() )
+         destroy();
+      else
+         restore();
+   }
+}
+
+bool PhysicsAnimatedShape::onAdd()
+{
+// start jc
+   if(mEnableInputEvents)
+      mTypeMask |= InputEventObjectType;
+   else
+      mTypeMask &= ~InputEventObjectType;
+// end jc
+
+   if ( !Parent::onAdd() )
+      return false;
+
+   // If we don't have a physics plugin active then
+   // we have to fail completely.
+   if ( !PHYSICSMGR )
+   {
+      Con::errorf( "PhysicsAnimatedShape::onAdd - No physics plugin is active!" );
+      return false;
+   }
+
+   // 
+   if ( !mPhysicsRep && !_createShape() )
+   {
+      Con::errorf( "PhysicsAnimatedShape::onAdd() - Shape creation failed!" );
+      return false;
+   }
+
+   // The reset position is the transform on the server
+   // at creation time... its not used on the client.
+   if ( isServerObject() )
+   {
+      storeRestorePos();
+      PhysicsPlugin::getPhysicsResetSignal().notify( this, &PhysicsAnimatedShape::_onPhysicsReset );
+   }
+
+   // Register for the resource change signal.
+   //ResourceManager::get().getChangedSignal().notify( this, &PhysicsAnimatedShape::_onResourceChanged );
+
+   // Only add server objects and non-destroyed client objects to the scene.
+   if ( isServerObject() || !mDestroyed)
+      addToScene();
+
+   if ( isClientObject() && mDestroyed )
+   {
+      // Disable all simulation of the body... no collision or dynamics.
+      if ( mPhysicsRep )
+         mPhysicsRep->setSimulationEnabled( false );
+
+      // Stop doing tick processing for this SceneObject.
+      setProcessTick( false );
+   }
+// start jc
+   if(isClientObject())
+   {
+      getDataBlock()->onAddClient_callback(this);
+
+      if(mShapeInst && mShapeInst->getMaterialList())
+         getDataBlock()->onMaterialsLoaded_callback(this);
+   }
+// end jc
+
+   return true;
+}
+
+void PhysicsAnimatedShape::onRemove()
+{
+   removeFromScene();
+
+   SAFE_DELETE( mPhysicsRep );
+   SAFE_DELETE( mShapeInst );
+   mAmbientThread = NULL;
+   mAmbientSeq = -1;
+   mWorld = NULL;
+
+   if ( isServerObject() )
+   {
+      PhysicsPlugin::getPhysicsResetSignal().remove( this, &PhysicsAnimatedShape::_onPhysicsReset );
+
+      if ( mDestroyedShape )
+		  mDestroyedShape->deleteObject();
+   }
+
+   // Remove the resource change signal.
+   //ResourceManager::get().getChangedSignal().remove( this, &PhysicsAnimatedShape::_onResourceChanged );
+
+   Parent::onRemove();
+}
+*/
+// end jc

@@ -141,6 +141,13 @@ GuiTSCtrl::GuiTSCtrl()
    mLastCameraQuery.object = NULL;
    mLastCameraQuery.farPlane = 10.0f;
    mLastCameraQuery.nearPlane = 0.01f;
+// start jc
+   mLastCameraQuery.frustumOffset = Point4F::Zero;
+   mForceFrustumOffset = Point4F::Zero;
+   mForceAspect = 0.0f;
+   mCameraRoll = 0.0f;
+   mEnableAugmentations = false;
+// end jc
 
    mLastCameraQuery.ortho = false;
 }
@@ -155,6 +162,19 @@ void GuiTSCtrl::initPersistFields()
          "Z rotation angle of camera." );
       addField("forceFOV",   TypeF32, Offset(mForceFOV,   GuiTSCtrl),
          "The vertical field of view in degrees or zero to use the normal camera FOV." );
+   // start jc
+      addField("forceFrustumOffset",   TypePoint4F, Offset(mForceFrustumOffset,   GuiTSCtrl),
+         "." );
+      addField("forceAspect",   TypeF32, Offset(mForceAspect,   GuiTSCtrl),
+         "." );
+      addField("cameraRoll",   TypeF32, Offset(mCameraRoll,   GuiTSCtrl),
+         "." );
+      addField("enableAugmentations",   TypeBool, Offset(mEnableAugmentations,   GuiTSCtrl),
+         "." );
+	  
+   // end jc
+
+	
          
    endGroup( "Camera" );
    
@@ -299,6 +319,35 @@ void GuiTSCtrl::onRender(Point2I offset, const RectI &updateRect)
       return;
    }
 
+// start jc
+   if(mEnableAugmentations)
+   {
+       if(mForceFOV != 0.0)
+          mLastCameraQuery.fov = mDegToRad(mForceFOV);
+    
+       if(mForceFrustumOffset.z != 0.0f && mForceFrustumOffset.w != 0.0f)
+          mLastCameraQuery.frustumOffset = mForceFrustumOffset;
+    
+       if(mCameraRoll != 0.0)
+       {
+    
+    
+    
+    
+          if(mCameraRoll == -90.0f)
+          {
+             Point3F vec, vec2;
+             mLastCameraQuery.cameraMatrix.getColumn(0, &vec);
+             mLastCameraQuery.cameraMatrix.getColumn(2, &vec2);
+             vec2.neg();
+     
+             mLastCameraQuery.cameraMatrix.setColumn(0, vec2);
+             mLastCameraQuery.cameraMatrix.setColumn(2, vec);
+          }
+       }
+   }
+// end jc
+
    if ( mReflectPriority > 0 )
    {
       // Get the total reflection priority.
@@ -311,9 +360,10 @@ void GuiTSCtrl::onRender(Point2I offset, const RectI &updateRect)
                            getExtent(),
                            mLastCameraQuery );
    }
-
-   if(mForceFOV != 0)
-      mLastCameraQuery.fov = mDegToRad(mForceFOV);
+// start jc
+//   if(mForceFOV != 0)
+//      mLastCameraQuery.fov = mDegToRad(mForceFOV);
+// end jc
 
    if(mCameraZRot)
    {
@@ -324,6 +374,8 @@ void GuiTSCtrl::onRender(Point2I offset, const RectI &updateRect)
    // set up the camera and viewport stuff:
    F32 wwidth;
    F32 wheight;
+// start jc
+   /*
    F32 aspectRatio = F32(getWidth()) / F32(getHeight());
    
    // Use the FOV to calculate the viewport height scale
@@ -346,6 +398,107 @@ void GuiTSCtrl::onRender(Point2I offset, const RectI &updateRect)
    F32 right = (updateRect.point.x + updateRect.extent.x - offset.x) * hscale - wwidth;
    F32 top = wheight - vscale * (updateRect.point.y - offset.y);
    F32 bottom = wheight - vscale * (updateRect.point.y + updateRect.extent.y - offset.y);
+   */
+
+   F32 aspectRatio, hscale, vscale;
+   F32 left, right, top, bottom;
+   if(mForceAspect == 0.0f)
+   {
+      aspectRatio = F32(getWidth()) / F32(getHeight());
+
+      // Use the FOV to calculate the viewport height scale
+      // then generate the width scale from the aspect ratio.
+      if(!mLastCameraQuery.ortho)
+      {
+         wheight = mLastCameraQuery.nearPlane * mTan(mLastCameraQuery.fov / 2.0f);
+         wwidth = aspectRatio * wheight;
+      }
+      else
+      {
+         wheight = mLastCameraQuery.fov;
+         wwidth = aspectRatio * wheight;
+      }
+
+      hscale = wwidth * 2.0f / F32(getWidth());
+      vscale = wheight * 2.0f / F32(getHeight());
+
+      left = (updateRect.point.x - offset.x) * hscale - wwidth;
+      right = (updateRect.point.x + updateRect.extent.x - offset.x) * hscale - wwidth;
+      top = wheight - vscale * (updateRect.point.y - offset.y);
+      bottom = wheight - vscale * (updateRect.point.y + updateRect.extent.y - offset.y);
+
+   }
+   else
+   {
+      aspectRatio = mForceAspect;
+		if(mCameraRoll != -90)
+		{
+
+      // Use the FOV to calculate the viewport height scale
+      // then generate the width scale from the aspect ratio.
+      if(!mLastCameraQuery.ortho)
+      {
+         wheight = mLastCameraQuery.nearPlane * mTan(mLastCameraQuery.fov / 2.0f);
+         wwidth = aspectRatio * wheight;
+      }
+      else
+      {
+         wheight = mLastCameraQuery.fov;
+         wwidth = aspectRatio * wheight;
+      }
+
+   //   hscale = wwidth * 2.0f / (aspectRatio * F32(getHeight()));
+   //   vscale = wheight * 2.0f / F32(getHeight());
+			hscale = wwidth * 2.0f / F32(getWidth());
+			vscale = wheight * 2.0f / F32(getHeight());
+/*
+      if(mCameraRoll != 0.0)
+      {
+         if(mCameraRoll == -90)
+         {
+            top = (updateRect.point.x - offset.x) * hscale - wwidth;
+            bottom = (updateRect.point.x + updateRect.extent.x - offset.x) * hscale - wwidth;
+            right = 1.0f - (wheight - vscale * (updateRect.point.y - offset.y));
+            left = 1.0f - (wheight - vscale * (updateRect.point.y + updateRect.extent.y - offset.y));
+         }
+      }
+      else
+      {
+      */
+         left = (updateRect.point.x - offset.x) * hscale - wwidth;
+         right = (updateRect.point.x + updateRect.extent.x - offset.x) * hscale - wwidth;
+         top = wheight - vscale * (updateRect.point.y - offset.y);
+         bottom = wheight - vscale * (updateRect.point.y + updateRect.extent.y - offset.y);
+
+    //  }
+		}
+		else
+		{
+			if(!mLastCameraQuery.ortho)
+			{
+				wwidth = mLastCameraQuery.nearPlane * mTan(mLastCameraQuery.fov / 2.0f);
+				wheight = aspectRatio * wwidth;
+			}
+			else
+			{
+				wwidth = mLastCameraQuery.fov;
+				wheight = aspectRatio * wwidth;
+			}
+			hscale = wwidth * 2.0f / F32(getWidth());
+			vscale = wheight * 2.0f / F32(getHeight());
+
+			left = (updateRect.point.x - offset.x) * hscale - wwidth;
+			right = (updateRect.point.x + updateRect.extent.x - offset.x) * hscale - wwidth;
+			top = wheight - vscale * (updateRect.point.y - offset.y);
+			bottom = wheight - vscale * (updateRect.point.y + updateRect.extent.y - offset.y);
+		}
+
+   }
+
+
+// end jc
+
+
 
    Frustum frustum;
    frustum.set( mLastCameraQuery.ortho, left, right, top, bottom, mLastCameraQuery.nearPlane, mLastCameraQuery.farPlane );
@@ -357,6 +510,14 @@ void GuiTSCtrl::onRender(Point2I offset, const RectI &updateRect)
       gScreenShot->tileFrustum( frustum );      
       GFX->setViewMatrix(MatrixF::Identity);
    }
+// start jc
+//   if (mLastCameraQuery.frustumOffset != Point4F::Zero)
+   if(mLastCameraQuery.frustumOffset.z != 0.0f && mLastCameraQuery.frustumOffset.w != 0.0f)
+   {
+      frustum.offsetFrustum(mLastCameraQuery.frustumOffset);
+      GFX->setViewMatrix(MatrixF::Identity);
+   }
+// end jc
       
    RectI tempRect = updateRect;
    
@@ -464,6 +625,58 @@ DefineEngineMethod( GuiTSCtrl, unproject, Point3F, ( Point3F screenPosition ),,
    object->unproject( screenPosition, &worldPos );
    return worldPos;
 }
+
+// start pg
+//-----------------------------------------------------------------------------
+DefineEngineMethod( GuiTSCtrl, getNearLeft, float, (  ),,
+   "Get near left limit of projection on near plane." )
+{
+//   if(object->mEnableAugmentations && object->mCameraRoll == -90.0f)
+//      return object->getLastFrustum().getNearTop();
+
+   return object->getLastFrustum().getNearLeft();
+}
+//-----------------------------------------------------------------------------
+DefineEngineMethod( GuiTSCtrl, getNearRight, float, (  ),,
+   "Get near right limit of projection on near plane." )
+{
+//   if(object->mEnableAugmentations && object->mCameraRoll == -90.0f)
+//      return object->getLastFrustum().getNearBottom();
+   
+   return object->getLastFrustum().getNearRight();
+}
+//-----------------------------------------------------------------------------
+DefineEngineMethod( GuiTSCtrl, getNearTop, float, (  ),,
+   "Get near top limit of projection on near plane." )
+{
+//   if(object->mEnableAugmentations && object->mCameraRoll == -90.0f)
+//      return object->getLastFrustum().getNearRight();
+   
+   return object->getLastFrustum().getNearTop();
+}
+//-----------------------------------------------------------------------------
+DefineEngineMethod( GuiTSCtrl, getNearBottom, float, (  ),,
+   "Get near bottom limit of projection on near plane." )
+{
+//   if(object->mEnableAugmentations && object->mCameraRoll == -90.0f)
+//      return object->getLastFrustum().getNearLeft();
+      
+   return object->getLastFrustum().getNearBottom();
+}
+//-----------------------------------------------------------------------------
+DefineEngineMethod( GuiTSCtrl, getNearDist, float, (  ),,
+   "Get near clipping plane distance." )
+{
+   
+   return object->getLastFrustum().getNearDist();
+}
+//-----------------------------------------------------------------------------
+DefineEngineMethod( GuiTSCtrl, getFarDist, float, (  ),,
+   "Get far clipping plane distance." )
+{
+   return object->getLastFrustum().getFarDist();
+}
+// end pg
 
 //-----------------------------------------------------------------------------
 

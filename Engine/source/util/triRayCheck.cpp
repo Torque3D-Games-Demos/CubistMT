@@ -263,3 +263,81 @@ bool castRayTriangle(const Point3D &orig, const Point3D &dir,
    return (t >= 0.f && t <=1.f);
 }
 
+
+// start jc
+//--------------------------------------------------------
+//--------------------------------------------------------
+// JK: faster ray->convexHull test - taken from TSMesh...
+//
+// Used by lighting system...
+//
+bool castRayBrush(const Point3F &start, const Point3F &end,
+				  PlaneF *planes, U32 planeCount)
+{
+   //   F32 startTime = -0.01f;
+   F32 startNum = -0.01f;
+   F32 startDen =  1.00f;
+   //   F32 endTime   = 1.01f;
+   F32 endNum = 1.01f;
+   F32 endDen = 1.00f;
+
+   S32 curPlane = 0;
+   U32 curMaterial = 0;
+   bool found = false;
+
+   bool tmpFound;
+   S32 tmpPlane;
+   F32 sgn = -1.0f;
+   F32 * pnum = &startNum;
+   F32 * pden = &startDen;
+   S32 * pplane = &curPlane;
+   bool * pfound = &found;
+
+   for (S32 i=0; i<planeCount; i++)
+   {
+      // if start & end outside, no collision
+      // if start & end inside, continue
+      // if start outside, end inside, or visa versa, find intersection of line with plane
+      //    then update intersection of line with hull (using startTime and endTime)
+      F32 dot1 = mDot(planes[i],start) + planes[i].d;
+      F32 dot2 = mDot(planes[i],end) + planes[i].d;
+      if (dot1*dot2>0.0f)
+      {
+         // same side of the plane...which side -- dot==0 considered inside
+         if (dot1>0.0f)
+            // start and end outside of this plane, no collision
+            return false;
+         // start and end inside plane, continue
+         continue;
+      }
+
+      AssertFatal(dot1/(dot1-dot2)>=0.0f && dot1/(dot1-dot2)<=1.0f,"TSMesh::castRay (1)");
+
+      // find intersection (time) with this plane...
+      // F32 time = dot1 / (dot1-dot2);
+      F32 num = mFabs(dot1);
+      F32 den = mFabs(dot1-dot2);
+
+      if (sgn*dot1>=0)
+      {
+         sgn *= -1.0f;
+         pnum = (F32*) ((dsize_t)pnum ^ (dsize_t)&endNum ^ (dsize_t)&startNum);
+         pden = (F32*) ((dsize_t)pden ^ (dsize_t)&endDen ^ (dsize_t)&startDen);
+         pplane = (S32*) ((dsize_t)pplane ^ (dsize_t)&tmpPlane ^ (dsize_t)&curPlane);
+         pfound = (bool*) ((dsize_t)pfound ^ (dsize_t)&tmpFound ^ (dsize_t)&found);
+      }
+      bool noCollision = num*endDen*sgn<endNum*den*sgn && num*startDen*sgn<startNum*den*sgn;
+      if (num * *pden * sgn < *pnum * den * sgn && !noCollision)
+      {
+         *pnum = num;
+         *pden = den;
+         *pplane = i;
+         *pfound = true;
+      }
+      else if (noCollision)
+         return false;
+   }
+
+   return found;
+}
+// end jc

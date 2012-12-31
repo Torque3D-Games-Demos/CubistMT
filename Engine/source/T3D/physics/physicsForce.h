@@ -63,6 +63,9 @@ public:
 
    ///
    void attach( const Point3F &start, const Point3F &direction, F32 maxDist );
+// start jc
+   void attach( PhysicsBody* body );
+// end jc
 
    ///
    void detach( const Point3F &force = Point3F::Zero );

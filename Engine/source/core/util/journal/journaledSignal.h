@@ -269,6 +269,13 @@ enum InputAction {
    IA_DELTA    = (1 << 4),
    IA_BUTTON   = (1 << 5),
 };
+// start jc
+enum TouchEventType {
+   TOUCH_DOWN  = (1 << 0),
+   TOUCH_UP    = (1 << 1),
+   TOUCH_MOVE  = (1 << 2),
+};
+// end jc
 
 enum ApplicationMessage {
    Quit,
@@ -292,6 +299,11 @@ typedef U32 WindowId;
 /// void event()
 typedef JournaledSignal<void()> IdleEvent;
 
+// start jc
+/// void event(WindowId,U32 modifier,S32 x,S32 y, bool isRelative)
+typedef JournaledSignal<void(WindowId,U32,S32,S32,U32)> TouchEvent;
+// end jc
+
 /// void event(WindowId,U32 modifier,S32 x,S32 y, bool isRelative)
 typedef JournaledSignal<void(WindowId,U32,S32,S32,bool)> MouseEvent;
 
@@ -300,6 +312,11 @@ typedef JournaledSignal<void(WindowId,U32,S32,S32)> MouseWheelEvent;
 
 /// void event(WindowId,U32 modifier,U32 action,U16 key)
 typedef JournaledSignal<void(WindowId,U32,U32,U16)> KeyEvent;
+
+// start jc
+/// void event(WindowId,U32 modifier,U32 action,U16 key)
+typedef Signal<void(WindowId,U32, U32, U32)> NativeKeyEvent;
+// end jc
 
 /// void event(WindowId,U32 modifier,U16 key)
 typedef JournaledSignal<void(WindowId,U32,U16)> CharEvent;

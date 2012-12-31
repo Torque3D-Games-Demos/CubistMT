@@ -33,6 +33,9 @@
 #include "T3D/physics/physicsObject.h"
 #include "T3D/physics/physicsWorld.h"
 #include "core/util/tNamedFactory.h"
+// start jc
+#include "console/engineAPI.h"
+// end jc
 
 
 PhysicsPlugin* PhysicsPlugin::smSingleton = NULL;
@@ -214,3 +217,11 @@ ConsoleFunction( physicsDebugDraw, void, 2, 2, "physicsDebugDraw( bool enable )"
    if ( PHYSICSMGR )
       PHYSICSMGR->enableDebugDraw( dAtoi( argv[1] ) );
 }
+
+// start jc
+DefineEngineFunction( physicsSetGravity, void, (String worldName, Point3F gravity),,"physicsSetGravity( Point3F gravity )" )
+{
+   if ( PHYSICSMGR )
+      PHYSICSMGR->getWorld(worldName)->setGravity(gravity);
+}
+// end jc

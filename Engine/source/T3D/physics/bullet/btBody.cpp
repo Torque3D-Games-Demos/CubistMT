@@ -172,6 +172,9 @@ void BtBody::setMaterial(  F32 restitution,
    // like that.
 
    mActor->setFriction( friction );
+// start jc
+   mActor->setHitFraction( staticFriction );
+// end jc
 
    // Wake it up... it may need to move.
    mActor->activate();

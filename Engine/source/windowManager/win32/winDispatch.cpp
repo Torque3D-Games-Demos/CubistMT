@@ -61,6 +61,11 @@ extern InputModifiers convertModifierBits(const U32 in);
 
 static void _keyboardEvent(Win32Window* window,UINT message, WPARAM wParam, WPARAM lParam)
 {
+// start jc
+	window->nativeKeyEvent.trigger(window->getWindowId(), message, wParam, lParam);
+// end jc
+
+
 	if(!initKBState)
 	{
 		dMemset(keyboardState, 0, sizeof(keyboardState));
@@ -328,6 +333,11 @@ static bool _dispatch(HWND hWnd,UINT message,WPARAM wParam,WPARAM lParam)
 	case WM_SYSKEYUP:
 	case WM_KEYDOWN:
 	case WM_SYSKEYDOWN:
+//start jc
+   case WM_CHAR:
+//   case WM_IMECHAR:
+   case WM_SYSCHAR:
+// end jc
 		if (window)
 			_keyboardEvent(window,message,wParam,lParam);
 		break;

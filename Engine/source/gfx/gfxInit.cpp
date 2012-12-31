@@ -87,19 +87,37 @@ inline static void _GFXInitReportAdapters(Vector<GFXAdapter*> &adapters)
    }
 }
 
-inline static void _GFXInitGetInitialRes(GFXVideoMode &vm, const Point2I &initialSize)
+// start jc
+//inline static void _GFXInitGetInitialRes(GFXVideoMode &vm, const Point2I &initialSize)
+inline static void _GFXInitGetInitialRes(U32 screen, GFXVideoMode &vm, const Point2I &initialSize)
+// end jc
 {
    const U32 kDefaultWindowSizeX = 800;
    const U32 kDefaultWindowSizeY = 600;
    const bool kDefaultFullscreen = false;
    const U32 kDefaultBitDepth = 32;
    const U32 kDefaultRefreshRate = 60;
+// start jc
+   const U32 kDefaultWindowPosX = 0;
+   const U32 kDefaultWindowPosY = 0;
+   const bool kDefaultBorderless = false;
+// end jc
 
    // cache the desktop size of the main screen
    GFXVideoMode desktopVm = GFXInit::getDesktopResolution();
 
    // load pref variables, properly choose windowed / fullscreen  
-   const String resString = Con::getVariable("$pref::Video::mode");
+// start jc
+//   const String resString = Con::getVariable("$pref::Video::mode");
+   String resString;
+   if(screen)
+   {
+      String buf(String("$pref::Video::mode") + String::ToString(screen));
+      resString = Con::getVariable(buf.c_str());
+   }
+   else
+      resString = Con::getVariable("$pref::Video::mode");
+// end jc
 
    // Set defaults into the video mode, then have it parse the user string.
    vm.resolution.x = kDefaultWindowSizeX;
@@ -108,9 +126,20 @@ inline static void _GFXInitGetInitialRes(GFXVideoMode &vm, const Point2I &initia
    vm.bitDepth     = kDefaultBitDepth;
    vm.refreshRate  = kDefaultRefreshRate;
    vm.wideScreen = false;
+// start jc
+   vm.position.x = kDefaultWindowPosX;
+   vm.position.y = kDefaultWindowPosY;
+   vm.borderless = kDefaultBorderless;
+// end jc
 
    vm.parseFromString(resString);
 }
+// start jc
+inline static void _GFXInitGetInitialRes(GFXVideoMode &vm, const Point2I &initialSize)
+{
+   _GFXInitGetInitialRes(0, vm, initialSize);
+}
+// end jc
 
 GFXInit::RegisterDeviceSignal& GFXInit::getRegisterDeviceSignal()
 {
@@ -299,6 +328,15 @@ GFXVideoMode GFXInit::getInitialVideoMode()
    _GFXInitGetInitialRes(vm, Point2I(800,600));
    return vm;
 }
+
+// start jc
+GFXVideoMode GFXInit::getInitialVideoMode(U32 screen)
+{
+   GFXVideoMode vm;
+   _GFXInitGetInitialRes(screen, vm, Point2I(800,600));
+   return vm;
+}
+// end jc
 
 S32 GFXInit::getAdapterCount()
 {
