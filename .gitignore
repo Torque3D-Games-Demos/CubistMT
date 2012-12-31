@@ -169,3 +169,5 @@ pip-log.txt
 console.log
 #*.cached.dts
 !Engine/bin
+My Projects/CubistMT/game/shaders/procedural/*
+My Projects/CubistMT/game/Cache/*

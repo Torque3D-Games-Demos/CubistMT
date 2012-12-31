@@ -55,6 +55,6 @@ exec("./teleporter.cs");
 exec("./player.cs");
 
 // Load our other player datablocks
-exec("./aiPlayer.cs");
+//exec("./aiPlayer.cs");
 //exec("./webView.cs");
 exec("./multitouch.cs");

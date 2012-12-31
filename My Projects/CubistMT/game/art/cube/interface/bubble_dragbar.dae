@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <author>Paul Gaze</author>
+      <authoring_tool>Blender 2.63.0 r46461:46487M</authoring_tool>
+    </contributor>
+    <created>2012-08-30T15:16:43</created>
+    <modified>2012-08-30T15:16:43</modified>
+    <unit name="meter" meter="1"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_geometries>
+    <geometry id="Cylinder-mesh" name="Cylinder">
+      <mesh>
+        <source id="Cylinder-mesh-positions">
+          <float_array id="Cylinder-mesh-positions-array" count="48">0 0.4732 0.1655055 0.1810858 0.4371798 0.1655055 0.334603 0.3346028 0.1655055 0.4371799 0.1810857 0.1655056 0.4732002 -1.57956e-7 0.1574297 0.4371799 -0.181086 0.1655056 0.334603 -0.3346031 0.1655057 0.1810858 -0.4371801 0.1655057 0 -0.4732003 0.1655057 -0.1810857 -0.4371801 0.1655057 -0.334603 -0.3346033 0.1655057 -0.4371799 -0.181086 0.1655056 -0.4732002 -1.31629e-7 0.1574297 -0.4371799 0.1810858 0.1655056 -0.3346029 0.334603 0.1655055 -0.1810856 0.4371799 0.1655055</float_array>
+          <technique_common>
+            <accessor source="#Cylinder-mesh-positions-array" count="16" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Cylinder-mesh-normals">
+          <float_array id="Cylinder-mesh-normals-array" count="42">0 0 1 0 0 1 0 0 1 0 3.8826e-7 1 0 3.88261e-7 1 0 -0.04455286 0.9990071 0 -0.04455286 0.999007 0 0.04455286 0.9990071 0 0.04455286 0.9990069 0 3.88261e-7 1 0 3.8826e-7 1 0 0 1 0 0 1 0 0 1</float_array>
+          <technique_common>
+            <accessor source="#Cylinder-mesh-normals-array" count="14" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Cylinder-mesh-vertices">
+          <input semantic="POSITION" source="#Cylinder-mesh-positions"/>
+        </vertices>
+        <polylist count="14">
+          <input semantic="VERTEX" source="#Cylinder-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Cylinder-mesh-normals" offset="1"/>
+          <vcount>3 3 3 3 3 3 3 3 3 3 3 3 3 3 </vcount>
+          <p>1 0 0 0 15 0 1 1 15 1 14 1 1 2 14 2 2 2 14 3 13 3 2 3 13 4 3 4 2 4 13 5 12 5 3 5 12 6 4 6 3 6 12 7 11 7 4 7 11 8 5 8 4 8 11 9 6 9 5 9 11 10 10 10 6 10 10 11 7 11 6 11 10 12 9 12 7 12 9 13 8 13 7 13</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="Scene" name="Scene">
+      <node id="dragbar" type="NODE">
+        <translate sid="location">0 0.1484035 0</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#Cylinder-mesh"/>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#Scene"/>
+  </scene>
+</COLLADA>

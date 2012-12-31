@@ -47,7 +47,7 @@ exec("./proximityMine.cs");
 exec("./player.cs");
 
 // Load our player scripts
-exec("./aiPlayer.cs");
+//exec("./aiPlayer.cs");
 exec("./aiUtilities.cs");
 //exec("./aiFish.cs");
 

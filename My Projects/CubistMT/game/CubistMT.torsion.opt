@@ -33,8 +33,8 @@
 </Bookmark>
 </Bookmarks>
 <OpenFiles>
-<File ScrollX="0" ScrollY="608" Active="true">scripts\server\multitouch.cs</File>
-<File ScrollX="0" ScrollY="41">art\datablocks\health.cs</File>
+<File ScrollX="0" ScrollY="608">scripts\server\multitouch.cs</File>
+<File ScrollX="0" ScrollY="30">art\datablocks\health.cs</File>
 <File ScrollX="0" ScrollY="465">art\cube\ai\materials.cs</File>
 <File ScrollX="0" ScrollY="284">art\cube\sets\materials.cs</File>
 <File ScrollX="0" ScrollY="0">art\materials.cs</File>
@@ -42,7 +42,7 @@
 <File ScrollX="0" ScrollY="19">art\cube\splines\materials.cs</File>
 <File ScrollX="0" ScrollY="1494">levels\default.mis</File>
 <File ScrollX="0" ScrollY="1605">scripts\server\aiFishPlayerscript.cs</File>
-<File ScrollX="0" ScrollY="16">art\datablocks\rigidShape.cs</File>
+<File ScrollX="0" ScrollY="5">art\datablocks\rigidShape.cs</File>
 <File ScrollX="0" ScrollY="0">art\datablocks\multitouch.cs</File>
 <File ScrollX="0" ScrollY="134">scripts\server\fishBubbles.cs</File>
 <File ScrollX="0" ScrollY="41">scripts\server\fishMarkers.cs</File>
@@ -50,10 +50,16 @@
 <File ScrollX="0" ScrollY="63">scripts\server\gameCubeMT.cs</File>
 <File ScrollX="0" ScrollY="233">scripts\client\multitouch.cs</File>
 <File ScrollX="0" ScrollY="52">scripts\client\serverConnection.cs</File>
-<File ScrollX="0" ScrollY="69">scripts\server\gameDM.cs</File>
+<File ScrollX="0" ScrollY="58">scripts\server\gameDM.cs</File>
 <File ScrollX="0" ScrollY="316">levels\simpleBrowser.mis</File>
 <File ScrollX="0" ScrollY="17">levels\airhockey.mis</File>
 <File ScrollX="0" ScrollY="387">scripts\server\gameCore.cs</File>
 <File ScrollX="0" ScrollY="108">scripts\client\prefs.cs</File>
+<File ScrollX="0" ScrollY="52">art\datablocks\aiPlayer.cs</File>
+<File ScrollX="0" ScrollY="464">scripts\client\default.bind.cs</File>
+<File ScrollX="0" ScrollY="118">scripts\server\aiPlayer.cs</File>
+<File ScrollX="0" ScrollY="4">art\datablocks\datablockExec.cs</File>
+<File ScrollX="0" ScrollY="484">art\datablocks\player.cs</File>
+<File ScrollX="0" ScrollY="15" Active="true">scripts\server\scriptExec.cs</File>
 </OpenFiles>
 </TorsionProjectOptions>

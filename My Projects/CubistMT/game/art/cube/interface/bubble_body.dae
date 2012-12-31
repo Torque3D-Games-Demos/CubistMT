@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<COLLADA xmlns="http://www.collada.org/2005/11/COLLADASchema" version="1.4.1">
+  <asset>
+    <contributor>
+      <author>Paul Gaze</author>
+      <authoring_tool>Blender 2.63.0 r46461:46487M</authoring_tool>
+    </contributor>
+    <created>2012-08-01T13:53:42</created>
+    <modified>2012-08-01T13:53:42</modified>
+    <unit name="meter" meter="1"/>
+    <up_axis>Z_UP</up_axis>
+  </asset>
+  <library_cameras/>
+  <library_lights/>
+  <library_effects>
+    <effect id="bubble_white-effect">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color sid="ambient">0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color sid="diffuse">0.64 0.64 0.64 1</color>
+            </diffuse>
+            <specular>
+              <color sid="specular">0.5 0.5 0.5 1</color>
+            </specular>
+            <shininess>
+              <float sid="shininess">50</float>
+            </shininess>
+            <index_of_refraction>
+              <float sid="index_of_refraction">1</float>
+            </index_of_refraction>
+          </phong>
+        </technique>
+        <extra>
+          <technique profile="GOOGLEEARTH">
+            <double_sided>1</double_sided>
+          </technique>
+        </extra>
+      </profile_COMMON>
+      <extra><technique profile="MAX3D"><double_sided>1</double_sided></technique></extra>
+    </effect>
+    <effect id="bubble_blue-effect">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color sid="ambient">0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color sid="diffuse">0 0.04155914 0.64 1</color>
+            </diffuse>
+            <specular>
+              <color sid="specular">0 0.04068632 0.6341504 1</color>
+            </specular>
+            <shininess>
+              <float sid="shininess">50</float>
+            </shininess>
+            <index_of_refraction>
+              <float sid="index_of_refraction">1</float>
+            </index_of_refraction>
+          </phong>
+        </technique>
+        <extra>
+          <technique profile="GOOGLEEARTH">
+            <double_sided>1</double_sided>
+          </technique>
+        </extra>
+      </profile_COMMON>
+      <extra><technique profile="MAX3D"><double_sided>1</double_sided></technique></extra>
+    </effect>
+    <effect id="bubble_semitrans-effect">
+      <profile_COMMON>
+        <technique sid="common">
+          <phong>
+            <emission>
+              <color sid="emission">0 0 0 1</color>
+            </emission>
+            <ambient>
+              <color sid="ambient">0 0 0 1</color>
+            </ambient>
+            <diffuse>
+              <color sid="diffuse">0.64 0.64 0.64 1</color>
+            </diffuse>
+            <specular>
+              <color sid="specular">0.5 0.5 0.5 1</color>
+            </specular>
+            <shininess>
+              <float sid="shininess">50</float>
+            </shininess>
+            <transparency>
+              <float sid="transparency">0.4180791</float>
+            </transparency>
+            <index_of_refraction>
+              <float sid="index_of_refraction">1</float>
+            </index_of_refraction>
+          </phong>
+        </technique>
+        <extra>
+          <technique profile="GOOGLEEARTH">
+            <double_sided>1</double_sided>
+          </technique>
+        </extra>
+      </profile_COMMON>
+      <extra><technique profile="MAX3D"><double_sided>1</double_sided></technique></extra>
+    </effect>
+  </library_effects>
+  <library_materials>
+    <material id="bubble_white-material" name="bubble_white">
+      <instance_effect url="#bubble_white-effect"/>
+    </material>
+    <material id="bubble_blue-material" name="bubble_blue">
+      <instance_effect url="#bubble_blue-effect"/>
+    </material>
+    <material id="bubble_semitrans-material" name="bubble_semitrans">
+      <instance_effect url="#bubble_semitrans-effect"/>
+    </material>
+  </library_materials>
+  <library_geometries>
+    <geometry id="Cylinder_004-mesh" name="Cylinder.004">
+      <mesh>
+        <source id="Cylinder_004-mesh-positions">
+          <float_array id="Cylinder_004-mesh-positions-array" count="288">0 0.24 1.033361 0.04682165 0.2353885 1.033361 0.09184402 0.2217311 1.033361 0.1333369 0.1995527 1.033361 0.1697056 0.1697056 1.033361 0.1995527 0.1333369 1.033361 0.2217311 0.09184402 1.033361 0.2353885 0.04682165 1.033361 0.24 0 1.033361 0.2353885 -0.04682165 1.033361 0.2217311 -0.09184396 1.033361 0.1995527 -0.1333369 1.033361 0.1697056 -0.1697056 1.033361 0.1333369 -0.1995527 1.033361 0.09184396 -0.2217311 1.033361 0.04682159 -0.2353885 1.033361 0 -0.24 1.033361 -0.04682177 -0.2353885 1.033361 -0.09184414 -0.2217311 1.033361 -0.133337 -0.1995527 1.033361 -0.1697058 -0.1697055 1.033361 -0.1995528 -0.1333367 1.033361 -0.2217312 -0.09184384 1.033361 -0.2353885 -0.04682147 1.033361 -0.24 2.37179e-7 1.033361 -0.2353885 0.04682189 1.033361 -0.221731 0.09184426 1.033361 -0.1995525 0.1333371 1.033361 -0.1697054 0.1697059 1.033361 -0.1333366 0.1995529 1.033361 -0.09184372 0.2217313 1.033361 -0.04682129 0.2353886 1.033361 -0.02031189 0.1021158 0.8583466 0 0.3569169 1.037683 -0.03984344 0.09619104 0.8583466 0.06963104 0.3500588 1.037683 -0.0578438 0.08656966 0.8583466 0.1365862 0.3297482 1.037683 -0.07362127 0.07362145 0.8583466 0.1982924 0.2967655 1.037683 -0.08656954 0.05784404 0.8583466 0.2523784 0.2523783 1.037683 -0.09619092 0.03984367 0.8583466 0.2967656 0.1982923 1.037683 -0.1021158 0.02031213 0.8583466 0.3297482 0.1365861 1.037683 -0.1041164 0 0.8583466 0.3500589 0.06963098 1.037683 -0.1021158 -0.02031201 0.8583466 0.3569169 0 1.037683 -0.09619098 -0.03984355 0.8583466 0.3500589 -0.06963104 1.037683 -0.08656966 -0.05784392 0.8583466 0.3297482 -0.1365862 1.037683 -0.07362145 -0.07362139 0.8583466 0.2967656 -0.1982924 1.037683 -0.05784398 -0.0865696 0.8583466 0.2523784 -0.2523784 1.037683 -0.03984361 -0.09619098 0.8583466 0.1982924 -0.2967656 1.037683 -0.02031213 -0.1021158 0.8583466 0.1365861 -0.3297483 1.037683 0 -0.1041164 0.8583466 0.06963092 -0.350059 1.037683 0.02031207 -0.1021158 0.8583466 0 -0.356917 1.037683 0.03984355 -0.09619104 0.8583466 -0.06963115 -0.3500589 1.037683 0.05784392 -0.0865696 0.8583466 -0.1365863 -0.3297482 1.037683 0.07362139 -0.07362139 0.8583466 -0.1982926 -0.2967655 1.037683 0.0865696 -0.05784398 0.8583466 -0.2523785 -0.2523783 1.037683 0.09619098 -0.03984361 0.8583466 -0.2967657 -0.1982923 1.037683 0.1021158 -0.02031207 0.8583466 -0.3297483 -0.136586 1.037683 0.1041164 0 0.8583466 -0.3500589 -0.0696308 1.037683 0.1021158 0.02031207 0.8583466 -0.3569169 2.71411e-7 1.037683 0.09619098 0.03984355 0.8583466 -0.3500588 0.06963133 1.037683 0.0865696 0.05784392 0.8583466 -0.3297481 0.1365864 1.037683 0.07362139 0.07362133 0.8583466 -0.2967653 0.1982927 1.037683 0.05784392 0.08656954 0.8583466 -0.2523781 0.2523787 1.037683 0.03984361 0.09619092 0.8583466 -0.198292 0.2967658 1.037683 0.02031207 0.1021158 0.8583466 -0.1365857 0.3297483 1.037683 0 0.1041163 0.8583466 -0.0696305 0.3500589 1.037683</float_array>
+          <technique_common>
+            <accessor source="#Cylinder_004-mesh-positions-array" count="96" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <source id="Cylinder_004-mesh-normals">
+          <float_array id="Cylinder_004-mesh-normals-array" count="282">-0.01749682 0.03273427 0.9993109 -0.02354681 0.02869182 0.9993109 -0.02869182 0.02354681 0.9993109 -0.03273433 0.01749682 0.9993109 -0.03551876 0.01077449 0.9993109 -0.0369383 0.003638088 0.9993109 -0.0369383 -0.003638088 0.9993109 -0.03551882 -0.01077449 0.9993109 -0.03273433 -0.01749682 0.9993109 -0.02869188 -0.02354681 0.9993109 -0.02354681 -0.02869188 0.999311 -0.01749682 -0.03273433 0.9993109 -0.01077449 -0.03551882 0.9993109 -0.3730186 0.6978685 0.6114218 -0.2297034 0.7572316 0.6114219 -0.07756131 0.7874945 0.6114218 0.07756161 0.7874944 0.6114218 0.2297042 0.7572314 0.6114218 0.3730188 0.6978684 0.6114219 0.5019987 0.6116867 0.611422 0.6116872 0.5019981 0.6114219 0.697869 0.3730178 0.611422 -0.07756167 -0.7874944 0.611422 0.7572317 0.229703 0.6114219 0.7874945 0.07756072 0.6114219 0.7874943 -0.07756233 0.6114219 0.7572312 -0.2297043 0.611422 0.697868 -0.3730193 0.6114219 0.6116861 -0.5019992 0.611422 0.5019978 -0.6116874 0.611422 0.3730175 -0.697869 0.611422 0.2297025 -0.7572317 0.611422 0.07756084 -0.7874944 0.6114221 -0.01077449 0.03551876 0.9993109 -0.003638088 0.0369383 0.9993109 0.003638088 0.0369383 0.9993109 0.01077449 0.03551876 0.9993109 0.01749682 0.03273427 0.999311 0.02354681 0.02869182 0.9993109 0.02869188 0.02354675 0.9993109 0.03273433 0.01749682 0.9993109 0.03551882 0.01077443 0.9993109 0.0369383 0.003638029 0.9993109 0.0369383 -0.003638148 0.9993109 0.03551882 -0.01077455 0.9993109 0.03273433 -0.01749688 0.9993109 0.02869182 -0.02354687 0.9993109 0.02354675 -0.02869188 0.9993109 0.01749682 -0.03273433 0.9993109 0.01077443 -0.03551882 0.9993109 0.003638029 -0.03693836 0.9993109 -0.2297037 -0.7572313 0.6114221 -0.003638088 -0.03693836 0.999311 -0.3730185 -0.6978684 0.611422 -0.5019985 -0.6116868 0.611422 -0.6116868 -0.5019984 0.6114219 -0.6978686 -0.3730184 0.611422 -0.7572314 -0.2297037 0.611422 -0.7874944 -0.07756167 0.611422 -0.7874945 0.07756131 0.611422 -0.7572314 0.2297038 0.611422 -0.6978687 0.3730182 0.6114219 -0.6116868 0.5019985 0.6114219 -0.5019986 0.6116868 0.6114218 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1 0 0 1</float_array>
+          <technique_common>
+            <accessor source="#Cylinder_004-mesh-normals-array" count="94" stride="3">
+              <param name="X" type="float"/>
+              <param name="Y" type="float"/>
+              <param name="Z" type="float"/>
+            </accessor>
+          </technique_common>
+        </source>
+        <vertices id="Cylinder_004-mesh-vertices">
+          <input semantic="POSITION" source="#Cylinder_004-mesh-positions"/>
+        </vertices>
+        <polylist material="bubble_blue" count="32">
+          <input semantic="VERTEX" source="#Cylinder_004-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Cylinder_004-mesh-normals" offset="1"/>
+          <vcount>4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 </vcount>
+          <p>61 0 59 0 13 0 14 0 59 1 57 1 12 1 13 1 57 2 55 2 11 2 12 2 55 3 53 3 10 3 11 3 53 4 51 4 9 4 10 4 51 5 49 5 8 5 9 5 49 6 47 6 7 6 8 6 47 7 45 7 6 7 7 7 45 8 43 8 5 8 6 8 43 9 41 9 4 9 5 9 41 10 39 10 3 10 4 10 39 11 37 11 2 11 3 11 37 12 35 12 1 12 2 12 63 33 61 33 14 33 15 33 65 34 63 34 15 34 16 34 67 35 65 35 16 35 17 35 69 36 67 36 17 36 18 36 71 37 69 37 18 37 19 37 73 38 71 38 19 38 20 38 75 39 73 39 20 39 21 39 77 40 75 40 21 40 22 40 79 41 77 41 22 41 23 41 81 42 79 42 23 42 24 42 83 43 81 43 24 43 25 43 85 44 83 44 25 44 26 44 87 45 85 45 26 45 27 45 89 46 87 46 27 46 28 46 91 47 89 47 28 47 29 47 93 48 91 48 29 48 30 48 95 49 93 49 30 49 31 49 31 50 0 50 33 50 95 50 0 52 1 52 35 52 33 52</p>
+        </polylist>
+        <polylist material="bubble_semitrans" count="62">
+          <input semantic="VERTEX" source="#Cylinder_004-mesh-vertices" offset="0"/>
+          <input semantic="NORMAL" source="#Cylinder_004-mesh-normals" offset="1"/>
+          <vcount>4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 4 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 3 </vcount>
+          <p>14 13 13 13 68 13 66 13 15 14 14 14 66 14 64 14 16 15 15 15 64 15 62 15 17 16 16 16 62 16 60 16 18 17 17 17 60 17 58 17 19 18 18 18 58 18 56 18 20 19 19 19 56 19 54 19 21 20 20 20 54 20 52 20 22 21 21 21 52 21 50 21 1 22 0 22 94 22 92 22 23 23 22 23 50 23 48 23 24 24 23 24 48 24 46 24 25 25 24 25 46 25 44 25 26 26 25 26 44 26 42 26 27 27 26 27 42 27 40 27 28 28 27 28 40 28 38 28 29 29 28 29 38 29 36 29 30 30 29 30 36 30 34 30 31 31 30 31 34 31 32 31 0 32 31 32 32 32 94 32 2 51 1 51 92 51 90 51 3 53 2 53 90 53 88 53 4 54 3 54 88 54 86 54 5 55 4 55 86 55 84 55 6 56 5 56 84 56 82 56 7 57 6 57 82 57 80 57 8 58 7 58 80 58 78 58 9 59 8 59 78 59 76 59 10 60 9 60 76 60 74 60 11 61 10 61 74 61 72 61 12 62 11 62 72 62 70 62 13 63 12 63 70 63 68 63 92 64 94 64 32 64 92 65 32 65 34 65 92 66 34 66 90 66 34 67 36 67 90 67 36 68 88 68 90 68 36 69 38 69 88 69 38 70 86 70 88 70 38 71 40 71 86 71 40 72 84 72 86 72 40 73 42 73 84 73 42 74 82 74 84 74 42 75 44 75 82 75 44 76 80 76 82 76 44 77 46 77 80 77 46 78 78 78 80 78 46 79 48 79 78 79 48 80 76 80 78 80 48 81 50 81 76 81 50 82 74 82 76 82 50 83 52 83 74 83 52 84 72 84 74 84 52 85 54 85 72 85 54 86 70 86 72 86 54 87 56 87 70 87 56 88 68 88 70 88 56 89 58 89 68 89 58 90 66 90 68 90 58 91 60 91 66 91 60 92 64 92 66 92 60 93 62 93 64 93</p>
+        </polylist>
+      </mesh>
+      <extra><technique profile="MAYA"><double_sided>1</double_sided></technique></extra>
+    </geometry>
+  </library_geometries>
+  <library_visual_scenes>
+    <visual_scene id="Scene" name="Scene">
+      <node id="body" type="NODE">
+        <translate sid="location">-3.438e-4 1.042527 -1.53482e-4</translate>
+        <rotate sid="rotationZ">0 0 1 0</rotate>
+        <rotate sid="rotationY">0 1 0 0</rotate>
+        <rotate sid="rotationX">1 0 0 90.00001</rotate>
+        <scale sid="scale">1 1 1</scale>
+        <instance_geometry url="#Cylinder_004-mesh">
+          <bind_material>
+            <technique_common>
+              <instance_material symbol="bubble_white" target="#bubble_white-material"/>
+              <instance_material symbol="bubble_blue" target="#bubble_blue-material"/>
+              <instance_material symbol="bubble_semitrans" target="#bubble_semitrans-material"/>
+            </technique_common>
+          </bind_material>
+        </instance_geometry>
+      </node>
+    </visual_scene>
+  </library_visual_scenes>
+  <scene>
+    <instance_visual_scene url="#Scene"/>
+  </scene>
+</COLLADA>
