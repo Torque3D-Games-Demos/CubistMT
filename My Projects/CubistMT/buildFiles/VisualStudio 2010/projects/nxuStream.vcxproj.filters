@@ -1,0 +1,152 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+   <ItemGroup>
+      <Filter Include="Source Files">
+         <UniqueIdentifier>{380b7645-040c-447e-959d-8f357a7cf2c5}</UniqueIdentifier>
+         <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;cc</Extensions>
+      </Filter>
+      <Filter Include="Source Files\NVIDIA Corporation">
+         <UniqueIdentifier>{65815c62-23e9-4554-9f63-9dc85c34ee4e}</UniqueIdentifier>
+      </Filter>
+      <Filter Include="Source Files\NVIDIA Corporation\v2.8.3">
+         <UniqueIdentifier>{18129a51-04df-45c0-b53c-3ebac8bc45bc}</UniqueIdentifier>
+      </Filter>
+      <Filter Include="Source Files\NVIDIA Corporation\v2.8.3\NxuStream2">
+         <UniqueIdentifier>{bb546941-bbf7-4599-8faf-f714aed28022}</UniqueIdentifier>
+      </Filter>
+   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Torque.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+   <ItemGroup>
+      <ClCompile Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_Asc2Bin.cpp">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_ColladaExport.cpp">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_ColladaImport.cpp">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_cooking.cpp">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_customcopy.cpp">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_File.cpp">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_Geometry.cpp">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_GraphicsMesh.cpp">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_helper.cpp">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_hull.cpp">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_PhysicsExport.cpp">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_PhysicsInstantiator.cpp">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_ScaledCopy.cpp">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_schema.cpp">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_SchemaStream.cpp">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_Streaming.cpp">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_string.cpp">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_tinystr.cpp">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_tinyxml.cpp">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_tinyxmlerror.cpp">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_tinyxmlparser.cpp">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClCompile>
+   </ItemGroup>
+   <ItemGroup>
+      <ClInclude Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_Asc2Bin.h">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_ColladaExport.h">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_ColladaImport.h">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_cooking.h">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_customcopy.h">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_File.h">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_Geometry.h">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_GraphicsMesh.h">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_helper.h">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_hull.h">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_PhysicsExport.h">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_PhysicsInstantiator.h">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_ScaledCopy.h">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_schema.h">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_SchemaStream.h">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_SchemaTypes.h">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_Streaming.h">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_string.h">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_tinystr.h">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\NVIDIA Corporation\NVIDIA PhysX SDK\v2.8.3\Tools\NxuStream2\NXU_tinyxml.h">
+         <Filter>Source Files\NVIDIA Corporation\v2.8.3\NxuStream2</Filter>
+      </ClInclude>
+   </ItemGroup>
+   <ItemGroup>
+   </ItemGroup>
+</Project>

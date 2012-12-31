@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+   <ItemGroup>
+      <Filter Include="Source Files">
+         <UniqueIdentifier>{815bb349-99b4-4bee-b605-5810372c61a4}</UniqueIdentifier>
+         <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;cc</Extensions>
+      </Filter>
+      <Filter Include="Source Files\lib">
+         <UniqueIdentifier>{efa0005b-0e7a-47ee-8c22-b5cdd3807b50}</UniqueIdentifier>
+      </Filter>
+   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Torque.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+   <ItemGroup>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lpng\png.c">
+         <Filter>Source Files\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lpng\pngerror.c">
+         <Filter>Source Files\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lpng\pnggccrd.c">
+         <Filter>Source Files\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lpng\pngget.c">
+         <Filter>Source Files\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lpng\pngmem.c">
+         <Filter>Source Files\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lpng\pngpread.c">
+         <Filter>Source Files\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lpng\pngread.c">
+         <Filter>Source Files\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lpng\pngrio.c">
+         <Filter>Source Files\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lpng\pngrtran.c">
+         <Filter>Source Files\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lpng\pngrutil.c">
+         <Filter>Source Files\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lpng\pngset.c">
+         <Filter>Source Files\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lpng\pngtrans.c">
+         <Filter>Source Files\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lpng\pngvcrd.c">
+         <Filter>Source Files\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lpng\pngwio.c">
+         <Filter>Source Files\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lpng\pngwrite.c">
+         <Filter>Source Files\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lpng\pngwtran.c">
+         <Filter>Source Files\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lpng\pngwutil.c">
+         <Filter>Source Files\lib</Filter>
+      </ClCompile>
+   </ItemGroup>
+   <ItemGroup>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lpng\png.h">
+         <Filter>Source Files\lib</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lpng\pngasmrd.h">
+         <Filter>Source Files\lib</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lpng\pngconf.h">
+         <Filter>Source Files\lib</Filter>
+      </ClInclude>
+   </ItemGroup>
+   <ItemGroup>
+   </ItemGroup>
+</Project>

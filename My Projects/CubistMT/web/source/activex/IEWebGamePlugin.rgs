@@ -1,0 +1,11 @@
+HKCR
+{
+	NoRemove AppID
+	{
+		'%APPID%' = s 'IECubistMTPlugin'
+		'IECubistMTPlugin.DLL'
+		{
+			val AppID = s '%APPID%'
+		}
+	}
+}

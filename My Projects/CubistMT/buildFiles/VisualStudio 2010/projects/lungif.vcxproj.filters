@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+   <ItemGroup>
+      <Filter Include="Source Files">
+         <UniqueIdentifier>{127f3c66-b920-4224-8650-fc1b81e3241a}</UniqueIdentifier>
+         <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;cc</Extensions>
+      </Filter>
+      <Filter Include="Source Files\lib">
+         <UniqueIdentifier>{a82a427e-c3a8-4e23-a3b3-db0e39f7d978}</UniqueIdentifier>
+      </Filter>
+   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Torque.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+   <ItemGroup>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lungif\dgif_lib.c">
+         <Filter>Source Files\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lungif\gifalloc.c">
+         <Filter>Source Files\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lungif\gif_err.c">
+         <Filter>Source Files\lib</Filter>
+      </ClCompile>
+   </ItemGroup>
+   <ItemGroup>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lungif\gif_lib.h">
+         <Filter>Source Files\lib</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\lungif\gif_lib_private.h">
+         <Filter>Source Files\lib</Filter>
+      </ClInclude>
+   </ItemGroup>
+   <ItemGroup>
+   </ItemGroup>
+</Project>

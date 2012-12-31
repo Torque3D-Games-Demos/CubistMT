@@ -1,0 +1,236 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+   <ItemGroup>
+      <Filter Include="Source Files">
+         <UniqueIdentifier>{ae0da289-1be1-442e-909a-9cd55c6ca772}</UniqueIdentifier>
+         <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;cc</Extensions>
+      </Filter>
+      <Filter Include="Source Files\lib">
+         <UniqueIdentifier>{893c6229-8a8f-44c2-a3ce-bc745bc9a82c}</UniqueIdentifier>
+      </Filter>
+      <Filter Include="Source Files\lib\include">
+         <UniqueIdentifier>{8192951c-4137-4383-bc06-f0322359ae61}</UniqueIdentifier>
+      </Filter>
+      <Filter Include="Source Files\lib\lib">
+         <UniqueIdentifier>{5875a33f-48ad-4be7-ac27-f1bd3551b19b}</UniqueIdentifier>
+      </Filter>
+      <Filter Include="Source Files\lib\lib\books">
+         <UniqueIdentifier>{a231759d-60b2-47d1-ba15-7df7c7006569}</UniqueIdentifier>
+      </Filter>
+      <Filter Include="Source Files\lib\lib\books\coupled">
+         <UniqueIdentifier>{7f4e227b-b17e-4dfb-8820-83e830bad377}</UniqueIdentifier>
+      </Filter>
+      <Filter Include="Source Files\lib\lib\books\floor">
+         <UniqueIdentifier>{0975ed80-1a67-41ac-9e5f-60f0320157bd}</UniqueIdentifier>
+      </Filter>
+      <Filter Include="Source Files\lib\lib\books\uncoupled">
+         <UniqueIdentifier>{afebddea-e1e5-461d-8d84-287a323f1644}</UniqueIdentifier>
+      </Filter>
+      <Filter Include="Source Files\lib\lib\modes">
+         <UniqueIdentifier>{2aceb814-909f-4468-97ad-f61e07301a93}</UniqueIdentifier>
+      </Filter>
+   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Torque.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+   <ItemGroup>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\analysis.c">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\bitrate.c">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\block.c">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\codebook.c">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\envelope.c">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\floor0.c">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\floor1.c">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\info.c">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\lookup.c">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\lpc.c">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\lsp.c">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\mapping0.c">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\mdct.c">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\psy.c">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\registry.c">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\res0.c">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\sharedbook.c">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\smallft.c">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\synthesis.c">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\vorbisenc.c">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\vorbisfile.c">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\window.c">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClCompile>
+   </ItemGroup>
+   <ItemGroup>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\include\vorbis\codec.h">
+         <Filter>Source Files\lib\include</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\include\vorbis\vorbisenc.h">
+         <Filter>Source Files\lib\include</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\include\vorbis\vorbisfile.h">
+         <Filter>Source Files\lib\include</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\backends.h">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\bitrate.h">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\codebook.h">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\codec_internal.h">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\envelope.h">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\highlevel.h">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\lookup.h">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\lookup_data.h">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\lpc.h">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\lsp.h">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\masking.h">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\mdct.h">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\misc.h">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\os.h">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\psy.h">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\registry.h">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\scales.h">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\smallft.h">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\window.h">
+         <Filter>Source Files\lib\lib</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\books\coupled\res_books_stereo.h">
+         <Filter>Source Files\lib\lib\books\coupled</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\books\floor\floor_books.h">
+         <Filter>Source Files\lib\lib\books\floor</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\books\uncoupled\res_books_uncoupled.h">
+         <Filter>Source Files\lib\lib\books\uncoupled</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\modes\floor_all.h">
+         <Filter>Source Files\lib\lib\modes</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\modes\psych_11.h">
+         <Filter>Source Files\lib\lib\modes</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\modes\psych_16.h">
+         <Filter>Source Files\lib\lib\modes</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\modes\psych_44.h">
+         <Filter>Source Files\lib\lib\modes</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\modes\psych_8.h">
+         <Filter>Source Files\lib\lib\modes</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\modes\residue_16.h">
+         <Filter>Source Files\lib\lib\modes</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\modes\residue_44.h">
+         <Filter>Source Files\lib\lib\modes</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\modes\residue_44u.h">
+         <Filter>Source Files\lib\lib\modes</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\modes\residue_8.h">
+         <Filter>Source Files\lib\lib\modes</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\modes\setup_11.h">
+         <Filter>Source Files\lib\lib\modes</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\modes\setup_16.h">
+         <Filter>Source Files\lib\lib\modes</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\modes\setup_22.h">
+         <Filter>Source Files\lib\lib\modes</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\modes\setup_32.h">
+         <Filter>Source Files\lib\lib\modes</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\modes\setup_44.h">
+         <Filter>Source Files\lib\lib\modes</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\modes\setup_44u.h">
+         <Filter>Source Files\lib\lib\modes</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\modes\setup_8.h">
+         <Filter>Source Files\lib\lib\modes</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\libvorbis\lib\modes\setup_X.h">
+         <Filter>Source Files\lib\lib\modes</Filter>
+      </ClInclude>
+   </ItemGroup>
+   <ItemGroup>
+   </ItemGroup>
+</Project>

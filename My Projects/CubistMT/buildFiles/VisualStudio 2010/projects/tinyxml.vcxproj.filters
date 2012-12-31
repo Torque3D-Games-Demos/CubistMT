@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+   <ItemGroup>
+      <Filter Include="Source Files">
+         <UniqueIdentifier>{7635251a-9236-4c27-a094-6c96c40e4c05}</UniqueIdentifier>
+         <Extensions>cpp;c;cxx;rc;def;r;odl;idl;hpj;bat;cc</Extensions>
+      </Filter>
+      <Filter Include="Source Files\lib">
+         <UniqueIdentifier>{82e54ad1-c803-4d99-8278-f1aca497890a}</UniqueIdentifier>
+      </Filter>
+   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Torque.rc">
+      <Filter>Source Files</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+   <ItemGroup>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\tinyxml\tinystr.cpp">
+         <Filter>Source Files\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\tinyxml\tinyxml.cpp">
+         <Filter>Source Files\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\tinyxml\tinyxmlerror.cpp">
+         <Filter>Source Files\lib</Filter>
+      </ClCompile>
+      <ClCompile Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\tinyxml\tinyxmlparser.cpp">
+         <Filter>Source Files\lib</Filter>
+      </ClCompile>
+   </ItemGroup>
+   <ItemGroup>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\tinyxml\tinystr.h">
+         <Filter>Source Files\lib</Filter>
+      </ClInclude>
+      <ClInclude Include="I:\Torque3D\Torque 3D 1.2\Engine\lib\tinyxml\tinyxml.h">
+         <Filter>Source Files\lib</Filter>
+      </ClInclude>
+   </ItemGroup>
+   <ItemGroup>
+   </ItemGroup>
+</Project>

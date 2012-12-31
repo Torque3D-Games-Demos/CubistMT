@@ -1,0 +1,1554 @@
+//--- OBJECT WRITE BEGIN ---
+new SimGroup(MissionGroup) {
+   canSave = "1";
+   canSaveDynamicFields = "1";
+      cdTrack = "2";
+      CTF_scoreLimit = "5";
+      enabled = "1";
+      musicTrack = "lush";
+
+   new SimGroup(EnvironmentStuff) {
+      internalName = "level";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+
+      new SimGroup(MainCamera)
+      {
+         canSave = "1";
+         canSaveDynamicFields = "1";
+      };
+      new SimGroup(PlayerDropPoints) {
+         canSave = "1";
+         canSaveDynamicFields = "1";
+            enabled = "1";
+            
+         
+         new SpawnSphere() {
+            spawnClass = "Camera";
+            spawnDatablock = "";
+            autoSpawn = "0";
+            radius = "0.1";
+            sphereWeight = "1";
+            indoorWeight = "1";
+            outdoorWeight = "1";
+            enableInputEvents = "0";
+            dataBlock = "SpawnSphereMarker";
+            position = $pref::Cube::mosaicCameraPositionOffset;
+            rotation = $pref::Cube::mosaicCameraRotation;            
+            scale = "0.1 0.1 0.1";
+            canSave = "1";
+            canSaveDynamicFields = "1";
+            locked = true;
+            hidden = true;
+               isNonPlayer = "1";
+               enabled = "1";
+               homingCount = "0";
+               lockCount = "0";
+         };
+      };
+      new MissionArea() {
+         area = "768 768 512 512";
+         flightCeiling = "10";
+         flightCeilingRange = "100";
+         canSave = "1";
+         canSaveDynamicFields = "1";
+      };
+
+      new Forest(ReefForest) {
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         canSave = "1";
+         canSaveDynamicFields = "1";
+         dataFile = "levels/default.forest";
+         lodReflectScalar = "2";
+         internalName = "ReefForest";
+         isFilled = true;
+      };
+      
+      
+      new ForestWindEmitter(ReefWind) {
+         position = "539.774 697.692 121.867";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         canSave = "1";
+         canSaveDynamicFields = "1";
+         windEnabled = "1";
+         radialEmitter = "0";
+         strength = "3";
+         radius = "0";
+         gustStrength = "0.05";
+         gustFrequency = "3";
+         gustYawAngle = "5";
+         gustYawFrequency = "1";
+         gustWobbleStrength = "3";
+         turbulenceStrength = "1";
+         turbulenceFrequency = "0.5";
+         hasMount = "0";
+
+      };
+      
+      new LevelInfo(theLevelInfo) {
+         nearClip = $pref::Cube::mosaicNearClip;
+         visibleDistance = "500";
+         decalBias = "0.0015";
+         fogColor = "1 71 154 255";
+         fogDensity = "0.05";
+         fogDensityOffset = "8";
+         fogAtmosphereHeight = "0";
+         canvasClearColor = "0 0 0 255";
+         ambientLightBlendPhase = "1";
+         ambientLightBlendCurve = "0 0 -1 -1";
+         advancedLightmapSupport = "1";
+         soundAmbience = "AudioAmbienceDefault";
+         soundDistanceModel = "Linear";
+         canSave = "1";
+         canSaveDynamicFields = "1";
+         
+            cameraFOV = $pref::Cube::mosaicFOV;
+            cameraOffset[0] = $pref::Cube::mosaicOffset0;
+            cameraOffset[1] = $pref::Cube::mosaicOffset1;
+            cameraOffset[2] = $pref::Cube::mosaicOffset2;
+            cameraOffset[3] = $pref::Cube::mosaicOffset3;
+            cameraOffset[4] = $pref::Cube::mosaicOffset4;
+                                 
+            cameraSpeed = "5 50";
+            desc0 = "Simple example of Great Barrier Reef Project";
+            LevelName = "Great Barrier Reef Sandbox";
+            mosiacResolution = $pref::Cube::mosaicResolution;
+            worldSize = "10000";
+            gameType = "CubeMT";
+      };
+      new ScatterSky(ScatterSkyNetSync) {
+         skyBrightness = "75";
+         mieScattering = "0.015";
+         rayleighScattering = "0.0009";
+         sunScale = "0.972549 0.972549 0.968628 1";
+         ambientScale = "0.835294 0.839216 0.839216 1";
+         fogScale = "1 1 1 1";
+         exposure = "10";
+         azimuth = "572.958";
+         elevation = "60";
+         moonAzimuth = "20";
+         moonElevation = "45";
+         castShadows = "1";
+         brightness = "1.1";
+         flareType = "SunFlareExample";
+         flareScale = "1.2";
+         nightColor = "0.105882 0.133333 0.333333 1";
+         nightFogColor = "0.160784 0.207843 0.262745 1";
+         moonEnabled = "0";
+         moonMat = "Moon_Pacific_Mat";
+         moonScale = "0.15";
+         moonLightColor = "0.137255 0.180392 0.235294 1";
+         useNightCubemap = "0";
+         nightCubemap = "nightCubemap";
+         attenuationRatio = "0 1 1";
+         shadowType = "PSSM";
+         texSize = "2048";
+        // texSize = "1024";
+         overDarkFactor = "10000 8000 6000 5000";
+         shadowDistance = "300";
+         shadowSoftness = "0.2";
+         numSplits = "4";
+         logWeight = "0.92";
+         fadeStartDistance = "50";
+         lastSplitTerrainOnly = "0";
+         representedInLightmap = "0";
+         shadowDarkenColor = "0 0 0 -1";
+         includeLightmappedGeometryInShadow = "0";
+         position = "735.755 853.124 97.6111";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         canSave = "1";
+         canSaveDynamicFields = "1";
+            moonTexture = "art/skies/night/moon_wglow.png";
+            moonTint = "0.192157 0.192157 0.192157 1";
+            viewerHeight = "1.004";
+      };
+      new WaterPlane(wplane) {
+         gridSize = "25";
+         gridElementSize = "4";
+         density = "0";
+         viscosity = "1";
+         liquidType = "DefaultLiquidType";
+         baseColor = "254 254 254 255";
+         fresnelBias = "0.1";
+         fresnelPower = "1";
+         specularPower = "48";
+         specularColor = "0.996078 0.996078 0.996078 1";
+         emissive = "0";
+         waveDir[0] = "0.3 0.3";
+         waveDir[1] = "1 0";
+         waveDir[2] = "-0.3 0.3";
+         waveSpeed[0] = "1";
+         waveSpeed[1] = "2";
+         waveSpeed[2] = "0.3535";
+         waveMagnitude[0] = "1";
+         waveMagnitude[1] = "0.4";
+         waveMagnitude[2] = "0.2";
+         overallWaveMagnitude = "0.1";
+         rippleTex = "art/water/noise02.dds";
+         rippleDir[0] = "0 1";
+         rippleDir[1] = "0.707 0.707";
+         rippleDir[2] = "0.5 0.86";
+         rippleSpeed[0] = "-0.065";
+         rippleSpeed[1] = "0.06";
+         rippleSpeed[2] = "0.03";
+         rippleTexScale[0] = "2.14 2.14";
+         rippleTexScale[1] = "5 5";
+         rippleTexScale[2] = "25 25";
+         rippleMagnitude[0] = "1";
+         rippleMagnitude[1] = "1";
+         rippleMagnitude[2] = "0.3";
+         overallRippleMagnitude = "20";
+         foamTex = "art/water/wateredge512.dds";
+         foamDir[0] = "1 0";
+         foamDir[1] = "0 1";
+         foamSpeed[0] = "0.2";
+         foamSpeed[1] = "0.01";
+         foamTexScale[0] = "2 2";
+         foamTexScale[1] = "10 10";
+         foamOpacity[0] = "0";
+         foamOpacity[1] = "0";
+         overallFoamOpacity = "1.5";
+         foamMaxDepth = "5";
+         foamAmbientLerp = "1";
+         foamRippleInfluence = "0.05";
+         cubemap = "BlankSkyCubemap";
+         fullReflect = "1";
+         reflectivity = "1";
+         reflectPriority = "-1";
+         reflectMaxRateMs = "16";
+         reflectDetailAdjust = "0.5";
+         reflectNormalUp = "1";
+         useOcclusionQuery = "0";
+         reflectTexSize = "2048";
+         waterFogDensity = "0.08";
+         waterFogDensityOffset = "8";
+         wetDepth = "0.2";
+         wetDarkening = "0";
+         depthGradientTex = "art/cube/water/pacific_ocean_ramp.png";
+         depthGradientMax = "0";
+         distortStartDist = "0.1";
+         distortEndDist = "20";
+         distortFullDepth = "3.5";
+         clarity = "1";
+         underwaterColor = "0.2353 0.854902 0.85098 1";
+         position = "0 0 0.525";
+         canSave = "1";
+         canSaveDynamicFields = "1";
+            foamColorModulate = "0 0 0";
+            foamScale = "0.2";
+            whiteCapAmount = "0";
+            underwaterFog = 0;
+      };
+      new TimeOfDay(tod) {
+         axisTilt = "23.44";
+         dayLength = "240";
+         startTime = "0.0895";
+         time = "0.0895";  // wants to be 0.0905 but will get set in CubeMTGame::syncCubeMT
+         play = "0";
+         azimuthOverride = "0.2";
+         dayScale = "1";
+         nightScale = "1";
+         position = "0 0 0";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+         canSave = "1";
+         canSaveDynamicFields = "1";
+      };
+      
+   new PointLight()
+   {
+      position = "-7 0 0.2";
+      rotation = "1 0 0 0";
+      radius = 100;
+      brightness = 1;
+      color = "0.992157 0.992157 0.992157 1";
+   };      
+      
+      new ParticleEmitterNode() {
+         emitter = ReefAmbientBubbleEmitterData;
+         dataBlock = ReefAmbientBubbleEmitterNodeData;
+         position = "0 12.6056 -25";
+         rotation = "1 0 0 0";
+         scale = "1 1 1";
+      };
+
+   new PhysicalZone() {
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "10000 10000 10000";
+      velocityMod = "1";
+      gravityMod = "0";
+      appliedForce = "0 0 0";
+   };
+   
+   };
+   //CLOWN (MIDDLE ANEMONE)
+   new StaticShape() {
+      dataBlock = "ClownFishMarker";
+      spawnCount = 4;   //will be 2 after modifier applied
+      herdId = -1;
+      position = "-0.79972 7.623105 -4.33506";
+      wanderRange = "-1.18292 7.21101 -4.523 -0.41652 8.0352 -4.218";
+
+      enableInputEvents = "0";
+      rotation = "0.00140144 0.0107841 0.999941 87.8093";
+      scale = "0.5 0.5 0.5";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+
+   };
+   //CLOWN (LEFT ANEMONE)
+   new StaticShape() {
+      dataBlock = "ClownFishMarker";
+      spawnCount = 4;
+      herdId = -1;
+      position = "-5.105 8.75 -5.099";
+      wanderRange = "-5.355 8.458 -5.46 -4.855 8.958 -5.155";
+
+      enableInputEvents = "0";
+      rotation = "0.00140144 0.0107841 0.999941 87.8093";
+      scale = "0.5 0.5 0.5";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+
+   };
+   
+   //TANG
+   new StaticShape() {
+      dataBlock = "BlueTangFishMarker";
+      spawnCount = 10;
+      herdId = 110;
+      position = "3.241 8.298 -4.394";
+      position2 = "-3.262 8.298 -4.56";
+      wanderRange = "-6.3 7 -5.15 -1.5 8.75 -3.5";
+      
+      enableInputEvents = "0";
+      rotation = "0.00140144 0.0107841 0.999941 87.8093";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //TANG1
+   new StaticShape() {
+      dataBlock = "BlueTangFishMarker";
+      spawnCount = 5;
+      herdId = 111;
+      position = "3.205 12.463 -5.55";
+      wanderRange = "0.6 7.6 -5.6 6.8 9.6 -4.1";
+      
+      enableInputEvents = "0";
+      rotation = "0.00140144 0.0107841 0.999941 87.8093";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //TANG2
+   new StaticShape() {
+      dataBlock = "BlueTangFishMarker";
+      spawnCount = 5;
+      herdId = 112;
+      position = "-3.657 12.27 -5.608";
+      wanderRange = "-5.48035 10.71872 -7.12467 -1.72603 14.5015 -4.77289";
+      
+      enableInputEvents = "0";
+      rotation = "0.00140144 0.0107841 0.999941 87.8093";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //TANG3
+   new StaticShape() {
+      dataBlock = "BlueTangFishMarker";
+      spawnCount = 5;
+      herdId = 113;
+      position = "-7.167 12.668 -3.72";
+      wanderRange = "-10.01083 9.30732 -4.89218 -5.28431 16.35425 -3.20846";
+
+      enableInputEvents = "0";
+      rotation = "0.00140144 0.0107841 0.999941 87.8093";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //new harlequin
+   //HARLEQUIN
+   new StaticShape() {
+      dataBlock = "HarlequinTuskFishMarker";
+      spawnCount = 4;
+      herdId = 110;
+      position = "3.241 8.298 -4.394";
+      position2 = "-3.262 8.298 -4.56";
+      wanderRange = "-6.3 7 -5.15 -1.5 8.75 -3.5";
+
+      enableInputEvents = "0";
+      rotation = "0.00140144 0.0107841 0.999941 87.8093";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //HARLEQUIN1
+   new StaticShape() {
+      dataBlock = "HarlequinTuskFishMarker";
+      spawnCount = 5;
+      herdId = 111;
+      position = "3.205 12.463 -5.55";
+      wanderRange = "-0.48324 10.57454 -6.6287 6.54321 14.06056 -4.96187";
+
+      enableInputEvents = "0";
+      rotation = "0.00140144 0.0107841 0.999941 87.8093";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //HARLEQUIN2
+   new StaticShape() {
+      dataBlock = "HarlequinTuskFishMarker";
+      spawnCount = 5;
+      herdId = 112;
+      position = "-3.657 12.27 -5.608";
+      wanderRange = "-5.48035 10.71872 -7.12467 -1.72603 14.5015 -4.77289";
+      
+      enableInputEvents = "0";
+      rotation = "0.00140144 0.0107841 0.999941 87.8093";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //TANG3
+   new StaticShape() {
+      dataBlock = "BlueTangFishMarker";
+      spawnCount = 5;
+      herdId = 113;
+      position = "-7.167 12.668 -3.72";
+      wanderRange = "-10.01083 9.30732 -4.89218 -5.28431 16.35425 -3.20846";
+
+      enableInputEvents = "0";
+      rotation = "0.00140144 0.0107841 0.999941 87.8093";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+
+   //SEAHORSE1
+   new StaticShape() {
+      dataBlock = "SeahorseFishMarker";
+      spawnCount = 10;
+      herdId = -1;
+      position = "4.669 9.467 -5.042";
+      wanderRange = "0.6 7.6 -5.6 6.8 9.6 -4.1";
+
+      enableInputEvents = "0";
+      rotation = "0.00140144 0.0107841 0.999941 87.8093";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //MOORISH_IDOL1
+   new StaticShape() {
+      dataBlock = "MoorishIdolFishMarker";
+      spawnCount = 12;
+      herdId = 130;
+      position = "3.383 11.472 -5.336";
+      position2 = "-3.369 11.472 -5.606";
+      wanderRange = "-5.04277 10.88144 -6.93198 6.17938 13.93668 -5.20128";
+      
+      enableInputEvents = "0";
+      rotation = "0.00140144 0.0107841 0.999941 87.8093";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //MOORISH_IDOL
+   new StaticShape() {
+      dataBlock = "MoorishIdolFishMarker";
+      spawnCount = 12;
+      herdId = 131;
+      position = "3.489 8.324 -4.488";
+      position2 = "-3.558 8.324 -4.488";
+      wanderRange = "-7.02901 7.70519 -5.31982 7.22787 11.0917 -4.31352";
+      
+      enableInputEvents = "0";
+      rotation = "0.00140144 0.0107841 0.999941 87.8093";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //CUTTLE FISH
+   //hack(no range set so will use default)
+   new StaticShape() {
+      dataBlock = "CuttleFishMarker";
+      spawnCount =3;
+      herdId = -1;
+      wanderRange = "-5.04277 10.88144 -6.93198 6.17938 13.93668 -4.20128";
+      
+      position = "2 16 -4.66756";
+      rotation = "0.00140144 0.0107841 0.999941 87.8093";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      enableInputEvents = "0";
+   };
+   new StaticShape() {
+      dataBlock = "CuttleFishMarker";
+      spawnCount =3;
+      herdId = -1;
+      wanderRange = "0.6 7.6 -5.6 6.8 9.6 -4.1";
+
+      position = "4.669 9.467 -5.042";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      enableInputEvents = "0";
+   };
+   //TREVALLY
+   new StaticShape() {
+      dataBlock = "BluefinTrevallyFishMarker";
+      spawnCount = 4;   
+      herdId = 150;
+      position = "3.926 19.759 -7.792";
+      wanderRange = "-14.7764 17.74296 -10.00884 16.263 25.49472 -1.7246";
+      
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      enableInputEvents = "0";
+   };
+   //TREVALLY2
+   new StaticShape() {
+      dataBlock = "BluefinTrevallyFishMarker";
+      spawnCount = 4;   
+      herdId = 151;
+      position = "3.926 12.677 -4.294";
+      wanderRange = "-10.07549 11.77018 -7.39067 11.12958 18.33832 -0.83772";
+      
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      enableInputEvents = "0";
+   };
+   //TREVALLY3
+   new StaticShape() {
+      dataBlock = "BluefinTrevallyFishMarker";
+      spawnCount = 4;   
+      herdId = 152;
+      position = "3.063 26.356 -7.38";
+      wanderRange = "-20.44048 25.28161 -11.44429 20.74723 33.10563 -1.66546";
+      
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      position = "0.637 17.265 -5.62";
+      enableInputEvents = "0";
+   };
+   //BASSELET
+   new StaticShape() {
+      dataBlock = "OrangeBasseletFishMarker";
+      spawnCount = 40;    //should be 1000s but too much for now
+      herdId = 160;
+      wanderRange = "-6.3 7 -5.15 -1.5 8.75 -3.5";
+      position = "3.091 8.356 -4.538";
+      position2 = "-3.753 8.356 -4.539";
+      
+      enableInputEvents = "0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      
+
+   };
+   //BASSELET1
+   new StaticShape() {
+      dataBlock = "OrangeBasseletFishMarker";
+      spawnCount = 40;    //should be 1000s but too much for now
+      herdId = 161;
+      wanderRange = "0.6 7.6 -5.6 6.8 9.6 -4.1";
+
+      position = "1.387 11.44 -5.26";
+      enableInputEvents = "0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //BASSELET2
+   new StaticShape() {
+      dataBlock = "OrangeBasseletFishMarker";
+      spawnCount = 40;    //should be 1000s but too much for now
+      herdId = 162;
+      wanderRange = "-5.48035 10.72785 -7.10758 -1.72603 13.78308 -4.7558";
+      position = "-3.536 11.45 -5.834";
+      
+      enableInputEvents = "0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //JELLYFISH
+   new StaticShape() {
+      dataBlock = "MoonJellyFishMarker";
+      spawnCount = 6;
+      herdId = -1;
+      position = "-1.096 13.146 -2.834";
+      wanderRange = "-11.54539 12.10159 -8.70849 12.75588 25.39946 0.37993";
+
+      enableInputEvents = "0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //JELLYFISH1
+   new StaticShape() {
+      dataBlock = "MoonJellyFishMarker";
+      spawnCount = 6;
+      herdId = -1;
+      position = "2.722 8.901 -2.834";
+      wanderRange = "-6.89436 7.94064 -5.64447 6.98568 12.16259 -0.46722";
+
+      enableInputEvents = "0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //JELLYFISH2
+   new StaticShape() {
+      dataBlock = "MoonJellySmallFishMarker";
+      spawnCount = 3;
+      herdId = -1;
+      position = "4.669 9.467 -5.042";
+      wanderRange = "0.6 7.6 -5.6 6.8 9.6 -4.1";
+
+      enableInputEvents = "1";
+      rotation = "0.00140144 0.0107841 0.999941 87.8093";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+
+   //SNAPPER
+   new StaticShape() {
+      dataBlock = "SnapperFishMarker";
+      spawnCount = 10;
+      herdId = 180;
+      position = "3.205 9.483 -4.832";
+      position2 = "-3.66 9.359 -4.531";
+      wanderRange = "-6.3 7 -5.15 -1.5 8.75 -3.5";
+
+      enableInputEvents = "0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //SNAPPER1
+   new StaticShape() {
+      dataBlock = "SnapperFishMarker";
+      spawnCount = 8;
+      herdId = 181;
+      position = "3.666 14.131 -6.277";
+      wanderRange = "0.6 7.6 -5.6 6.8 9.6 -4.1";
+
+      enableInputEvents = "0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //SNAPPER2
+   new StaticShape() {
+      dataBlock = "SnapperFishMarker";
+      spawnCount = 8;
+      herdId = 182;
+      position = "-4.052 15.546 -5.946";
+      wanderRange = "-7.11128 12.43308 -8.38518 -2.09255 19.51106 -4.69176";
+
+      enableInputEvents = "0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //SNAPPER3
+   new StaticShape() {
+      dataBlock = "SnapperFishMarker";
+      spawnCount = 8;
+      herdId = 183;
+      position = "-7.865 12.907 -3.676";
+      wanderRange = "-10.53675 11.23562 -4.85096 -6.47448 17.77676 -2.76071";
+
+      enableInputEvents = "0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //LIONFISH
+   new StaticShape() {
+      dataBlock = "LionFishMarker";
+      spawnCount = 2;
+      herdId = -1;
+      position = "2.592 8.701 -4.52";
+      wanderRange = "0.6 7.6 -5.6 6.8 9.6 -4.1";
+
+      enableInputEvents = "0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //LIONFISH1
+   new StaticShape() {
+      dataBlock = "LionFishMarker";
+      spawnCount = 2;
+      herdId = -1;
+      position = "4.074 11.229 -5.222";
+      wanderRange = "0.17467 10.82147 -6.45235 6.13683 13.63572 -4.28293";
+      
+      enableInputEvents = "0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //LIONFISH2
+   new StaticShape() {
+      dataBlock = "LionFishMarker";
+      spawnCount = 2;
+      herdId = -1;
+      position = "-5.373 9.068 -3.021";
+      wanderRange = "-8.28203	8.45325	-3.80393	-4.3617	11.2675	-2.2744";
+      
+      enableInputEvents = "0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   
+   new StaticShape() {
+      dataBlock = "PufferFishMarker";
+      spawnCount = 8;
+      herdId = -1;
+      position = "2.592 8.701 -4.52";
+      wanderRange = "0.6 7.6 -5.6 6.8 9.6 -4.1";
+      
+      enableInputEvents = "0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+
+   
+   //WRASSE1   
+   new StaticShape() {
+      dataBlock = "BluestreakedWrasseFishMarker";
+      spawnCount = 6;
+      herdId = -1;
+      position = "-3.548 8.56 -4.563";
+      wanderRange = "-6.3 7 -5.15 -1.5 8.75 -3.5";
+      
+      enableInputEvents = "0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //WRASSE2   
+   new StaticShape() {
+      dataBlock = "BluestreakedWrasseFishMarker";
+      spawnCount = 6;
+      herdId = -1;
+      position = "-3.49 11.629 -6.118";
+      wanderRange = "-5.60125 10.74734 -7.34194 -2.47976 14.86075 -4.80022";
+      
+      enableInputEvents = "0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //WRASSE3   
+   new StaticShape() {
+      dataBlock = "BluestreakedWrasseFishMarker";
+      spawnCount = 6;
+      herdId = -1;
+      position = "3.083 8.283 -4.547";
+      wanderRange = "0.6 7.6 -5.6 6.8 9.6 -4.1";
+
+      enableInputEvents = "0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //WRASSE4  
+   new StaticShape() {
+      dataBlock = "BluestreakedWrasseFishMarker";
+      spawnCount = 6;
+      herdId = 203;
+      position = "3.083 11.303 -5.241";
+      wanderRange = "-0.28122 10.82006 -6.61263 6.26655 13.8753 -4.60633";
+      
+      enableInputEvents = "0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //PARROT_FISH   
+   new StaticShape() {
+      dataBlock = "ParrotfishJuvenileFishMarker";
+      spawnCount = 5;
+      herdId = -1;
+      position = "-0.43 8 -4.157";
+      wanderRange = "-6.3 7 -5.15 -1.5 8.75 -3.5";
+
+      enableInputEvents = "0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //PARROT_FISH1   
+   new StaticShape() {
+      dataBlock = "ParrotfishFemaleFishMarker";
+      spawnCount = 4;
+      herdId = -1;
+      position = "4.327 20.086 -8.552";
+      wanderRange = "0.68811 19.33567 -10.34298 12.81389 25.21889 -7.62306";
+      
+      enableInputEvents = "0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   new StaticShape() {
+      dataBlock = "ParrotfishMaleFishMarker";
+      spawnCount = 4;
+      herdId = -1;
+      position = "4.327 20.086 -8.552";
+      wanderRange = "0.68811 19.33567 -10.34298 12.81389 25.21889 -7.62306";
+      
+      
+      enableInputEvents = "0";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   //REMORA 
+   new StaticShape() {
+      enableInputEvents = "0";
+      dataBlock = "RemoraFishMarker";
+      position = "-3.207 21.021 -3.738";
+      wanderRange = "-5.4305 7.5645 -5.4905 5.4 20.4775 -1.9855";
+      rotation = "1 0 0 0";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      herdId = -1;
+      spawnCount = 3;
+   };
+   //SARDINELLA
+   new StaticShape(SardinellaPath1) {
+      enableInputEvents = "0";
+      dataBlock = "SardinellaPath1_SSData";
+      position = "4.80584 35.7679 -11.5635";
+      rotation = "0 0 1 -3.83";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      animationSpeed = 0.8;
+   };
+   new StaticShape() {
+      fishType = "SCHOOL";
+      enableInputEvents = "0";
+      dataBlock = "SardinellaFishMarker";
+      position = "0 0 -2";
+      rotation = "1 0 0 3";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      herdId = "17";
+      spawnCount = 50;
+
+
+      spline = SardinellaPath1;
+      followNode = "mount0";
+      
+      schoolUse = "1";                     //true=>use schooling code otherwise normal fish
+      schoolOrientationRadius = "1.0";     //how near other fish must be to be used by this fish for orientation
+      schoolAvoidRadius = "0.2";     //how near other fish must be to be avoided
+
+      schoolAvoidWeight = "0.0";            //weighting used on avoiding other fish
+      schoolOrientationWeight = "0.0";      //weighting used on orientating to other fish
+      schoolGravityWeight = "1.0";          //weighting for going to target position
+
+      schoolSchoolRadius = "1";            //size of school
+      schoolGlobalOrientation = "0";       //true means school is orientated relative to world axis, otherwise uses axes of node following
+      schoolNearDistance = "1.0";            //when this distance from target, targetting of target scales down
+      schoolNearDistance2 = "1.5";            //when this distance from target, targetting of target scales down
+      
+      
+      schoolFarDistance = "20.0";            //
+      schoolTargetDistance = "10.0";
+      schoolFormation = "EGG";
+   };
+
+   /*
+   new StaticShape(MantaSet1_SS) {
+      animationSpeed = 0.85;
+      enableInputEvents = "0";
+      dataBlock = "MantaRaySet1_SSData";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      delayStart = $pref::Cube::delayForClients + $WhaleSet1Length;
+      loopInterval = $cinimaticsLength;
+      scopeAlways = true;
+   };
+   
+   new StaticShape(WhaleSet1_SS) {
+      enableInputEvents = "0";
+      dataBlock = "WhaleSet1_SSData";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      delayStart = ($pref::Cube::delayForClients);
+      loopInterval = $cinimaticsLength;
+      scopeAlways = true;
+      animationSpeed = 0.75*0.9;
+   };
+   new StaticShape(WhaleSet2_SS) {
+      enableInputEvents = "0";
+      dataBlock = "WhaleSet2_SSData";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      delayStart = ($pref::Cube::delayForClients + $WhaleSet1Length + $MantaRaySet1Length + $DugongSet1Length);
+      loopInterval = $cinimaticsLength;
+      scopeAlways = true;
+      animationSpeed = 0.75*0.95;
+
+   };
+   */
+         
+   new StaticShape(DugongSet1_SS) {
+      enableInputEvents = "1";
+      animationSpeed = 0.9;
+      inputEventsMethod = "Hybrid";
+      dataBlock = "DugongSet1_SSData";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+  //    delayStart = $pref::Cube::delayForClients + $WhaleSet1Length + $MantaRaySet1Length;
+      delayStart = $pref::Cube::delayForClients;
+      loopInterval = $cinimaticsLength;
+ 
+      scopeAlways = true;
+   };
+   /*
+   new StaticShape(GreyReefSharkSet1_SS) {
+      enableInputEvents = "1";
+      inputEventsMethod = "Hybrid";
+      dataBlock = "GreyReefSharkSet1_SSData";
+      position = "5.4766 32.145 -11.1993";
+      rotation = "0 0 1 -3.17";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      delayStart = $pref::Cube::delayForClients;
+      loopInterval = $DayLength;
+      scopeAlways = true;
+      animationSpeed = 0.75*0.85;
+   };
+
+   new StaticShape(GreyReefSharkSet2_SS) {
+      enableInputEvents = "1";
+      inputEventsMethod = "Hybrid";
+      dataBlock = "GreyReefSharkSet2_SSData";
+      position = "5.4766 32.145 -11.1993";
+      rotation = "0 0 1 -3.17";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      delayStart = $pref::Cube::delayForClients;
+      loopInterval = $DayLength;
+      scopeAlways = true;
+      animationSpeed = 0.75*0.85;
+   };
+   new StaticShape(BluespottedStingRaySet1_SS) {
+      animationSpeed = 0.95;
+      enableInputEvents = "1";
+      inputEventsMethod = "Hybrid";
+      dataBlock = "BluespottedStingRaySet1_SSData";
+      position = "5.4766 32.145 -11.4663";
+      rotation = "0 0 1 -3.17";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      delayStart = $pref::Cube::delayForClients;
+      loopInterval = $DayLength;
+      scopeAlways = true;
+   };
+
+   new StaticShape(GreenSeaTurtleSet1_SS) {
+      animationSpeed = 0.95;
+      enableInputEvents = "1";
+      inputEventsMethod = "Hybrid";
+      dataBlock = "GreenSeaTurtleSet1_SSData";
+      scale = "1 1 1";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      delayStart = $pref::Cube::delayForClients;
+      loopInterval = $DayLength;
+      scopeAlways = true;
+   };
+   new StaticShape(WhitemouthMorayEelLeftSet1_SS) {
+      animationSpeed = 0.95;
+      enableInputEvents = "1";
+      inputEventsMethod = "Hybrid";
+      dataBlock = "WhitemouthMorayEelLeftSet1_SSData";
+      position = "5.4766 32.145 -11.4993";
+      scale = "0.022819 0.02 0.02";
+      rotation = "0 0 1 -3.17";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      delayStart = $pref::Cube::delayForClients;
+      loopInterval = $DayLength;
+      scopeAlways = true;
+   };
+   new StaticShape(WhitemouthMorayEelRightSet1_SS) {
+      animationSpeed = 0.95;
+      enableInputEvents = "1";
+      inputEventsMethod = "Hybrid";
+      dataBlock = "WhitemouthMorayEelRightSet1_SSData";
+      position = "5.4766 32.145 -11.3419";
+      rotation = "0 0 1 -3.17";
+      scale = "2.2819 2 2";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      delayStart = $pref::Cube::delayForClients;
+      loopInterval = $DayLength;
+      scopeAlways = true;
+   };
+   new StaticShape(HermitCrab1Set1_SS) {
+      animationSpeed = 0.95;
+      enableInputEvents = "1";
+      inputEventsMethod = "Hybrid";
+      dataBlock = "HermitCrab1Set1_SSData";
+      position = "5.4766 32.145 -11.474";
+      rotation = "0 0 1 -3.1716";
+      scale = "0.01 0.01 0.01";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      delayStart = $pref::Cube::delayForClients;
+      loopInterval = $DayLength;
+      scopeAlways = true;
+   };
+   new StaticShape(HermitCrab2Set1_SS) {
+      animationSpeed = 0.95;
+      enableInputEvents = "1";
+      inputEventsMethod = "Hybrid";
+      dataBlock = "HermitCrab2Set1_SSData";
+      position = "5.4766 32.145 -11.4948";
+      rotation = "0 0 1 -3.1716";
+      scale = "0.01 0.01 0.01";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      delayStart = $pref::Cube::delayForClients;
+      loopInterval = $DayLength;
+      scopeAlways = true;
+   };
+   new StaticShape(HermitCrab3Set1_SS) {
+      animationSpeed = 0.95;
+      enableInputEvents = "1";
+      inputEventsMethod = "Hybrid";
+      dataBlock = "HermitCrab3Set1_SSData";
+      position = "5.4766 32.145 -11.4993";
+      rotation = "0 0 1 -3.1716";
+      scale = "0.01 0.01 0.01";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      delayStart = $pref::Cube::delayForClients;
+      loopInterval = $DayLength;
+      scopeAlways = true;
+   };
+   new StaticShape(HermitCrab4Set1_SS) {
+      animationSpeed = 0.95;
+      enableInputEvents = "1";
+      inputEventsMethod = "Hybrid";
+      dataBlock = "HermitCrab4Set1_SSData";
+      position = "5.4766 32.145 -11.4993";
+      rotation = "0 0 1 -3.1716";
+      scale = "0.01 0.01 0.01";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      delayStart = $pref::Cube::delayForClients;
+      loopInterval = $DayLength;
+      scopeAlways = true;
+   };
+   
+   new StaticShape(GrouperSet1_SS) {
+      animationSpeed = 0.95;
+      enableInputEvents = "1";
+      inputEventsMethod = "Hybrid";
+      dataBlock = "GrouperSet1_SSData";
+      position = "0 0 0";
+      rotation = "0 0 1 0";
+      scale = "0.01 0.01 0.01";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      delayStart = $pref::Cube::delayForClients;
+      loopInterval = $DayLength;
+      scopeAlways = true;
+   };
+   new StaticShape(DiverSet1_SS) {
+      animationSpeed = 0.95;
+      enableInputEvents = "1";
+      inputEventsMethod = "Hybrid";
+      dataBlock = "DiverSet1_SSData";
+      position = "0 0 0";
+      rotation = "0 0 1 0";
+      scale = "0.01 0.01 0.01";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      delayStart = $pref::Cube::delayForClients + $WhaleSet1Length + $MantaRaySet1Length + $DugongSet1Length + $WhaleSet2Length;
+      loopInterval = $cinimaticsLength;
+      scopeAlways = true;
+   };
+   new StaticShape(WhaleSharkSet1_SS) {
+      animationSpeed = 0.95;
+      enableInputEvents = "0";
+      dataBlock = "WhaleSharkSet1_SSData";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      delayStart = $pref::Cube::delayForClients + $WhaleSet1Length + $MantaRaySet1Length + $DugongSet1Length + $WhaleSet2Length;
+      loopInterval = $cinimaticsLength;
+      scopeAlways = true;
+   };
+   new StaticShape(SunFishSet1_SS) {
+      enableInputEvents = "0";
+      dataBlock = "SunFishSet1_SSData";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      delayStart = $pref::Cube::delayForClients + $WhaleSet1Length + $MantaRaySet1Length + $DugongSet1Length + $WhaleSet2Length + $DiverSet1Length;
+      loopInterval = $cinimaticsLength;
+      scopeAlways = true;
+   };
+   new StaticShape(HammerHeadSet1_SS) {
+      enableInputEvents = "0";
+      dataBlock = "HammerHeadSet1_SSData";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      delayStart = $pref::Cube::delayForClients + $WhaleSet1Length + $MantaRaySet1Length + $DugongSet1Length + $WhaleSet2Length + $DiverSet1Length + $SunFishSet1Length;
+      loopInterval = $cinimaticsLength;
+      scopeAlways = true;
+   };
+   new StaticShape(TigerSharkSet1_SS) {
+      animationSpeed = 0.95;
+      enableInputEvents = "0";
+      dataBlock = "TigerSharkSet1_SSData";
+      hidden = "0";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      delayStart = $pref::Cube::delayForClients + $WhaleSet1Length + $MantaRaySet1Length + $DugongSet1Length + $WhaleSet2Length + $DiverSet1Length + $SunFishSet1Length + $HammerHeadSet1Length;
+      loopInterval = $cinimaticsLength;
+      scopeAlways = true;
+   };
+*/
+   
+   new ScriptGroup(statics_placement) {
+      class = "CloneStaticShapeToNodeClass";
+      nodeShapeName = "art/cube/sets/reef_placement_misc.dae";
+      shapeDatablock[0] = "Urchin_SSData";
+      shapeDatablock[1] = "Starfish_SSData";
+      shapeDatablock[2] = "Clam_SSData";
+      shapeDatablock[3] = "PorcelainCrab_SSData";
+      shapeDatablock[4] = "Nudibranch_SSData";
+      shapeDatablock[5] = "Seacucumber_SSData";
+      shapeDatablock[6] = "Shrimp_SSData";
+      shapeDatablock[7] = "Fanworm_SSData";
+      nodeName[0] = "urchin";
+      nodeName[1] = "starfish";
+      nodeName[2] = "clam";
+      nodeName[3] = "porcelain_crab";
+      nodeName[4] = "nudibranch";
+      nodeName[5] = "seacucucumber";
+      nodeName[6] = "shrimp";
+      nodeName[7] = "fanworm";
+      position = "0 0 0";
+      rotation = "0 0 1 0";
+      scale = "1 1 1";
+      offsetTransform = "0 0 0 0 0 1 3.1416";
+      enableInputEvents[0] = "1";
+      enableInputEvents[1] = "1";
+      enableInputEvents[2] = "1";
+      enableInputEvents[3] = "1";
+      enableInputEvents[4] = "1";
+      enableInputEvents[5] = "1";
+      enableInputEvents[6] = "1";
+      enableInputEvents[7] = "1";
+      inputEventsMethod[0] = "BoundingBox";
+      inputEventsMethod[1] = "BoundingBox";
+      inputEventsMethod[2] = "BoundingBox";
+      inputEventsMethod[3] = "BoundingBox";
+      inputEventsMethod[4] = "BoundingBox";
+      inputEventsMethod[5] = "Mesh";
+      inputEventsMethod[6] = "BoundingBox";
+      inputEventsMethod[7] = "BoundingBox";
+      scale1[0] = "0.7 0.7 0.7";
+      scale1[2] = "0.486 0.486 0.486";
+      scale1[5] = "0.4 0.4 0.4";
+      scale1[6] = "0.662 0.662 0.662";
+      scale1[7] = "0.4 0.4 0.4";
+      scale2[2] = "2 2 2";
+      scale2[3] = "0.5 0.5 0.5";
+      scale2[4] = "0.398 0.398 0.398";
+      scale2[5] = "0.440 0.440 0.440";
+      scale2[6] = "0.382 0.382 0.382";
+      scale2[7] = "0.398 0.398 0.398";
+      scale2[8] = "0.62 0.62 0.62";
+      scale2[9] = "0.44 0.44 0.44";
+      scale2[10] = "0.908 0.908 0.908";
+      scale2[11] = "0.294 0.294 0.294";
+      scale2[12] = "0.368 0.368 0.368";
+      scale2[13] = "0.418 0.418 0.418";
+      scale2[14] = "1.394 1.394 1.394";
+      scale2[15] = "1.23 1.23 1.23";
+      scale2[16] = "1.23 1.23 1.23";
+      scale2[17] = "0.952 0.952 0.952";
+      scale4[0] = "0.75 0.75 0.75";
+      scale4[1] = "0.5 0.5 0.5";
+      scale4[2] = "0.5 0.5 0.5";
+      scale4[3] = "0.75 0.75 0.75";
+      scale4[4] = "0.8 0.8 0.8";
+      scale4[5] = "0.7 0.7 0.7";
+      scale4[6] = "0.7 0.7 0.7";
+      scale4[7] = "1 1 1";
+      scale4[8] = "0.95 0.95 0.95";
+      scale5[0] = "3 3 3";
+      scale5[1] = "2.5 2.5 2.5";
+      scale5[2] = "2 2 2";
+      scale5[3] = "2 2 2";
+      scale5[4] = "2 2 2";
+      scale5[5] = "1.5 1.5 1.5";
+      scale5[6] = "2.5 2.5 2.5";
+      scale5[7] = "2 2 2";
+      scale5[8] = "2 2 2";
+      scale5[9] = "2 2 2";
+      scale5[10] = "2.5 2.5 2.5";
+      scale5[11] = "2.5 2.5 2.5";
+      scale5[12] = "2.5 2.5 2.5";
+      scale5[13] = "2.5 2.5 2.5";
+      scale5[14] = "1.5 1.5 1.5";
+      scale5[15] = "1.5 1.5 1.5";
+      scale5[16] = "3 3 3";
+      delayStart = $pref::Cube::delayForClients;
+   };
+   new ScriptGroup(dentro_placement) {
+      class = "CloneStaticShapeToNodeClass";
+      nodeShapeName = "art/cube/sets/reef_placement_dendro.dae";
+      forest = ReefForest;
+      shapeDatablock[0] = "Dendro1ForestMesh";
+      shapeDatablock[1] = "Dendro2ForestMesh";
+      shapeDatablock[2] = "Dendro3ForestMesh";
+      nodeName[0] = "dendro1";
+      nodeName[1] = "dendro2";
+      nodeName[2] = "dendro3";
+      position = "0 0 0";
+      rotation = "0 0 1 0";
+      scale = "1 1 1";
+      offsetTransform = "0 0 0 0 0 1 3.1416";
+      enableInputEvents[0] = "0";
+      enableInputEvents[1] = "0";
+      enableInputEvents[2] = "0";
+
+      delayStart = $pref::Cube::delayForClients;
+   };
+   
+   new ScriptGroup(sea_grass_placement) {
+      class = "CloneRandomToNodeClass";
+      nodeShapeName = "art/cube/sets/reef_placement_grass.dae";
+      forest = ReefForest;
+      shapeDatablock[0] = "SeaGrass1ForestMesh";
+      shapeDatablock[1] = "SeaGrass2ForestMesh";
+      shapeDatablock[2] = "SeaGrass3ForestMesh";
+      shapeDatablock[3] = "SeaGrass4ForestMesh";
+      shapeCount = 4;
+      nodeName[0] = "seagrass";
+      position = "0 0 0";
+      rotation = "0 0 1 0";
+      scale = "1 1 1";
+      offsetTransform = "0 0 -0.1 0 0 1 3.1416";
+      enableInputEvents[0] = "0";
+      enableInputEvents[1] = "0";
+      flipFrequency = "0";
+      frequency[0] = "0.1";
+      frequency[1] = "0.1";
+      frequency[2] = "0.4";
+      frequency[3] = "0.4";
+      scaleRange[0] = "0.7 0.9";
+      scaleRange[1] = "0.7 0.9";
+      scaleRange[2] = "0.7 0.9";
+      scaleRange[3] = "0.7 0.9";
+   };
+   new ScriptGroup(anemone_placement) {
+      class = "CloneStaticShapeToNodeClass";
+      nodeShapeName = "art/cube/sets/anemone_placement.dae";
+      forest = ReefForest;
+      shapeDatablock[0] = "AnemoneLeftForestMesh";
+      shapeDatablock[1] = "AnemoneRightForestMesh";
+      nodeName[0] = "anemoneLeft";
+      nodeName[1] = "anemoneRight";
+      position = "0 0 0";
+      rotation = "0 0 1 0";
+      scale = "1 1 1";
+      offsetTransform = "0 0 0 0 0 1 3.1416";
+      enableInputEvents[0] = "0";
+      enableInputEvents[1] = "0";
+      delayStart = $pref::Cube::delayForClients;
+   };
+   
+   
+   new TSStatic(fan1) {
+      shapeName = "art/cube/sets/fan1.dts";
+      playAmbient = "0";
+      collisionType = "None";
+      decalType = "None";
+      allowPlayerStep = "0";
+      renderNormals = "0";
+      forceDetail = "-1";
+      enableInputEvents = "0";
+      position = "0 0 0";
+      rotation = "0 0 1 0";
+      scale = "1 1 1";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+   };
+   new TSStatic(fan2 : fan1) {
+      shapeName = "art/cube/sets/fan2.dts";
+   };
+   new TSStatic(fan3 : fan1) {
+      shapeName = "art/cube/sets/fan3.dts";
+   };
+   new TSStatic(fan4 : fan1) {
+      shapeName = "art/cube/sets/fan4.dts";
+   };
+   new TSStatic(fan5 : fan1) {
+      shapeName = "art/cube/sets/fan5.dts";
+   };
+   new TSStatic(fan6 : fan1) {
+      shapeName = "art/cube/sets/fan6.dts";
+   };
+   new TSStatic(fan7 : fan1) {
+      shapeName = "art/cube/sets/fan7.dts";
+   };
+   new TSStatic(fan8 : fan1) {
+      shapeName = "art/cube/sets/fan8.dts";
+   };
+   new TSStatic(fan9 : fan1) {
+      shapeName = "art/cube/sets/fan9.dts";
+   };
+   new TSStatic(fan10 : fan1) {
+      shapeName = "art/cube/sets/fan10.dts";
+   };
+   new TSStatic(fan11 : fan1) {
+      shapeName = "art/cube/sets/fan11.dts";
+   };
+   new TSStatic(fan12 : fan1) {
+      shapeName = "art/cube/sets/fan12.dts";
+   };
+   new TSStatic(fan13 : fan1) {
+      shapeName = "art/cube/sets/fan13.dts";
+   };
+   new TSStatic(fan14 : fan1) {
+      shapeName = "art/cube/sets/fan14.dts";
+   };
+   new TSStatic(fan15 : fan1) {
+      shapeName = "art/cube/sets/fan15.dts";
+   };
+   new TSStatic(fan16 : fan1) {
+      shapeName = "art/cube/sets/fan16.dts";
+   };
+   new TSStatic(fan17 : fan1) {
+      shapeName = "art/cube/sets/fan17.dts";
+   };
+   new TSStatic(fan18 : fan1) {
+      shapeName = "art/cube/sets/fan18.dts";
+   };
+   new TSStatic(fan19 : fan1) {
+      shapeName = "art/cube/sets/fan19.dts";
+   };
+   new TSStatic(fan20 : fan1) {
+      shapeName = "art/cube/sets/fan20.dts";
+   };
+   new TSStatic(fan21 : fan1) {
+      shapeName = "art/cube/sets/fan21.dts";
+   };
+   new TSStatic(fan22 : fan1) {
+      shapeName = "art/cube/sets/fan22.dts";
+   };
+   new TSStatic(fan23 : fan1) {
+      shapeName = "art/cube/sets/fan23.dts";
+   };
+   new TSStatic(fan24 : fan1) {
+      shapeName = "art/cube/sets/fan24.dts";
+   };
+   new TSStatic(fan25 : fan1) {
+      shapeName = "art/cube/sets/fan25.dts";
+   };
+   new TSStatic(fan26 : fan1) {
+      shapeName = "art/cube/sets/fan26.dts";
+   };
+   new TSStatic(fan27 : fan1) {
+      shapeName = "art/cube/sets/fan27.dts";
+   };
+
+   new TSStatic(reef_blocker1) {
+      shapeName = "art/cube/sets/reef_blocker.dae";
+      playAmbient = "0";
+      meshCulling = "1";
+      originSort = "0";
+      collisionType = "None";
+      decalType = "None";
+      allowPlayerStep = "0";
+      renderNormals = "0";
+      forceDetail = "-1";
+      enableInputEvents = "0";
+      position = "0 0 0";
+      rotation = "0 0 1 180";
+      scale = "1 1 1";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      castShadowsOnly = true;    
+   };
+
+   new TSStatic(reef_blocker5) {
+      shapeName = "art/cube/sets/reef_blocker5.dts";
+      playAmbient = "0";
+      meshCulling = "1";
+      originSort = "0";
+      collisionType = "None";
+      decalType = "None";
+      allowPlayerStep = "0";
+      renderNormals = "0";
+      forceDetail = "-1";
+      enableInputEvents = "0";
+      position = "0 0 0";
+      rotation = "1 0 0 0";
+      scale = "1.2 1 1";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      isRenderEnabled = true;
+   };
+
+   new TSStatic(anemone_collision) {
+      shapeName = "art/cube/sets/anemone_collision.dts";
+      playAmbient = "0";
+      meshCulling = "0";
+      originSort = "0";
+      collisionType = "Visible Mesh";
+      decalType = "None";
+      allowPlayerStep = "1";
+      renderNormals = "0";
+      forceDetail = "-1";
+      enableInputEvents = "0";
+      position = "0 0 0";
+      rotation = "0 0 1 0";
+      scale = "1 1 1";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      isRenderEnabled = false;
+   };
+   new TSStatic(reef_collision1) {
+      shapeName = "art/cube/sets/reef_collision.dae";
+      playAmbient = "0";
+      meshCulling = "1";
+      originSort = "0";
+      collisionType = "Visible Mesh";
+      decalType = "None";
+      allowPlayerStep = "1";
+      renderNormals = "0";
+      forceDetail = "-1";
+      enableInputEvents = "0";
+      position = "0 0 0";
+      rotation = "0 0 1 180";
+      scale = "1 1 1";
+      canSave = "1";
+      canSaveDynamicFields = "1";
+      isRenderEnabled = false;
+   };
+};
+//--- OBJECT WRITE END ---
