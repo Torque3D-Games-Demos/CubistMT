@@ -159,7 +159,7 @@ pip-log.txt
 #Mr Developer
 .mr.developer.cfg
 
-# Mac crap
+# Mac
 .DS_Store
 
 #############
@@ -169,6 +169,10 @@ pip-log.txt
 console.log
 #*.cached.dts
 !Engine/bin
+My Projects/
+Project Manager.exe
+projects.xml
 My Projects/CubistMT/game/shaders/procedural/*
 My Projects/CubistMT/game/Cache/*
 My Projects/CubistMT/buildFiles/Link/*
+Qt*.dll

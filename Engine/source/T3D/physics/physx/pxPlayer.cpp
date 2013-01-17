@@ -62,7 +62,8 @@ void PxPlayer::_releaseController()
    if ( mController )
    {
       mController->getActor()->userData = NULL;
-	   mWorld->releaseController( *mController );
+      mWorld->getStaticChangedSignal().remove( this, &PxPlayer::_onStaticChanged );
+      mWorld->releaseController( *mController );
       mController = NULL;
    }
 }
@@ -160,6 +161,8 @@ void PxPlayer::init( const char *type,
    }
 // end pg
 
+    mWorld->getStaticChangedSignal().notify( this, &PxPlayer::_onStaticChanged );
+
    // Put the kinematic actor on group 29.
    NxActor *kineActor = mController->getActor();
    kineActor->setGroup( 29 );
@@ -169,6 +172,11 @@ void PxPlayer::init( const char *type,
 
    mUserData.setObject( obj );
    kineActor->userData = &mUserData;
+}
+
+void PxPlayer::_onStaticChanged()
+{
+    mController->reportSceneChanged();
 }
 
 void PxPlayer::_onPhysicsReset( PhysicsResetEvent reset )

@@ -1236,19 +1236,16 @@ DefineEngineMethod( AIPlayer, setMoveSpeed, void, ( F32 speed ),,
 	object->setMoveSpeed(speed);
 }
 
-// start jc
-DefineEngineMethod( AIPlayer, getMoveSpeed, F32, ( void ),,
-   "@brief Gets the move speed for an AI object.\n\n"
+DefineEngineMethod( AIPlayer, getMoveSpeed, F32, ( ),,
+   "@brief Gets the move speed of an AI object.\n\n"
 
-   "@param speed A speed multiplier between 0.0 and 1.0.  "
-   "This is multiplied by the AIPlayer's base movement rates (as defined in "
-   "its PlayerData datablock)\n\n"
-   
-   "@see getMoveDestination()\n")
+   "@return A speed multiplier between 0.0 and 1.0.\n\n"
+
+   "@see setMoveSpeed()\n")
 {
-	return object->getMoveSpeed();
+   return object->getMoveSpeed();
 }
-// end jc
+
 
 DefineEngineMethod( AIPlayer, setMoveDestination, void, ( Point3F goal, bool slowDown ), ( true ),
    "@brief Tells the AI to move to the location provided\n\n"
